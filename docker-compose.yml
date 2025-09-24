@@ -2,7 +2,7 @@
 services:
   # Base de Datos PostgreSQL 15
   database:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: cochatech_db
     environment:
       POSTGRES_DB: cochatech_sistema
