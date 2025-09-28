@@ -21,7 +21,7 @@ services:
     volumes:
       - ./backend:/var/www/html
     ports:
-      - "8000:8000"
+      - "8000:80"
     depends_on:
       - db
 #
@@ -48,7 +48,7 @@ services:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=:http://backend:8000
+      - VITE_API_URL=:http://backend:80
       - CHOKIDAR_USEPOLLING=true
     stdin_open: true
     tty: true
