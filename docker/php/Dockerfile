@@ -31,3 +31,17 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Definir directorio de trabajo
 WORKDIR /var/www/html
+
+#----------para istalar vendor
+
+# Copiar composer.json y composer.lock primero (para usar cache)
+COPY ./backend/composer.json ./backend/composer.lock* ./
+
+# Instalar dependencias de Laravel (sin el código aún)
+RUN composer install --no-scripts --no-autoloader
+
+# Luego copiar el resto del proyecto
+COPY ./backend ./
+
+# Regenerar autoload
+RUN composer dump-autoload
