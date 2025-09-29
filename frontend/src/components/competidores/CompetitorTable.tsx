@@ -56,7 +56,7 @@ export function CompetitorTable({ competitors, onEdit, onDelete }: CompetitorTab
           </thead>
           <tbody className="competitor-table-body">
             {competitors.map((competitor) => (
-              <tr key={competitor.id} className="competitor-table-row">
+              <tr key={competitor.id_olimpista} className="competitor-table-row">
                 <td className="competitor-table-td competitor-table-td-name">{competitor.nombre}</td>
                 <td className="competitor-table-td">{competitor.documento}</td>
                 <td className="competitor-table-td">{competitor.institucion}</td>
@@ -64,7 +64,7 @@ export function CompetitorTable({ competitors, onEdit, onDelete }: CompetitorTab
                 <td className="competitor-table-td">{competitor.nivel}</td>
                 <td className="competitor-table-td">{competitor.gradoEscolaridad}</td>
                 <td className="competitor-table-td">{competitor.contactoTutor}</td>
-                <td className="competitor-table-td">{competitor.departamento}</td>
+                <td className="competitor-table-td">{competitor.departamentoNombre}</td>
                 <td className="competitor-table-td">
                   <div className="competitor-table-actions">
                     <button 
@@ -77,7 +77,7 @@ export function CompetitorTable({ competitors, onEdit, onDelete }: CompetitorTab
                     <button 
                       className="competitor-table-btn competitor-table-btn-delete" 
                       title="Eliminar"
-                      onClick={() => handleDelete(competitor.id)}
+                      onClick={() => handleDelete(competitor.id_olimpista)}
                     >
                       <TrashIcon size={16} />
                     </button>
