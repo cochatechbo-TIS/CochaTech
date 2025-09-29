@@ -1,68 +1,615 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #f9fafb; /* Color de fondo de la página */
+}
+
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== NAVBAR OH! SANSI - SIN BORDES ===== */
+.navbar {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100vw;     /* 👈 mejor que 100vw, así evita scroll lateral */
+  margin: 0;
+  padding: 0;
+}
+.navbar-container {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-content {
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  width: 100%;
+  margin: 0;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.navbar-items {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  margin-right: 2rem;
+}
+
+.nav-item {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: all 0.2s ease;
+  color: #e0f2fe;
+  text-decoration: none;
+  border-radius: 4px;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+.nav-item:hover {
+  background-color: #2563eb;
+  color: white;
+}
+
+.nav-item.active {
+  background-color: transparent;
+  color: white;
+  font-weight: 600;
+}
+/* Hamburger Button - Hidden by default */
+.navbar-toggle {
+ display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+/* Mobile Menu - Hidden by default */
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index:1000;
+}
+
+.mobile-menu-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color:#1d4ed8;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  max-height: 80vh;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: slideDown 0.3s ease-out;
+}
+
+.mobile-nav-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-nav-item {
+  padding: 12px 16px;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.mobile-nav-item:hover,
+.mobile-nav-item.active {
+  background-color: #2563eb;
+  color:white;
+}
+
+.mobile-user-info {
+  margin-top: auto;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .navbar-items,
+  .user-info {
+    display: none; /* Hide desktop menu and user info */
   }
-  a:hover {
-    color: #747bff;
+  
+  .navbar-toggle {
+    display: flex; /* Show hamburger button */
   }
-  button {
-    background-color: #f9f9f9;
+  
+  .mobile-menu-overlay {
+    display: block; /* Show mobile menu when open */
   }
+  
+  
+}
+
+@media (min-width: 1025px) {
+  .mobile-menu-overlay {
+    display: none !important; /* Ensure mobile menu is hidden on desktop */
+  }
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-badge {
+  background-color: #1e4ed8;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.logout-btn {
+  background-color: #1e40af; /* azul */
+  color: #ffffff;           /* texto en blanco */
+  padding: 0.5rem 1rem;
+  border: none;              /* 👈 sin borde */
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.logout-btn:hover {
+  background-color: #1e3a8a; /* un azul más oscuro al hover */
+}
+
+.logout-icon {
+  width: 1rem;
+  height: 1rem;
+  stroke: #ffffff; /* 👈 ícono en blanco */
+}
+/* src/index.css */
+
+/* Estilos generales de la página gestionCompetidores */
+.gestion-competidores-page {
+  padding: 20px 5%; 
+  max-width: 1200px; 
+  margin: 0 auto; 
+  width: 90%; /* Usar porcentaje del viewport */
+}
+
+.page-header {
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 8px;
+  
+}
+
+.page-subtitle {
+  color: #6b7280;
+  font-size: 16px;
+}
+
+/* Contenedor principal blanco */
+.management-container {
+ max-width: 1100px;
+  background-color: white;
+  border-radius: 8px;
+  padding: 30px;
+  margin: 20px auto;   /* 👈 centrado horizontal */
+  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Sección de búsqueda */
+.search-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 1024px) {
+  .search-section {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.search-container {
+  flex: 1;
+  max-width: 400px;
+}
+
+.search-input-wrapper {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 12px 10px 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); /* Reemplaza ring */
+}
+.search-input::placeholder {
+  color: #9ca3af; /* Gris claro para el placeholder */
+}
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
+.search-svg {
+  width: 18px;
+  height: 18px;
+}
+
+.primary-button {
+  background-color: #2563eb;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+    font-weight: 500;
+  transition: background-color 0.2s;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.primary-button:hover {
+  background-color: #1d4ed8;
+}
+
+.button-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Estilos de la tabla */
+.competitor-table-container {
+  background-color: white;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.competitor-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.competitor-table-header {
+  background-color: #f8fafc; /* Fondo muy claro para el header */
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.competitor-table-th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color:#64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  vertical-align: top;
+}
+
+.competitor-table-body {
+  background-color: white;
+}
+
+.competitor-table-row {
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #e5e7eb;
+}
+.competitor-table-row:last-child {
+  border-bottom: none; /* Elimina la línea de la última fila */
+}
+
+.competitor-table-row:hover {
+  background-color: #f8fafc; /* Fondo muy claro al hover */
+}
+
+.competitor-table-td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #6b7280; /* Gris más claro para el contenido */
+    line-height: 1.5;
+    vertical-align: top;
+   text-align: left;
+}
+
+.competitor-table-td-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.competitor-table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.competitor-table-btn {
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+}
+
+.competitor-table-btn-edit {
+  background-color:transparent    ;
+  color: #2563eb;
+}
+
+.competitor-table-btn-edit:hover {
+ color: #1e3a8a;
+   background-color:transparent;
+}
+
+.competitor-table-btn-delete {
+  background-color: transparent;
+  color: #dc2626;
+}
+
+.competitor-table-btn-delete:hover {
+  background-color: transparent;
+  color: #7f1d1d;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(75, 85, 99, 0.5); /* Fondo blanco semitransparente */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+}
+
+.modal-container {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
+  width: 100%;
+  max-width: 42rem;
+  max-height: 100vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.modal-close-btn {
+  color: #6b7280;
+  padding: 4px;
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close-btn:hover {
+  color: #374151;
+}
+
+.modal-form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+  .modal-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.modal-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 4px;
+  text-align: left;
+}
+
+.modal-input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modal-input:focus {
+  outline: none;
+  border-color: #101010;
+  border-width: 2px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  padding-top: 24px;
+}
+
+.modal-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.modal-btn-cancel {
+  border-color: #d1d5db;
+  color: #374151;
+  background-color: white;
+}
+
+.modal-btn-cancel:hover {
+  background-color: #f9fafb;
+}
+
+.modal-btn-primary {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+}
+
+.modal-btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+/* Pagination */
+.pagination-section {
+  margin-top: 16px;
+  font-size: 14px;
+  color: #6b7280;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (min-width: 1024px) {
+  .pagination-section {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.pagination-info {
+  font-size: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.pagination-btn {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.pagination-btn-prev,
+.pagination-btn-next {
+  background-color: transparent;
+  color: #374151;
+}
+
+.pagination-btn-prev:hover,
+.pagination-btn-next:hover {
+  background-color: #d1d5db;
+}
+
+.pagination-btn-active {
+  background-color: #2563eb;
+  color: white;
+}
+
+/* Estados vacíos */
+.competitor-table-container:empty::before {
+  content: "No se encontraron competidores";
+  display: block;
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+  font-style: italic;
 }
