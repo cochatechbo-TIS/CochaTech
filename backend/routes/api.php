@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EstudianteController;
 use App\Http\Controllers\Gestion_Olimpista_Controller;
-
+#---esto es de H3
 Route::post('/estudiantes', [EstudianteController::class, 'store']);
 Route::get('/olimpistas', [Gestion_Olimpista_Controller::class, 'index']);
 Route::get('/olimpistas/{id}', [Gestion_Olimpista_Controller::class, 'show']);
