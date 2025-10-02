@@ -3,6 +3,8 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import GestionCompetidores from './pages/GestionCompetidores'
 import './App.css'
+//import CargaMasiva from './components/carga masiva/CargarCSV';
+import CargaMasiva from './components/carga masiva/CargarCSV';
 
 // Componentes placeholder para las otras páginas
 const Inicio = () => (
@@ -12,12 +14,12 @@ const Inicio = () => (
   </div>
 )
 
-const CargaMasiva = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Carga Masiva (RF1)</h1>
-    <p className="text-gray-600">Funcionalidad en desarrollo...</p>
-  </div>
-)
+//const CargaMasiva = () => (
+ // <div className="p-8">
+  //  <h1 className="text-3xl font-bold text-gray-800 mb-4">Carga Masiva</h1>
+  //  <p className="text-gray-600">Funcionalidad en desarrollo...</p>
+  //</div>
+//)
 
 const Responsables = () => (
   <div className="p-8">

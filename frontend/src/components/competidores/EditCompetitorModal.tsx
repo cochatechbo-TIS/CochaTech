@@ -3,6 +3,19 @@ import React, { useState } from 'react';
 import { XIcon } from 'lucide-react';
 import type { Competidor } from '../../interfaces/Competidor';
 
+// Mover los mapeos fuera del componente (constantes fijas)
+const departamentosMap = {
+  'La Paz': 1,
+  'Cochabamba': 2, 
+  'Santa Cruz': 3,
+  'Oruro': 4,
+  'Potosí': 5,
+  'Tarija': 6,
+  'Chuquisaca': 7,
+  'Beni': 8,
+  'Pando': 9
+};
+
 interface EditCompetitorModalProps {
   competitor: Competidor;
   onSave: (competitor: Competidor) => void;
@@ -25,16 +38,32 @@ export function EditCompetitorModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(editedCompetitor);
+    
+    const idDepartamento = departamentosMap[editedCompetitor.departamentoNombre as keyof typeof departamentosMap];
+    
+    const competitorParaGuardar: Competidor = {
+      ...editedCompetitor,
+      ci: editedCompetitor.documento || editedCompetitor.ci,
+      grado: editedCompetitor.gradoEscolaridad || editedCompetitor.grado,
+      contacto_tutor: editedCompetitor.contactoTutor || editedCompetitor.contacto_tutor,
+      id_departamento: idDepartamento
+    };
+    
+    onSave(competitorParaGuardar);
   };
 
-  // Reset form when competitor changes
+  // Ahora el useEffect solo depende de 'competitor'
   React.useEffect(() => {
-    setEditedCompetitor({ ...competitor });
-  }, [competitor]);
+    setEditedCompetitor({ 
+      ...competitor,
+      documento: competitor.ci,
+      gradoEscolaridad: competitor.grado,
+      contactoTutor: competitor.contacto_tutor,
+      departamentoNombre: competitor.departamento?.nombre_departamento || ''
+  });
+  }, [competitor]); // Solo 'competitor' en las dependencias
 
   if (!isOpen) return null;
-
   return (
     <div className="modal-overlay">
       <div className="modal-container">
@@ -53,7 +82,7 @@ export function EditCompetitorModal({
           <div className="modal-form-grid">
             <div className="modal-form-group">
               <label className="modal-label">
-                Nombre Completo
+                Nombre Completo *
               </label>
               <input
                 type="text"
@@ -67,12 +96,12 @@ export function EditCompetitorModal({
             
             <div className="modal-form-group">
               <label className="modal-label">
-                Documento
+                Documento (CI) *
               </label>
               <input
                 type="text"
                 name="documento"
-                value={editedCompetitor.documento}
+                value={editedCompetitor.documento || editedCompetitor.ci}
                 onChange={handleChange}
                 className="modal-input"
                 required
@@ -81,7 +110,7 @@ export function EditCompetitorModal({
             
             <div className="modal-form-group">
               <label className="modal-label">
-                Institución
+                Institución *
               </label>
               <input
                 type="text"
@@ -95,7 +124,7 @@ export function EditCompetitorModal({
             
             <div className="modal-form-group">
               <label className="modal-label">
-                Área
+                Área *
               </label>
               <select
                 name="area"
@@ -115,7 +144,7 @@ export function EditCompetitorModal({
             
             <div className="modal-form-group">
               <label className="modal-label">
-                Nivel
+                Nivel *
               </label>
               <select
                 name="nivel"
@@ -136,7 +165,7 @@ export function EditCompetitorModal({
               </label>
               <select
                 name="gradoEscolaridad"
-                value={editedCompetitor.gradoEscolaridad}
+                value={editedCompetitor.gradoEscolaridad || editedCompetitor.grado}
                 onChange={handleChange}
                 className="modal-input"
               >
@@ -153,7 +182,7 @@ export function EditCompetitorModal({
               <input
                 type="tel"
                 name="contactoTutor"
-                value={editedCompetitor.contactoTutor}
+                value={editedCompetitor.contactoTutor || editedCompetitor.contacto_tutor}
                 onChange={handleChange}
                 className="modal-input"
               />
@@ -161,11 +190,11 @@ export function EditCompetitorModal({
             
             <div className="modal-form-group">
               <label className="modal-label">
-                Departamento
+                Departamento *
               </label>
               <select
-                name="departamento"
-                value={editedCompetitor.departamento}
+                name="departamentoNombre"
+                value={editedCompetitor.departamentoNombre || ''}
                 onChange={handleChange}
                 className="modal-input"
                 required
