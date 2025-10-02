@@ -2,6 +2,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import GestionCompetidores from './pages/GestionCompetidores'
+import GestionResponsables from './pages/GestionResponsable'
 import './App.css'
 //import CargaMasiva from './components/carga masiva/CargarCSV';
 import CargaMasiva from './components/carga masiva/CargarCSV';
@@ -21,12 +22,12 @@ const Inicio = () => (
   //</div>
 //)
 
-const Responsables = () => (
+/*const Responsables = () => (
   <div className="p-8">
     <h1 className="text-3xl font-bold text-gray-800 mb-4">Gestión de Responsables (RF3)</h1>
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
-)
+)*/
 
 const Evaluadores = () => (
   <div className="p-8">
@@ -71,7 +72,7 @@ function App() {
         <Route path="/inicio" element={<Inicio />} />
         <Route path="/carga-masiva" element={<CargaMasiva />} />
         <Route path="/competidores" element={<GestionCompetidores />} />
-        <Route path="/responsables" element={<Responsables />} />
+        <Route path="/responsables" element={<GestionResponsables />} />
         <Route path="/evaluadores" element={<Evaluadores />} />
         <Route path="/medallero" element={<Medallero />} />
         <Route path="/listas" element={<Listas />} />
