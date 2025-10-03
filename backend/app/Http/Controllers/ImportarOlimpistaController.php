@@ -58,7 +58,6 @@ class ImportarOlimpistaController extends Controller
                 $linea++;
                 try {
                     $data = array_combine($header, $row);
-
                     // ---- VALIDACIONES ----
                     // 1. Campos obligatorios
                     if (empty($data['ci']) || empty($data['nombre']) || empty($data['institucion'])) {
