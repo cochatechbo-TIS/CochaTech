@@ -1,9 +1,13 @@
 // src/App.tsx
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Layout from './components/layout/Layout';
-import GestionCompetidores from './pages/GestionCompetidores';
+
+import { Routes, Route, Navigate } from 'react-router-dom'
+import Layout from './components/layout/Layout'
+import GestionCompetidores from './pages/GestionCompetidores'
+import GestionResponsables from './pages/GestionResponsable'
+import './App.css'
+//import CargaMasiva from './components/carga masiva/CargarCSV';
+import CargaMasiva from './components/carga masiva/CargarCSV';
 import Login from './pages/Login';
-import './App.css';
 
 // Componentes placeholder para las otras páginas
 const Inicio = () => (
@@ -13,19 +17,21 @@ const Inicio = () => (
   </div>
 );
 
-const CargaMasiva = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Carga Masiva (RF1)</h1>
-    <p className="text-gray-600">Funcionalidad en desarrollo...</p>
-  </div>
-);
 
-const Responsables = () => (
+//const CargaMasiva = () => (
+ // <div className="p-8">
+  //  <h1 className="text-3xl font-bold text-gray-800 mb-4">Carga Masiva</h1>
+  //  <p className="text-gray-600">Funcionalidad en desarrollo...</p>
+  //</div>
+//)
+
+/*const Responsables = () => (
   <div className="p-8">
     <h1 className="text-3xl font-bold text-gray-800 mb-4">Gestión de Responsables (RF3)</h1>
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
-);
+
+)*/
 
 const Evaluadores = () => (
   <div className="p-8">
@@ -63,37 +69,28 @@ const Reportes = () => (
 );
 
 // Componente para rutas protegidas
-const ProtectedRoutes = () => (
-  <Layout>
-    <Routes>
-      <Route path="inicio" element={<Inicio />} />
-      <Route path="carga-masiva" element={<CargaMasiva />} />
-      <Route path="competidores" element={<GestionCompetidores />} />
-      <Route path="responsables" element={<Responsables />} />
-      <Route path="evaluadores" element={<Evaluadores />} />
-      <Route path="medallero" element={<Medallero />} />
-      <Route path="listas" element={<Listas />} />
-      <Route path="validacion" element={<Validacion />} />
-      <Route path="reportes" element={<Reportes />} />
-      {/* Redirigir rutas no encontradas dentro de protegidas a login */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
-  </Layout>
-);
 
 function App() {
   return (
-    <Routes>
-      {/* Ruta pública: Login sin Layout/Navbar */}
-      <Route path="/login" element={<Login />} />
-      
-      {/* Ruta por defecto: Redirige a login */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      
-      {/* Rutas protegidas: Todas bajo /* */}
-      <Route path="/*" element={<ProtectedRoutes />} />
-    </Routes>
-  );
+   
+      <Routes>
+
+        <Route path="/" element={<Layout showNavbar={true}><Login /></Layout>} />
+        <Route path="/inicio" element={<Layout showNavbar={true}><Inicio /></Layout>} />
+        <Route path="/carga-masiva" element={<Layout showNavbar={true}><CargaMasiva /></Layout>} />
+        <Route path="/competidores" element={<Layout showNavbar={true}><GestionCompetidores /></Layout>} />
+        <Route path="/responsables" element={<Layout showNavbar={true}><GestionResponsables /></Layout>} />
+        <Route path="/evaluadores" element={<Layout showNavbar={true}><Evaluadores /></Layout>}  />
+        <Route path="/medallero" element={<Layout showNavbar={true}><Medallero /></Layout>} />
+        <Route path="/listas" element={<Layout showNavbar={true}><Listas /></Layout>} />
+        <Route path="/validacion" element={<Layout showNavbar={true}><Validacion /> </Layout>} />
+        <Route path="/reportes" element={<Layout showNavbar={true}><Reportes /></Layout>} />
+  
+        {/* Ruta por defecto - redirige a inicio */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+  
+  )
 }
 
 export default App;

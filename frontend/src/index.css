@@ -616,208 +616,26 @@ html, body {
   font-style: italic;
 }
 
-/* Añadir al final de src/index.css para estilos del login */
-.min-h-screen {
-  min-height: 100vh;
-}
 
-.bg-white {
-  background-color: #fff;
-}
-
-.flex {
+.login-btn {
   display: flex;
-}
-
-.items-center {
   align-items: center;
+  gap: 8px; /* espacio entre icono y texto */
+  padding: 10px 16px;
+  background-color: #1756af; /* gris oscuro */
+  color: white;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(5, 140, 250, 0.781);
+  cursor: pointer;
+  transition: background 0.2s ease-in-out, transform 0.1s;
 }
 
-.justify-center {
-  justify-content: center;
+.login-btn:hover {
+  background-color: #0b3692; /* un poco más oscuro al hover */
 }
 
-.p-6 {
-  padding: 1.5rem;
-}
-
-.rounded-lg {
-  border-radius: 0.5rem;
-}
-
-.shadow-md {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.max-w-md {
-  max-width: 28rem;
-}
-
-.w-full {
-  width: 100%;
-}
-
-.text-2xl {
-  font-size: 1.5rem;
-}
-
-.font-bold {
-  font-weight: 700;
-}
-
-.text-blue-600 {
-  color: #2563eb;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.mb-2 {
-  margin-bottom: 0.5rem;
-}
-
-.text-gray-600 {
-  color: #4b5563;
-}
-
-.mb-6 {
-  margin-bottom: 1.5rem;
-}
-
-.text-red-500 {
-  color: #ef4444;
-}
-
-.mb-4 {
-  margin-bottom: 1rem;
-}
-
-.block {
-  display: block;
-}
-
-.text-gray-700 {
-  color: #374151;
-}
-
-.mb-2 {
-  margin-bottom: 0.5rem;
-}
-
-.relative {
-  position: relative;
-}
-
-.w-5 {
-  width: 1.25rem;
-}
-
-.h-5 {
-  height: 1.25rem;
-}
-
-.text-gray-400 {
-  color: #9ca3af;
-}
-
-.absolute {
-  position: absolute;
-}
-
-.left-3 {
-  left: 0.75rem;
-}
-
-.top-1\/2 {
-  top: 50%;
-}
-
-.transform {
-  transform: translateY(-50%);
-}
-
-.p-2 {
-  padding: 0.5rem;
-}
-
-.pl-10 {
-  padding-left: 2.5rem;
-}
-
-.border {
-  border-width: 1px;
-}
-
-.border-gray-300 {
-  border-color: #d1d5db;
-}
-
-.rounded-md {
-  border-radius: 0.375rem;
-}
-
-.focus:outline-none {
-  outline: none;
-}
-
-.focus:border-blue-600 {
-  border-color: #2563eb;
-}
-
-.pr-10 {
-  padding-right: 2.5rem;
-}
-
-.right-3 {
-  right: 0.75rem;
-}
-
-.text-gray-400 {
-  color: #9ca3af;
-}
-
-.hover:text-gray-700 {
-  color: #374151;
-}
-
-.bg-blue-600 {
-  background-color: #2563eb;
-}
-
-.text-white {
-  color: #fff;
-}
-
-.py-2 {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
-.flex {
-  display: flex;
-}
-
-.justify-center {
-  justify-content: center;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.hover:bg-blue-700 {
-  background-color: #1d4ed8;
-}
-
-.disabled:opacity-50 {
-  opacity: 0.5;
-}
-
-.mt-4 {
-  margin-top: 1rem;
-}
-
-.hover:underline {
-  text-decoration: underline;
+.login-btn:active {
+  transform: scale(0.97); /* pequeño "click" al presionar */
 }
