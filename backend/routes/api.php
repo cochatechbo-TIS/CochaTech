@@ -26,7 +26,7 @@ use App\Http\Controllers\ImportarOlimpistaController;
 #Route::middleware('auth:sanctum')->group(function () {
     // Ruta para obtener los datos del usuario autenticado
     #Route::get('/user', function (Request $request) {
-    #    return $request->user();
+    #   return $request->user();
     #});
 
     // Aquí deberías mover las rutas que quieres proteger
