@@ -63,7 +63,7 @@ const GestionCompetidores: React.FC = () => {
   // FETCH: Actualizar competidor
   const handleEditCompetitor = async (editedCompetitor: Competidor) => {
     try {
-const response = await fetch(`${API_BASE}/olimpistas/${editedCompetitor.id_olimpista}`, {
+        const response = await fetch(`${API_BASE}/olimpistas/${editedCompetitor.id_olimpista}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

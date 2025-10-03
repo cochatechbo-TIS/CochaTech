@@ -2,6 +2,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import GestionCompetidores from './pages/GestionCompetidores'
+import GestionResponsables from './pages/GestionResponsable'
 import './App.css'
 //import CargaMasiva from './components/carga masiva/CargarCSV';
 import CargaMasiva from './components/carga masiva/CargarCSV';
@@ -22,12 +23,12 @@ const Inicio = () => (
   //</div>
 //)
 
-const Responsables = () => (
+/*const Responsables = () => (
   <div className="p-8">
     <h1 className="text-3xl font-bold text-gray-800 mb-4">Gestión de Responsables (RF3)</h1>
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
-)
+)*/
 
 const Evaluadores = () => (
   <div className="p-8">
@@ -68,17 +69,18 @@ function App() {
   return (
    
       <Routes>
+
         <Route path="/" element={<Layout showNavbar={true}><LoginPrueba /></Layout>} />
         <Route path="/inicio" element={<Layout showNavbar={true}><Inicio /></Layout>} />
         <Route path="/carga-masiva" element={<Layout showNavbar={true}><CargaMasiva /></Layout>} />
         <Route path="/competidores" element={<Layout showNavbar={true}><GestionCompetidores /></Layout>} />
-        <Route path="/responsables" element={<Layout showNavbar={true}><Responsables /></Layout>} />
+        <Route path="/responsables" element={<Layout showNavbar={true}><GestionResponsables /></Layout>} />
         <Route path="/evaluadores" element={<Layout showNavbar={true}><Evaluadores /></Layout>}  />
         <Route path="/medallero" element={<Layout showNavbar={true}><Medallero /></Layout>} />
         <Route path="/listas" element={<Layout showNavbar={true}><Listas /></Layout>} />
         <Route path="/validacion" element={<Layout showNavbar={true}><Validacion /> </Layout>} />
         <Route path="/reportes" element={<Layout showNavbar={true}><Reportes /></Layout>} />
-        
+  
         {/* Ruta por defecto - redirige a inicio */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
