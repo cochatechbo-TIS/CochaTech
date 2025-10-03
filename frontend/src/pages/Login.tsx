@@ -3,7 +3,7 @@ import './login.css';
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
-import LoginHeader from '../components/layout/LoginHeader';
+
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -51,7 +51,7 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <LoginHeader />
+      
       <div className="flex flex-1 items-center justify-center px-4">
         <div className="w-full max-w-md bg-white rounded-lg shadow-md"> {/* Mantengo rounded-lg y shadow-md aquí */}
           <div className="bg-blue-600 text-white p-4 rounded-t-lg"> {/* Nuevo div para cuadro azul del título */}
