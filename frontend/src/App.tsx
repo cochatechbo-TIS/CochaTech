@@ -5,6 +5,7 @@ import GestionCompetidores from './pages/GestionCompetidores'
 import './App.css'
 //import CargaMasiva from './components/carga masiva/CargarCSV';
 import CargaMasiva from './components/carga masiva/CargarCSV';
+import LoginPrueba from './components/login/LoginPrueba';
 
 // Componentes placeholder para las otras páginas
 const Inicio = () => (
@@ -65,23 +66,23 @@ const Reportes = () => (
 
 function App() {
   return (
-    <Layout>
+   
       <Routes>
-        <Route path="/" element={<Inicio />} />
-        <Route path="/inicio" element={<Inicio />} />
-        <Route path="/carga-masiva" element={<CargaMasiva />} />
-        <Route path="/competidores" element={<GestionCompetidores />} />
-        <Route path="/responsables" element={<Responsables />} />
-        <Route path="/evaluadores" element={<Evaluadores />} />
-        <Route path="/medallero" element={<Medallero />} />
-        <Route path="/listas" element={<Listas />} />
-        <Route path="/validacion" element={<Validacion />} />
-        <Route path="/reportes" element={<Reportes />} />
+        <Route path="/" element={<Layout showNavbar={true}><LoginPrueba /></Layout>} />
+        <Route path="/inicio" element={<Layout showNavbar={true}><Inicio /></Layout>} />
+        <Route path="/carga-masiva" element={<Layout showNavbar={true}><CargaMasiva /></Layout>} />
+        <Route path="/competidores" element={<Layout showNavbar={true}><GestionCompetidores /></Layout>} />
+        <Route path="/responsables" element={<Layout showNavbar={true}><Responsables /></Layout>} />
+        <Route path="/evaluadores" element={<Layout showNavbar={true}><Evaluadores /></Layout>}  />
+        <Route path="/medallero" element={<Layout showNavbar={true}><Medallero /></Layout>} />
+        <Route path="/listas" element={<Layout showNavbar={true}><Listas /></Layout>} />
+        <Route path="/validacion" element={<Layout showNavbar={true}><Validacion /> </Layout>} />
+        <Route path="/reportes" element={<Layout showNavbar={true}><Reportes /></Layout>} />
         
         {/* Ruta por defecto - redirige a inicio */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </Layout>
+  
   )
 }
 
