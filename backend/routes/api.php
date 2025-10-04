@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController; // Importa el nuevo controlador
 use App\Http\Controllers\EstudianteController;
 use App\Http\Controllers\Gestion_Olimpista_Controller;
 use App\Http\Controllers\ImportarOlimpistaController;
+use App\Http\Controllers\UsuarioController;
 /*
 |--------------------------------------------------------------------------
 | Rutas Públicas (No requieren autenticación)
@@ -35,5 +36,6 @@ use App\Http\Controllers\ImportarOlimpistaController;
     Route::put('/olimpistas/{id}', [Gestion_Olimpista_Controller::class, 'update']);
     Route::delete('/olimpistas/{id}', [Gestion_Olimpista_Controller::class, 'destroy']);
     Route::post('/olimpistas/importar', [ImportarOlimpistaController::class, 'importar']);
+    
     // Puedes agregar más rutas protegidas aquí...
 #});
