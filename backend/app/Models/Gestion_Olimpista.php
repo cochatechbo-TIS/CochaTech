@@ -10,7 +10,7 @@ class Gestion_Olimpista extends Model
     protected $primaryKey = 'id_olimpista'; // Ahora la PK es id_olimpista
     public $incrementing = true;           // Es autoincremental
     protected $keyType = 'int';            // Tipo entero
-    public $timestamps = false;///me dio error por no poner esto
+    public $timestamps = false;///me dio error por no poner esto ey que este en false 
 
     protected $fillable = [
         'ci', 'nombre', 'institucion', 'area', 'nivel', 'grado',
