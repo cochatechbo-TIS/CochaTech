@@ -37,9 +37,9 @@ use App\Http\Controllers\UsuarioController;
     Route::delete('/olimpistas/{id}', [Gestion_Olimpista_Controller::class, 'destroy']);
     Route::post('/olimpistas/importar', [ImportarOlimpistaController::class, 'importar']);
 
-    Route::get('/usuarios', [UsuarioController::class, 'index']);     
-    Route::post('/usuarios', [UsuarioController::class, 'store']);     
-    Route::put('/usuarios/{id}', [UsuarioController::class, 'update']); 
-    Route::delete('/usuarios/{id}', [UsuarioController::class, 'destroy']); 
+    Route::get('/usuario', [UsuarioController::class, 'index']);     
+    Route::post('/usuario', [UsuarioController::class, 'store']);     
+    Route::put('/usuario/{id}', [UsuarioController::class, 'update']); 
+    Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']); 
     // Puedes agregar más rutas protegidas aquí...
 #});
