@@ -1,7 +1,8 @@
 // src/pages/GestionCompetidores.tsx
-import React, { useState, useEffect } from 'react'; // Agregar useEffect
+import React, { useState, useEffect } from 'react';
 import { CompetitorTable } from '../components/competidores/CompetitorTable';
 import type { Competidor } from '../interfaces/Competidor';
+import api from '../services/api'; // CORREGIDO: Importa la instancia de Axios
 
 const GestionCompetidores: React.FC = () => {
   const [competidores, setCompetidores] = useState<Competidor[]>([]);
@@ -9,84 +10,43 @@ const GestionCompetidores: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // URL base de la API
-  const API_BASE = 'http://localhost:8000/api';
-
-  // FETCH: Obtener competidores de la base de datos
+  // CORREGIDO: Usa api.get para obtener los competidores
   const fetchCompetidores = async () => {
     try {
       setLoading(true);
       setError('');
       
-      const response = await fetch(`${API_BASE}/olimpistas`);
+      const response = await api.get<Competidor[]>('/olimpistas');
       
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: No se pudo cargar los datos`);
-      }
+      // El backend ya devuelve los datos en el formato correcto
+      setCompetidores(response.data);
       
-      const data = await response.json();
-      
-      // Mapear los datos del backend a nuestra interfaz
-      const competidoresMapeados = data.data.map((olimpista: Competidor) => ({
-        id: olimpista.id_olimpista,
-        id_olimpista: olimpista.id_olimpista,
-        nombre: olimpista.nombre || '',
-        documento: olimpista.ci || '',
-        ci: olimpista.ci || '',
-        institucion: olimpista.institucion || '',
-        area: olimpista.area || '',
-        nivel: olimpista.nivel || '',
-        gradoEscolaridad: olimpista.grado || '',
-        grado: olimpista.grado || '',
-        contactoTutor: olimpista.contacto_tutor || '',
-        contacto_tutor: olimpista.contacto_tutor || '',
-        id_departamento: olimpista.id_departamento,
-        departamento: olimpista.departamento, // objeto entero
-        departamentoNombre: olimpista.departamento?.nombre_departamento || '' // 👈 este es el que vas a mostrar
-    }));
-      
-      setCompetidores(competidoresMapeados);
-      
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching competidores:', err);
-      setError('No se pudo conectar con el servidor. Verifica que el backend esté corriendo.');
+      const message = err.response?.status === 401
+        ? 'No estás autenticado. Por favor, inicia sesión.'
+        : 'No se pudo conectar con el servidor.';
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Cargar competidores al iniciar
   useEffect(() => {
     fetchCompetidores();
   }, []);
 
-  // FETCH: Actualizar competidor
+  // CORREGIDO: Usa api.put y la clave primaria 'ci'
   const handleEditCompetitor = async (editedCompetitor: Competidor) => {
     try {
-        const response = await fetch(`${API_BASE}/olimpistas/${editedCompetitor.id_olimpista}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-          ci: editedCompetitor.ci,
-          nombre: editedCompetitor.nombre,
-          institucion: editedCompetitor.institucion,
-          area: editedCompetitor.area,
-          nivel: editedCompetitor.nivel,
-          grado: editedCompetitor.grado,
-          contacto_tutor: editedCompetitor.contacto_tutor,
-          id_departamento: editedCompetitor.id_departamento
-        }),
-      });
+      // La URL usa el 'ci' del competidor para identificarlo
+      const response = await api.put(`/olimpistas/${editedCompetitor.ci}`, editedCompetitor);
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error('Error al actualizar competidor');
       }
 
-      // Recargar los datos actualizados
-      await fetchCompetidores();
+      await fetchCompetidores(); // Recarga los datos
       alert('Competidor actualizado exitosamente');
       
     } catch (err) {
@@ -96,23 +56,20 @@ const GestionCompetidores: React.FC = () => {
     }
   };
 
-  // FETCH: Eliminar competidor
-  const handleDeleteCompetitor = async (id: number) => {
+  // CORREGIDO: Usa api.delete, espera un 'ci' (string) y lo pasa a la URL
+  const handleDeleteCompetitor = async (ci: string) => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este competidor?')) {
       return;
     }
 
     try {
-      const response = await fetch(`${API_BASE}/olimpistas/${id}`, {
-        method: 'DELETE',
-      });
+      const response = await api.delete(`/olimpistas/${ci}`);
 
-      if (!response.ok) {
+      if (response.status !== 204) { // 204 No Content es la respuesta estándar para delete
         throw new Error('Error al eliminar competidor');
       }
 
-      // Recargar los datos actualizados
-      await fetchCompetidores();
+      await fetchCompetidores(); // Recarga los datos
       alert('Competidor eliminado exitosamente');
       
     } catch (err) {
@@ -124,7 +81,7 @@ const GestionCompetidores: React.FC = () => {
   
   const competidoresFiltrados = competidores.filter(comp =>
     comp.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
-    comp.documento?.includes(filtro) ||
+    comp.ci.includes(filtro) ||
     comp.institucion.toLowerCase().includes(filtro.toLowerCase()) ||
     comp.area.toLowerCase().includes(filtro.toLowerCase())
   );
@@ -202,7 +159,7 @@ const GestionCompetidores: React.FC = () => {
         <CompetitorTable 
           competitors={competidoresFiltrados}
           onEdit={handleEditCompetitor}
-          onDelete={handleDeleteCompetitor}
+          onDelete={(id) => handleDeleteCompetitor(String(id))}
         />
       </div>
 

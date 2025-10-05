@@ -1,5 +1,10 @@
+# Define la versión del archivo de Compose para mayor compatibilidad
+version: '3.8'
 
+# Todos los servicios deben estar dentro de esta sección 'services'
 services:
+
+  # Servicio de la Base de Datos (Postgres)
   db:
     image: postgres:15
     container_name: laravel_postgres
@@ -12,7 +17,10 @@ services:
       - db_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - app-network # Conecta el servicio a nuestra red dedicada
 
+  # Servicio del Backend (Laravel/PHP)
   backend:
     build:
       context: ./docker/php
@@ -24,19 +32,10 @@ services:
       - "8000:80"
     depends_on:
       - db
-#
-#  pgadmin:
-#    image: dpage/pgadmin4:8
-#    container_name: laravel_pgadmin
-#    restart: unless-stopped
-#    environment:
-#      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-#      PGADMIN_DEFAULT_PASSWORD: admin
-#    ports:
-#      - "5050:80"
-#    depends_on:
-#      - db
+    networks:
+      - app-network # Conecta el servicio a nuestra red dedicada
 
+  # Servicio del Frontend (React/Vite)
   frontend:
     build:
       context: ./frontend
@@ -45,15 +44,41 @@ services:
     ports:
       - "3000:3000"
     volumes:
+      # Sincroniza tu código local con el contenedor...
       - ./frontend:/app
-      - /app/node_modules
+      # ...excepto la carpeta node_modules, que usará un volumen gestionado por Docker.
+      - node_modules_volume:/app/node_modules
     environment:
-      - VITE_API_URL=:http://backend:80
+      - VITE_API_URL=http://backend:80 # Asegúrate de usar esta variable en tu código React
       - CHOKIDAR_USEPOLLING=true
     stdin_open: true
     tty: true
     depends_on:
       - backend
+    networks:
+      - app-network # Conecta el servicio a nuestra red dedicada
 
+  # pgadmin (Descomenta si lo necesitas en el futuro)
+  # pgadmin:
+  #   image: dpage/pgadmin4:8
+  #   container_name: laravel_pgadmin
+  #   restart: unless-stopped
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #   ports:
+  #     - "5050:80"
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - app-network
+
+# Define los volúmenes que serán gestionados por Docker
 volumes:
   db_data:
+  node_modules_volume:
+
+# Define la red dedicada para que los contenedores se comuniquen entre sí por su nombre
+networks:
+  app-network:
+    driver: bridge
