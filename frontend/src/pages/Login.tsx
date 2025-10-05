@@ -3,7 +3,7 @@ import './login.css';
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
-
+import authService from '../services/authService'; // <-- IMPORTANTE
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -18,33 +18,38 @@ const Login: React.FC = () => {
     setError('');
     setLoading(true);
 
-    if (!email) {
-      setError('El correo electrónico es obligatorio');
-      setLoading(false);
-      return;
-    }
+    try {
+      // Llama al servicio de autenticación
+      const data = await authService.login(email, password);
+      
+      // Lee el rol desde la respuesta de la API
+      const userRole = data.user.rol.nombre_rol; // O como se llame el campo en tu DB
 
-    if (!password) {
-      setError('La contraseña es obligatoria');
-      setLoading(false);
-      return;
-    }
-
-    console.log('Intentando login con:', { email, password });
-    setTimeout(() => {
-      if (email === 'admin@ejemplo.com' && password === 'admin') {
-        localStorage.setItem('token', 'mock-token');
-        localStorage.setItem('role', 'admin');
-        navigate('/inicio');
-      } else if (email === 'evaluador@ejemplo.com' && password === 'evaluador') {
-        localStorage.setItem('token', 'mock-token');
-        localStorage.setItem('role', 'evaluador');
-        navigate('/evaluadores');
-      } else {
-        setError('Credenciales inválidas');
+      // Redirige según el rol
+      switch (userRole) {
+        case 'administrador':
+          navigate('/inicio'); // Dashboard del admin
+          break;
+        case 'evaluador':
+          navigate('/evaluadores'); // Dashboard del evaluador
+          break;
+        case 'responsable':
+          navigate('/responsables'); // Dashboard del responsable
+          break;
+        default:
+          navigate('/inicio'); // Ruta por defecto si el rol no se reconoce
       }
+
+    } catch (err: any) {
+      // Maneja errores (ej: 401 Credenciales incorrectas)
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Ocurrió un error. Por favor, inténtelo de nuevo.');
+      }
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
