@@ -266,18 +266,20 @@ html, body {
 @media (min-width: 1024px) {
   .search-section {
     flex-direction: row;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between; /* Asegura que los elementos se separen */
+
   }
 }
 
 .search-container {
-  flex: 1;
-  max-width: 400px;
+  flex: 1; /* ¡IMPORTANTE! Ocupa todo el espacio disponible */
+  min-width: 100px;
 }
 
 .search-input-wrapper {
   position: relative;
+  max-width: 500px; /* Opcional: limita el ancho máximo del buscador */
 }
 
 .search-input {
@@ -324,6 +326,8 @@ html, body {
   border: none;
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0; /* Evita que el botón se reduzca */
+  width: max-content; /* Ancho mínimo según contenido */
 }
 
 .primary-button:hover {

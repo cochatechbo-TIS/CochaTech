@@ -59,8 +59,8 @@ const GestionCompetidores: React.FC = () => {
       
       // Mapear los datos del backend a nuestra interfaz
       const competidoresMapeados = response.data.data.map((olimpista: Competidor) => ({
+        id_olimpista: olimpista.id_olimpista, // <-- ¡Asegúrate de que el backend envíe este campo!
         ci: olimpista.ci || '',
-        documento: olimpista.ci || '', // Alias para la tabla
         nombre: olimpista.nombre || '',
         apellidos: olimpista.apellidos || '',
         institucion: olimpista.institucion || '',
@@ -126,7 +126,7 @@ const GestionCompetidores: React.FC = () => {
       
       setCompetidores(competidoresActualizados);
 
-      const response = await api.put(`/olimpistas/${editedCompetitor.ci}`, {
+      const response = await api.put(`/olimpistas/${editedCompetitor.id_olimpista}`, {
         ci: editedCompetitor.ci,
         nombre: editedCompetitor.nombre,
         institucion: editedCompetitor.institucion,
@@ -175,42 +175,51 @@ const GestionCompetidores: React.FC = () => {
   };
 
   // OPTIMIZADO: Eliminar competidor (ELIMINACIÓN LOCAL INMEDIATA)
-  const handleDeleteCompetitor = async (id: string) => {
-    // ... (mantén tu código existente de handleDeleteCompetitor)
-
-    if (!window.confirm('¿Estás seguro de que deseas eliminar este competidor?')) {
-      return;
-    }
-    
+  const handleDeleteCompetitor = async (ci: string) => { 
+       
     const competidoresAnteriores = [...competidores];
-    try {
-      const competidoresActualizados = competidores.filter(comp => 
-        comp.ci !== id
-      );
-      
-      setCompetidores(competidoresActualizados);
+    
+    // 1. Encontrar el competidor y obtener su ID de clave primaria
+    const competidorAEliminar = competidores.find(comp => comp.ci === ci);
 
-      await api.delete(`/olimpistas/${id}`);
-
-
-      alert('Competidor eliminado exitosamente');
-      
-    } catch (err: unknown) {
-      console.error('Error deleting competitor:', err);
-      setCompetidores(competidoresAnteriores);
-      
-      let errorMessage = 'Error al eliminar competidor';
-      
-      if (axios.isAxiosError(err)) {
-        errorMessage = err.response?.data?.message || errorMessage;
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-      
-      alert(errorMessage);
-      throw err;
+    if (!competidorAEliminar || !competidorAEliminar.id_olimpista) {
+        alert('Error: No se encontró el ID interno del competidor para eliminar.');
+        console.error('Competidor no encontrado o le falta id_olimpista:', competidorAEliminar);
+        return;
     }
-  };
+
+    try {
+        // Optimización: Actualizar la interfaz de usuario inmediatamente
+        const competidoresActualizados = competidores.filter(comp => 
+            comp.ci !== ci
+        );
+        
+        setCompetidores(competidoresActualizados);
+
+        // 2. Realizar la petición a la API usando el ID de clave primaria
+        // El backend espera: DELETE /olimpistas/{id_olimpista}
+        await api.delete(`/olimpistas/${competidorAEliminar.id_olimpista}`);
+
+
+        alert('Competidor eliminado exitosamente');
+        
+    } catch (err: unknown) {
+        console.error('Error deleting competitor:', err);
+        // Revertir el estado si la llamada a la API falla
+        setCompetidores(competidoresAnteriores);
+        
+        let errorMessage = 'Error al eliminar competidor. El cambio fue revertido.';
+        
+        if (axios.isAxiosError(err)) {
+            errorMessage = err.response?.data?.message || errorMessage;
+        } else if (err instanceof Error) {
+            errorMessage = err.message;
+        }
+        
+        alert(errorMessage);
+        throw err;
+    }
+};
 
   // Funciones para los botones (sin funcionalidad completa)
   const handleVerLista = () => {

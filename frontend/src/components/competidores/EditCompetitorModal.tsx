@@ -43,9 +43,10 @@ export function EditCompetitorModal({
     
     const competitorParaGuardar: Competidor = {
       ...editedCompetitor,
-      ci: editedCompetitor.documento || editedCompetitor.ci,
-      grado: editedCompetitor.gradoEscolaridad || editedCompetitor.grado,
-      contacto_tutor: editedCompetitor.contactoTutor || editedCompetitor.contacto_tutor,
+      // Se simplifica la asignación, ya que 'ci' ahora es el campo principal
+      ci: editedCompetitor.ci, 
+      grado: editedCompetitor.grado || editedCompetitor.grado,
+      contacto_tutor: editedCompetitor.contacto_tutor || editedCompetitor.contacto_tutor,
       id_departamento: idDepartamento
     };
     
@@ -56,9 +57,10 @@ export function EditCompetitorModal({
   React.useEffect(() => {
     setEditedCompetitor({ 
       ...competitor,
-      documento: competitor.ci,
-      gradoEscolaridad: competitor.grado,
-      contactoTutor: competitor.contacto_tutor,
+      // Usamos CI directamente y eliminamos 'documento'
+      // documento: competitor.ci, 
+      grado: competitor.grado,
+      contacto_tutor: competitor.contacto_tutor,
       departamentoNombre: competitor.departamento?.nombre_departamento || ''
   });
   }, [competitor]); // Solo 'competitor' en las dependencias
@@ -80,9 +82,10 @@ export function EditCompetitorModal({
         
         <form onSubmit={handleSubmit}>
           <div className="modal-form-grid">
+            
             <div className="modal-form-group">
               <label className="modal-label">
-                Nombre Completo *
+                Nombre(s) *
               </label>
               <input
                 type="text"
@@ -93,6 +96,22 @@ export function EditCompetitorModal({
                 required
               />
             </div>
+
+            {/* AÑADIDO: Campo Apellidos */}
+            <div className="modal-form-group">
+              <label className="modal-label">
+                Apellidos *
+              </label>
+              <input
+                type="text"
+                name="apellidos" // <-- Nombre del campo correcto
+                value={editedCompetitor.apellidos} // <-- Valor desde el estado
+                onChange={handleChange}
+                className="modal-input"
+                required
+              />
+            </div>
+            {/* FIN: Campo Apellidos */}
             
             <div className="modal-form-group">
               <label className="modal-label">
@@ -100,8 +119,8 @@ export function EditCompetitorModal({
               </label>
               <input
                 type="text"
-                name="documento"
-                value={editedCompetitor.documento || editedCompetitor.ci}
+                name="ci" // <-- CORREGIDO: Usamos 'ci' consistentemente
+                value={editedCompetitor.ci}
                 onChange={handleChange}
                 className="modal-input"
                 required
@@ -165,7 +184,7 @@ export function EditCompetitorModal({
               </label>
               <select
                 name="gradoEscolaridad"
-                value={editedCompetitor.gradoEscolaridad || editedCompetitor.grado}
+                value={editedCompetitor.grado || editedCompetitor.grado}
                 onChange={handleChange}
                 className="modal-input"
               >
@@ -182,7 +201,7 @@ export function EditCompetitorModal({
               <input
                 type="tel"
                 name="contactoTutor"
-                value={editedCompetitor.contactoTutor || editedCompetitor.contacto_tutor}
+                value={editedCompetitor.contacto_tutor || editedCompetitor.contacto_tutor}
                 onChange={handleChange}
                 className="modal-input"
               />

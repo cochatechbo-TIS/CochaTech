@@ -1,6 +1,7 @@
 // src/interfaces/Competidor.ts
 export interface Competidor {
-  ci: string; // La clave primaria es el CI (string)
+  id_olimpista: number; // <--- AÑADIDO: Clave primaria que el backend espera
+  ci: string; 
   nombre: string;
   apellidos: string;
   institucion: string;
@@ -10,7 +11,6 @@ export interface Competidor {
   contacto_tutor: string;
   id_departamento: number;
   departamentoNombre?: string; 
-  // La relación 'departamento' que viene del backend
   departamento?: {
     id_departamento: number;
     nombre_departamento: string;
