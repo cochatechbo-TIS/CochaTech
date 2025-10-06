@@ -216,10 +216,15 @@ html, body {
 
 /* Estilos generales de la página gestionCompetidores */
 .gestion-competidores-page {
-  padding: 20px 5%; 
-  max-width: 1200px; 
-  margin: 0 auto; 
-  width: 90%; /* Usar porcentaje del viewport */
+  padding: 20px 0; 
+  max-width: none; 
+  margin: 0; 
+  width: 100%; /* Usar porcentaje del viewport */
+}
+
+.page-content-wrapper {
+    margin: 0 auto; 
+    padding: 0 25px; /* Padding lateral de seguridad */
 }
 
 .page-header {
@@ -228,8 +233,8 @@ html, body {
 }
 
 .page-title {
-  font-size: 28px;
-  font-weight: bold;
+  font-size: 32px;
+  font-weight: 500;
   color: #1f2937;
   margin-bottom: 8px;
   
@@ -242,12 +247,12 @@ html, body {
 
 /* Contenedor principal blanco */
 .management-container {
- max-width: 1100px;
   background-color: white;
   border-radius: 8px;
-  padding: 30px;
-  margin: 20px auto;   /* 👈 centrado horizontal */
+  padding: 25px;
+  margin: 8px 0; 
   box-shadow: 0 3px 4px rgba(0, 0, 0, 0.1);
+  width: 100%; /* Ocupa todo el ancho disponible */
 }
 
 /* Sección de búsqueda */
@@ -335,6 +340,7 @@ html, body {
   background-color: white;
   border-radius: 8px;
   overflow-x: auto;
+    width: 100%; /* Asegura que ocupe todo el ancho disponible */
 }
 
 .competitor-table {
@@ -343,7 +349,7 @@ html, body {
 }
 
 .competitor-table-header {
-  background-color: #f8fafc; /* Fondo muy claro para el header */
+  background-color: #1d4ed8; /* Fondo muy claro para el header */
   border-bottom: 1px solid #e2e8f0;
 }
 
@@ -352,10 +358,10 @@ html, body {
   text-align: left;
   font-size: 12px;
   font-weight: 600;
-  color:#64748b;
+  color:#ffffff;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  vertical-align: top;
+  vertical-align: center;
 }
 
 .competitor-table-body {
@@ -638,4 +644,34 @@ html, body {
 
 .login-btn:active {
   transform: scale(0.97); /* pequeño "click" al presionar */
+}
+
+.registro-navigation {
+    display: flex;
+    border-bottom: 2px solid #e5e7eb; /* Línea gris de base */
+}
+
+.tab-button {
+    background-color: transparent;
+    border: none;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 550;
+    cursor: pointer;
+    color: #626262; /* Texto gris por defecto */
+    transition: color 0.2s, border-bottom 0.2s;
+    border-bottom: 2px solid transparent; 
+    white-space: nowrap; 
+    text-transform: uppercase; 
+    letter-spacing: 0.05em; 
+}
+
+.tab-button:hover {
+    color: #1f2937;
+}
+
+.tab-button.active {
+    color: #1d4ed8; /* Color azul para el texto activo */
+    font-weight: 600; 
+    border-bottom: 2px solid #1d4ed8;
 }

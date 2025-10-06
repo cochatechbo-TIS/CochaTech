@@ -1,94 +1,87 @@
 // src/components/carga-masiva/CargarCSV.tsx
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import './CargarCSV.css';
 
+interface CargarCSVProps {
+  onVerLista?: () => void;
+  onGenerarListas?: () => void;
+}
 
-function CargarCSV() {
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [file, setFile] = useState<File | null>(null);
+function CargarCSV({ onVerLista, onGenerarListas }: CargarCSVProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-
-//arrastrar o soltar un archivo desde una carpeta
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const fileObj = e.dataTransfer.files[0];
-    if (fileObj && fileObj.name.endsWith('.csv')) {
-      setFileName(fileObj.name);
-      setFile(fileObj);
-    }
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileObj = e.target.files?.[0];
     if (fileObj && fileObj.name.endsWith('.csv')) {
-      setFileName(fileObj.name);
-      setFile(fileObj);
+      if (window.confirm(`¿Estás seguro de que deseas cargar el archivo ${fileObj.name}? Esta acción podría sobrescribir datos existentes.`)) {
+        // Simular carga exitosa
+        alert('¡Archivo cargado exitosamente!');
+        // Limpiar el input
+        if (inputRef.current) {
+          inputRef.current.value = '';
+        }
+      } else {
+        // Limpiar el input si el usuario cancela
+        if (inputRef.current) {
+          inputRef.current.value = '';
+        }
+      }
     }
   };
 
-//actuva el imput oculto
-  const handleUploadClick = () => {
+  const handleSelectCSV = () => {
     inputRef.current?.click();
   };
 
-  const handleSubmit = () => {
-    alert('¡Archivo cargado! (simulación)');
-    setFile(null);
-    setFileName(null);
+  const handleVerLista = () => {
+    if (onVerLista) {
+      onVerLista();
+    } else {
+      alert('Función VER LISTA - En desarrollo');
+    }
+  };
+
+  const handleGenerarListas = () => {
+    if (onGenerarListas) {
+      onGenerarListas();
+    } else {
+      alert('Función GENERAR LISTAS POR ÁREA Y NIVEL - En desarrollo');
+    }
   };
 
   return (
-    <div className="min-h-[70vh] flex flex-col justify-center items-center bg-transparent">
-      <h1 className="text-3xl font-bold text-gray-900 mb-4 pt-4">Carga Masiva de Inscritos</h1>
-      <p className="text-gray-600">Administrar la carga de un CSV de inscritos</p>
-      <div className="cargar-csv-card">
+    <div className="management-container">
+      {/* Header con título y descripción */}
+      <div className="csv-header">
+        <h1 className="csv-title">Carga de Olimpistas</h1>
+        <p className="csv-description">
+          Sube un archivo CSV con los datos de los olimpistas. El archivo debe contener las siguientes columnas: 
+          Nombre completo, CI, Tutor legal, Contacto del tutor, Unidad educativa, Departamento, Grado, Área de competencia, Nivel, Tutor académico (opcional).
+        </p>
+      </div>
+
+      {/* Los 3 botones de acción */}
+      <div className="carga-action-buttons">
+        <button className="btn-primary" onClick={handleSelectCSV}>
+          SELECCIONAR CSV
+        </button>
+        <button className="btn-secondary" onClick={handleVerLista}>
+          VER LISTA
+        </button>
+        <button className="btn-secondary" onClick={handleGenerarListas}>
+          GENERAR LISTAS POR ÁREA Y NIVEL
+        </button>
         
-        
-        <div className="bg-white rounded-xl shadow px-6 py-8 min-h-[300px] flex flex-col justify-between">
-          {/* Título de sección */}
-          <label className="block text-lg mb-3 font-medium text-gray-800">
-            Subir archivo CSV
-          </label>
-          {/* Área de dropzone horizontal y centrada */}
-          <div
-            className="flex flex-col justify-center items-center h-56 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer transition hover:border-blue-500"
-            onClick={handleUploadClick}
-            onDrop={handleDrop}
-            onDragOver={e => e.preventDefault()}
-          >
-            <input
-              type="file"
-              accept=".csv"
-              ref={inputRef}
-              className="hidden"
-              onChange={handleFileChange}
-            />
-            <div className="text-5xl text-gray-400 mb-4">&#8682;</div>
-            {fileName ? (
-              <span className="text-blue-700 mt-2">{fileName}</span>
-            ) : (
-              <>
-                <span className="text-gray-700 text-center">Haz clic para seleccionar un archivo CSV</span>
-                <span className="text-gray-500 text-sm text-center"> o arrastra y suelta aquí</span>
-              </>
-            )}
-          </div>
-          {/* Botón alineado a la derecha */}
-          <div className="flex flex-row-reverse mt-8">
-            <button
-                
-             // className="cargar-csv-btn"
-              disabled={!file}
-              onClick={handleSubmit}
-            >
-              Cargar Datos
-            </button>
-          </div>
-        </div>
+        <input
+          type="file"
+          accept=".csv"
+          ref={inputRef}
+          className="csv-file-input-hidden"
+          onChange={handleFileChange}
+        />
       </div>
     </div>
   );
 }
 
 export default CargarCSV;
-

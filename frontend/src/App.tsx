@@ -2,10 +2,9 @@
 
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/layout/Layout'
-import GestionCompetidores from './pages/GestionCompetidores'
+import Registro from './pages/Registro'
 import GestionResponsables from './pages/GestionResponsable'
 import './App.css'
-//import CargaMasiva from './components/carga masiva/CargarCSV';
 import CargaMasiva from './components/carga masiva/CargarCSV';
 import Login from './pages/Login';
 
@@ -78,7 +77,7 @@ function App() {
         <Route path="/" element={<Layout showNavbar={true}><Login /></Layout>} />
         <Route path="/inicio" element={<Layout showNavbar={true}><Inicio /></Layout>} />
         <Route path="/carga-masiva" element={<Layout showNavbar={true}><CargaMasiva /></Layout>} />
-        <Route path="/competidores" element={<Layout showNavbar={true}><GestionCompetidores /></Layout>} />
+        <Route path="/competidores" element={<Layout showNavbar={true}><Registro /></Layout>} />
         <Route path="/responsables" element={<Layout showNavbar={true}><GestionResponsables /></Layout>} />
         <Route path="/evaluadores" element={<Layout showNavbar={true}><Evaluadores /></Layout>}  />
         <Route path="/medallero" element={<Layout showNavbar={true}><Medallero /></Layout>} />

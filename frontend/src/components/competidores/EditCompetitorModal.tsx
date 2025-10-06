@@ -6,12 +6,12 @@ import type { Competidor } from '../../interfaces/Competidor';
 // Mover los mapeos fuera del componente (constantes fijas)
 const departamentosMap = {
   'La Paz': 1,
-  'Cochabamba': 2, 
-  'Santa Cruz': 3,
+  'Santa Cruz': 2,
+  'Cochabamba': 3, 
   'Oruro': 4,
   'Potosí': 5,
-  'Tarija': 6,
-  'Chuquisaca': 7,
+  'Chuquisaca': 6,
+  'Tarija': 7,
   'Beni': 8,
   'Pando': 9
 };
@@ -200,12 +200,12 @@ export function EditCompetitorModal({
                 required
               >
                 <option value="La Paz">La Paz</option>
-                <option value="Cochabamba">Cochabamba</option>
                 <option value="Santa Cruz">Santa Cruz</option>
+                <option value="Cochabamba">Cochabamba</option>
                 <option value="Oruro">Oruro</option>
                 <option value="Potosí">Potosí</option>
-                <option value="Tarija">Tarija</option>
                 <option value="Chuquisaca">Chuquisaca</option>
+                <option value="Tarija">Tarija</option>
                 <option value="Beni">Beni</option>
                 <option value="Pando">Pando</option>
               </select>
@@ -224,7 +224,7 @@ export function EditCompetitorModal({
               type="submit"
               className="modal-btn modal-btn-primary"
             >
-              Guardar Cambios
+              Actualizar
             </button>
           </div>
         </form>

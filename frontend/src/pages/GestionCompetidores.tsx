@@ -1,7 +1,22 @@
 // src/pages/GestionCompetidores.tsx
-import React, { useState, useEffect } from 'react'; // Agregar useEffect
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { CompetitorTable } from '../components/competidores/CompetitorTable';
+import CargarCSV from '../components/carga masiva/CargarCSV';
 import type { Competidor } from '../interfaces/Competidor';
+
+// Mapa de departamentos
+const departamentosMapReverse: { [key: number]: string } = {
+  1: 'La Paz',
+  2: 'Santa Cruz', 
+  3: 'Cochabamba',
+  4: 'Oruro',
+  5: 'Potosí',
+  6: 'Chuquisaca',
+  7: 'Tarija',
+  8: 'Beni',
+  9: 'Pando'
+};
 
 const GestionCompetidores: React.FC = () => {
   const [competidores, setCompetidores] = useState<Competidor[]>([]);
@@ -12,22 +27,24 @@ const GestionCompetidores: React.FC = () => {
   // URL base de la API
   const API_BASE = 'http://localhost:8000/api';
 
-  // FETCH: Obtener competidores de la base de datos
-  const fetchCompetidores = async () => {
+  const api = React.useMemo(() => axios.create({
+    baseURL: API_BASE,
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    }
+  }), [API_BASE]);
+
+  const fetchCompetidores = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
       
-      const response = await fetch(`${API_BASE}/olimpistas`);
-      
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: No se pudo cargar los datos`);
-      }
-      
-      const data = await response.json();
+      console.log('Cargando competidores...');
+      const response = await api.get('/olimpistas');
       
       // Mapear los datos del backend a nuestra interfaz
-      const competidoresMapeados = data.data.map((olimpista: Competidor) => ({
+      const competidoresMapeados = response.data.data.map((olimpista: Competidor) => ({
         id: olimpista.id_olimpista,
         id_olimpista: olimpista.id_olimpista,
         nombre: olimpista.nombre || '',
@@ -41,85 +58,147 @@ const GestionCompetidores: React.FC = () => {
         contactoTutor: olimpista.contacto_tutor || '',
         contacto_tutor: olimpista.contacto_tutor || '',
         id_departamento: olimpista.id_departamento,
-        departamento: olimpista.departamento, // objeto entero
-        departamentoNombre: olimpista.departamento?.nombre_departamento || '' // 👈 este es el que vas a mostrar
-    }));
+        departamento: olimpista.departamento,
+        departamentoNombre: olimpista.departamento?.nombre_departamento || 
+                           departamentosMapReverse[olimpista.id_departamento] || 
+                           ''
+      }));
       
+      console.log('Competidores cargados:', competidoresMapeados.length);
       setCompetidores(competidoresMapeados);
       
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error fetching competidores:', err);
-      setError('No se pudo conectar con el servidor. Verifica que el backend esté corriendo.');
+      
+      let errorMessage = 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.';
+      
+      if (axios.isAxiosError(err)) {
+        errorMessage = err.response?.data?.message || 
+                      err.message || 
+                      errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  };
+  }, [api]);
 
-  // Cargar competidores al iniciar
+  // Cargar competidores solo al montar el componente
   useEffect(() => {
     fetchCompetidores();
-  }, []);
+  }, [fetchCompetidores]);
 
-  // FETCH: Actualizar competidor
+  // OPTIMIZADO: Actualizar competidor (ACTUALIZACIÓN LOCAL INMEDIATA)
   const handleEditCompetitor = async (editedCompetitor: Competidor) => {
+    // ... (mantén tu código existente de handleEditCompetitor)
+    const competidoresAnteriores = [...competidores]; 
+    
     try {
-        const response = await fetch(`${API_BASE}/olimpistas/${editedCompetitor.id_olimpista}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-          ci: editedCompetitor.ci,
-          nombre: editedCompetitor.nombre,
-          institucion: editedCompetitor.institucion,
-          area: editedCompetitor.area,
-          nivel: editedCompetitor.nivel,
-          grado: editedCompetitor.grado,
-          contacto_tutor: editedCompetitor.contacto_tutor,
-          id_departamento: editedCompetitor.id_departamento
-        }),
+      const competidoresActualizados = competidores.map(comp => 
+        comp.id_olimpista === editedCompetitor.id_olimpista 
+          ? { 
+              ...editedCompetitor,
+              departamentoNombre: editedCompetitor.departamentoNombre || 
+                                departamentosMapReverse[editedCompetitor.id_departamento] || 
+                                ''
+            }
+          : comp
+      );
+      
+      setCompetidores(competidoresActualizados);
+
+      const response = await api.put(`/olimpistas/${editedCompetitor.id_olimpista}`, {
+        ci: editedCompetitor.ci,
+        nombre: editedCompetitor.nombre,
+        institucion: editedCompetitor.institucion,
+        area: editedCompetitor.area,
+        nivel: editedCompetitor.nivel,
+        grado: editedCompetitor.grado,
+        contacto_tutor: editedCompetitor.contacto_tutor,
+        id_departamento: editedCompetitor.id_departamento
       });
 
-      if (!response.ok) {
-        throw new Error('Error al actualizar competidor');
+      if (response.data.data) {
+        const competidorActualizado = response.data.data;
+        const competidoresFinales = competidoresActualizados.map(comp => 
+          comp.id_olimpista === editedCompetitor.id_olimpista 
+            ? { 
+                ...comp,
+                ...competidorActualizado,
+                departamentoNombre: competidorActualizado.departamento?.nombre_departamento || 
+                                  departamentosMapReverse[competidorActualizado.id_departamento] || 
+                                  editedCompetitor.departamentoNombre
+              }
+            : comp
+        );
+        setCompetidores(competidoresFinales);
       }
 
-      // Recargar los datos actualizados
-      await fetchCompetidores();
       alert('Competidor actualizado exitosamente');
       
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error updating competitor:', err);
-      alert('Error al actualizar competidor');
+      setCompetidores(competidoresAnteriores);
+      
+      let errorMessage = 'Error al actualizar competidor';
+      
+      if (axios.isAxiosError(err)) {
+        errorMessage = err.response?.data?.message || errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      
+      alert(errorMessage);
       throw err;
     }
   };
 
-  // FETCH: Eliminar competidor
+  // OPTIMIZADO: Eliminar competidor (ELIMINACIÓN LOCAL INMEDIATA)
   const handleDeleteCompetitor = async (id: number) => {
+    // ... (mantén tu código existente de handleDeleteCompetitor)
     if (!window.confirm('¿Estás seguro de que deseas eliminar este competidor?')) {
       return;
     }
-
+    
+    const competidoresAnteriores = [...competidores];
     try {
-      const response = await fetch(`${API_BASE}/olimpistas/${id}`, {
-        method: 'DELETE',
-      });
+      const competidoresActualizados = competidores.filter(comp => 
+        comp.id_olimpista !== id
+      );
+      
+      setCompetidores(competidoresActualizados);
 
-      if (!response.ok) {
-        throw new Error('Error al eliminar competidor');
-      }
+      await api.delete(`/olimpistas/${id}`);
 
-      // Recargar los datos actualizados
-      await fetchCompetidores();
       alert('Competidor eliminado exitosamente');
       
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error deleting competitor:', err);
-      alert('Error al eliminar competidor');
+      setCompetidores(competidoresAnteriores);
+      
+      let errorMessage = 'Error al eliminar competidor';
+      
+      if (axios.isAxiosError(err)) {
+        errorMessage = err.response?.data?.message || errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      
+      alert(errorMessage);
       throw err;
     }
+  };
+
+  // Funciones para los botones (sin funcionalidad completa)
+  const handleVerLista = () => {
+    // Ya estamos en la lista, no hace nada
+  };
+
+  const handleGenerarListas = () => {
+    alert('Función GENERAR LISTAS POR ÁREA Y NIVEL - En desarrollo');
   };
   
   const competidoresFiltrados = competidores.filter(comp =>
@@ -129,14 +208,10 @@ const GestionCompetidores: React.FC = () => {
     comp.area.toLowerCase().includes(filtro.toLowerCase())
   );
 
-  // Estados de carga y error (mantener tus estilos)
+  // Estados de carga y error
   if (loading) {
     return (
       <div className="gestion-competidores-page">
-        <div className="page-header">
-          <h1 className="page-title">Gestión de Competidores</h1>
-          <p className="page-subtitle">Administra la información de los participantes registrados</p>
-        </div>
         <div className="management-container">
           <div className="flex justify-center items-center p-8">
             <div className="text-lg">Cargando competidores...</div>
@@ -149,10 +224,6 @@ const GestionCompetidores: React.FC = () => {
   if (error) {
     return (
       <div className="gestion-competidores-page">
-        <div className="page-header">
-          <h1 className="page-title">Gestión de Competidores</h1>
-          <p className="page-subtitle">Administra la información de los participantes registrados</p>
-        </div>
         <div className="management-container">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             <strong>Error:</strong> {error}
@@ -169,14 +240,14 @@ const GestionCompetidores: React.FC = () => {
     );
   }
 
-  // Tu return exactamente igual - NO CAMBIES LOS ESTILOS
   return (
     <div className="gestion-competidores-page">
-      <div className="page-header">
-        <h1 className="page-title">Gestión de Competidores</h1>
-        <p className="page-subtitle">
-          Administra la información de los participantes registrados
-        </p>
+      {/* SECCIÓN DE CARGA DE OLIMPISTAS - IGUAL QUE EN CargarCSV */}
+      <div className="carga-section">
+        <CargarCSV 
+          onVerLista={handleVerLista}
+          onGenerarListas={handleGenerarListas}
+        />
       </div>
       
       <div className="management-container">

@@ -50,3 +50,273 @@
   color: #666;
   cursor: not-allowed;
 }
+/* src/components/carga-masiva/CargarCSV.css */
+.carga-olimpistas-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.carga-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.carga-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.carga-action-buttons {
+  display: flex;
+  justify-content: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 6px 16px;
+  border: 1px solid #2563eb;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.btn-secondary {
+  background: white;
+  color: #2563eb;
+}
+
+.btn-secondary:hover {
+  background: #eff6ff;
+}
+
+.carga-file-section {
+  display: flex;
+  justify-content: center;
+}
+
+.file-upload-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  width: 100%;
+  max-width: 600px;
+}
+
+.file-upload-header {
+  margin-bottom: 1.5rem;
+}
+
+.file-upload-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.file-drop-zone {
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 1.5rem;
+}
+
+.file-drop-zone:hover {
+  border-color: #2563eb;
+  background: #f8fafc;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.drop-zone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.upload-icon {
+  font-size: 3rem;
+  color: #9ca3af;
+}
+
+.drop-text-main {
+  font-size: 1.1rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.drop-text-secondary {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.file-selected {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.file-name {
+  font-size: 1.1rem;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.file-ready {
+  font-size: 0.9rem;
+  color: #059669;
+}
+
+.upload-action {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.upload-btn {
+  padding: 0.75rem 2rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.upload-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.upload-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+/* src/components/carga-masiva/CargarCSV.css */
+
+/* Header con alineación izquierda */
+.csv-header {
+  text-align: left;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+/* Título más pequeño */
+.csv-title {
+  font-size: 20px; /* Más pequeño que el original */
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+/* Descripción que ocupa todo el ancho */
+.csv-description {
+  color: #000000;
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: left;
+  margin: 0;
+  width: 100%;
+  max-width: 100%; /* Asegura que ocupe todo el ancho disponible */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.csv-description strong {
+  color: #374151;
+  font-weight: 600;
+}
+
+/* Contenedor de botones alineados a la izquierda */
+.csv-action-buttons {
+  display: flex;
+  justify-content: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+/* Botón primario */
+.csv-btn-primary {
+  background-color: #2563eb;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.csv-btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+/* Botón secundario */
+.csv-btn-secondary {
+  background-color: white;
+  color: #2563eb;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: 2px solid #2563eb;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.csv-btn-secondary:hover {
+  background-color: #eff6ff;
+}
+
+/* Input de archivo oculto */
+.csv-file-input-hidden {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .csv-management-container {
+    padding: 20px;
+    margin: 10px auto;
+  }
+  
+  .csv-action-buttons {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .csv-btn-primary,
+  .csv-btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+}
