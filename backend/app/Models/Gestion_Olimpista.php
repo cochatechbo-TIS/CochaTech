@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Gestion_Olimpista extends Model
 {
     protected $table = 'olimpistas'; 
-    protected $primaryKey = 'id_olimpista'; // Ahora la PK es id_olimpista
-    public $incrementing = true;           // Es autoincremental
-    protected $keyType = 'int';            // Tipo entero
+    protected $primaryKey = 'id_olimpista'; 
+    public $incrementing = true;   
+    protected $keyType = 'int';           
     public $timestamps = false;///me dio error por no poner esto ey que este en false 
 
     protected $fillable = [

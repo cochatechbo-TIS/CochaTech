@@ -59,20 +59,20 @@ class ImportarOlimpistaController extends Controller
                 try {
                     $data = array_combine($header, $row);
                     // ---- VALIDACIONES ----
-                    // 1. Campos obligatorios
+                    //Campos obligatorios
                     if (empty($data['ci']) || empty($data['nombre']) || empty($data['institucion'])) {
                         $errores[] = "Línea $linea: Faltan campos obligatorios (ci, nombre o institucion)";
                         continue;
                     }
 
-                    // 2. CI duplicado en el mismo archivo
+                    //CI duplicado en el mismo archivo
                     if (in_array($data['ci'], $ciVistos)) {
                         $errores[] = "Línea $linea: CI duplicado en el archivo ({$data['ci']})";
                         continue;
                     }
                     $ciVistos[] = $data['ci'];
 
-                    // 3. Fila duplicada completa en el archivo
+                    //Fila duplicada completa en el archivo
                     $filaHash = md5(json_encode($row));
                     if (in_array($filaHash, $filasVistas)) {
                         $errores[] = "Línea $linea: Fila duplicada en el archivo";
@@ -80,13 +80,13 @@ class ImportarOlimpistaController extends Controller
                     }
                     $filasVistas[] = $filaHash;
 
-                    // 4. CI duplicado en BD
+                    //CI duplicado en BD
                     if (ImportarOlimpista::where('ci', $data['ci'])->exists()) {
                         $errores[] = "Línea $linea: CI ya existe en la base de datos ({$data['ci']})";
                         continue;
                     }
 
-                    // 5. Convertir departamento a número si está escrito en letras
+                    //Convertir departamento a número si está escrito en letras
                     $id_departamento = $data['id_departamento'] ?? null;
                     if ($id_departamento && !is_numeric($id_departamento)) {
                         $depLower = mb_strtolower(trim($id_departamento), 'UTF-8');
