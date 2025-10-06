@@ -32,14 +32,15 @@ class Gestion_Olimpista_Controller extends Controller
 
             // Solo aceptar los campos previstos para evitar mass-assignment inseguro
             $data = $request->only([
-                'ci', 'nombre', 'institucion', 'area',
+                'ci', 'nombre','apellidos', 'institucion', 'area',
                 'nivel', 'grado', 'contacto_tutor', 'id_departamento'
             ]);
 
             // Validación básica (evita errores por FK inválida, unique, etc)
             $validator = \Validator::make($data, [
-                'ci' => 'nullable|string|max:15|unique:olimpistas,ci,'.$id.',id_olimpista',
                 'nombre' => 'nullable|string|max:100',
+                'apellidos' => 'nullable|string|max:100',
+                'ci' => 'nullable|string|max:15|unique:olimpistas,ci,'.$id.',id_olimpista',
                 'institucion' => 'nullable|string|max:150',
                 'area' => 'nullable|string|max:50',
                 'nivel' => 'nullable|string|max:50',

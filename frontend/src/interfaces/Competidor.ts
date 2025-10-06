@@ -1,25 +1,18 @@
+// src/interfaces/Competidor.ts
 export interface Competidor {
-  id_olimpista: number;
-  ci: string;
+  ci: string; // La clave primaria es el CI (string)
   nombre: string;
+  apellidos: string;
   institucion: string;
   area: string;
   nivel: string;
   grado: string;
   contacto_tutor: string;
   id_departamento: number;
-
-  // Relación del backend
+  departamentoNombre?: string; 
+  // La relación 'departamento' que viene del backend
   departamento?: {
     id_departamento: number;
     nombre_departamento: string;
   };
-
-  // Campos que usaremos en frontend
-  documento?: string;
-  gradoEscolaridad?: string;
-  contactoTutor?: string;
-
-  // SOLO un string para mostrar en inputs/selects
-  departamentoNombre?: string; 
 }

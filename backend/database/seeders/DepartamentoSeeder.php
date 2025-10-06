@@ -1,12 +1,13 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-
-return new class extends Migration
+class DepartamentoSeeder extends Seeder
 {
-    public function up(): void
+    public function run(): void
     {
         DB::table('departamento')->insert([
             ['id_departamento' => 1, 'nombre_departamento' => 'La Paz'],
@@ -20,9 +21,4 @@ return new class extends Migration
             ['id_departamento' => 9, 'nombre_departamento' => 'Pando'],
         ]);
     }
-
-    public function down(): void
-    {
-        DB::table('departamento')->whereIn('id_departamento', [1,2,3,4,5,6,7,8,9])->delete();
-    }
-};
+}

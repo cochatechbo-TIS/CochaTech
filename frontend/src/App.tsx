@@ -1,12 +1,13 @@
 // src/App.tsx
-
-import { Routes, Route, Navigate } from 'react-router-dom'
-import Layout from './components/layout/Layout'
+import { Routes, Route, Navigate } from 'react-router-dom';
+import Layout from './components/layout/Layout';
 import Registro from './pages/Registro'
-import GestionResponsables from './pages/GestionResponsable'
-import './App.css'
+//import GestionCompetidores from './pages/GestionCompetidores';
+import GestionResponsables from './pages/GestionResponsable';
+import './App.css';
 import CargaMasiva from './components/carga masiva/CargarCSV';
 import Login from './pages/Login';
+import ProtectedRoute from './components/ProtectedRoute'; // <-- IMPORTANTE
 
 // Componentes placeholder para las otras páginas
 const Inicio = () => (
@@ -71,25 +72,33 @@ const Reportes = () => (
 
 function App() {
   return (
-   
-      <Routes>
+    <Routes>
+      {/* RUTAS PÚBLICAS */}
+      {/* El login no usa el Layout principal para no mostrar la barra de navegación */}
+      <Route path="/login" element={<Login />} />
 
-        <Route path="/" element={<Layout showNavbar={true}><Login /></Layout>} />
+      {/* RUTAS PROTEGIDAS */}
+      {/* Todas las rutas dentro de 'ProtectedRoute' requerirán que el usuario esté logueado */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/" element={<Layout showNavbar={true}><Login /></Layout>}/>
         <Route path="/inicio" element={<Layout showNavbar={true}><Inicio /></Layout>} />
         <Route path="/carga-masiva" element={<Layout showNavbar={true}><CargaMasiva /></Layout>} />
         <Route path="/competidores" element={<Layout showNavbar={true}><Registro /></Layout>} />
         <Route path="/responsables" element={<Layout showNavbar={true}><GestionResponsables /></Layout>} />
-        <Route path="/evaluadores" element={<Layout showNavbar={true}><Evaluadores /></Layout>}  />
+        <Route path="/evaluadores" element={<Layout showNavbar={true}><Evaluadores /></Layout>} />
         <Route path="/medallero" element={<Layout showNavbar={true}><Medallero /></Layout>} />
         <Route path="/listas" element={<Layout showNavbar={true}><Listas /></Layout>} />
-        <Route path="/validacion" element={<Layout showNavbar={true}><Validacion /> </Layout>} />
+        <Route path="/validacion" element={<Layout showNavbar={true}><Validacion /></Layout>} />
         <Route path="/reportes" element={<Layout showNavbar={true}><Reportes /></Layout>} />
-  
-        {/* Ruta por defecto - redirige a inicio */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-  
-  )
+        
+        {/* La ruta raíz ahora redirige a /inicio si estás logueado */}
+        <Route path="/" element={<Navigate to="/inicio" replace />} />
+      </Route>
+
+      {/* Ruta por defecto si ninguna coincide - redirige al login */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  );
 }
 
 export default App;

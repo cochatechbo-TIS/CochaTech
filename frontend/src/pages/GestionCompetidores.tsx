@@ -1,6 +1,7 @@
 // src/pages/GestionCompetidores.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+
 import { CompetitorTable } from '../components/competidores/CompetitorTable';
 import CargarCSV from '../components/carga masiva/CargarCSV';
 import type { Competidor } from '../interfaces/Competidor';
@@ -36,6 +37,7 @@ const GestionCompetidores: React.FC = () => {
   }), [API_BASE]);
 
   const fetchCompetidores = useCallback(async () => {
+
     try {
       setLoading(true);
       setError('');
@@ -45,11 +47,10 @@ const GestionCompetidores: React.FC = () => {
       
       // Mapear los datos del backend a nuestra interfaz
       const competidoresMapeados = response.data.data.map((olimpista: Competidor) => ({
-        id: olimpista.id_olimpista,
-        id_olimpista: olimpista.id_olimpista,
-        nombre: olimpista.nombre || '',
-        documento: olimpista.ci || '',
         ci: olimpista.ci || '',
+        documento: olimpista.ci || '', // Alias para la tabla
+        nombre: olimpista.nombre || '',
+        apellidos: olimpista.apellidos || '',
         institucion: olimpista.institucion || '',
         area: olimpista.area || '',
         nivel: olimpista.nivel || '',
@@ -81,24 +82,27 @@ const GestionCompetidores: React.FC = () => {
       }
       
       setError(errorMessage);
+
     } finally {
       setLoading(false);
     }
   }, [api]);
 
   // Cargar competidores solo al montar el componente
+
   useEffect(() => {
     fetchCompetidores();
   }, [fetchCompetidores]);
 
   // OPTIMIZADO: Actualizar competidor (ACTUALIZACIÓN LOCAL INMEDIATA)
+
   const handleEditCompetitor = async (editedCompetitor: Competidor) => {
     // ... (mantén tu código existente de handleEditCompetitor)
     const competidoresAnteriores = [...competidores]; 
     
     try {
       const competidoresActualizados = competidores.map(comp => 
-        comp.id_olimpista === editedCompetitor.id_olimpista 
+        comp.ci === editedCompetitor.ci  
           ? { 
               ...editedCompetitor,
               departamentoNombre: editedCompetitor.departamentoNombre || 
@@ -110,10 +114,11 @@ const GestionCompetidores: React.FC = () => {
       
       setCompetidores(competidoresActualizados);
 
-      const response = await api.put(`/olimpistas/${editedCompetitor.id_olimpista}`, {
+      const response = await api.put(`/olimpistas/${editedCompetitor.ci}`, {
         ci: editedCompetitor.ci,
         nombre: editedCompetitor.nombre,
         institucion: editedCompetitor.institucion,
+        apellidos: editedCompetitor.apellidos, // <<< Campo nuevo en PUT
         area: editedCompetitor.area,
         nivel: editedCompetitor.nivel,
         grado: editedCompetitor.grado,
@@ -124,7 +129,7 @@ const GestionCompetidores: React.FC = () => {
       if (response.data.data) {
         const competidorActualizado = response.data.data;
         const competidoresFinales = competidoresActualizados.map(comp => 
-          comp.id_olimpista === editedCompetitor.id_olimpista 
+          comp.ci === editedCompetitor.ci 
             ? { 
                 ...comp,
                 ...competidorActualizado,
@@ -136,6 +141,7 @@ const GestionCompetidores: React.FC = () => {
         );
         setCompetidores(competidoresFinales);
       }
+
 
       alert('Competidor actualizado exitosamente');
       
@@ -157,8 +163,9 @@ const GestionCompetidores: React.FC = () => {
   };
 
   // OPTIMIZADO: Eliminar competidor (ELIMINACIÓN LOCAL INMEDIATA)
-  const handleDeleteCompetitor = async (id: number) => {
+  const handleDeleteCompetitor = async (id: string) => {
     // ... (mantén tu código existente de handleDeleteCompetitor)
+
     if (!window.confirm('¿Estás seguro de que deseas eliminar este competidor?')) {
       return;
     }
@@ -166,12 +173,13 @@ const GestionCompetidores: React.FC = () => {
     const competidoresAnteriores = [...competidores];
     try {
       const competidoresActualizados = competidores.filter(comp => 
-        comp.id_olimpista !== id
+        comp.ci !== id
       );
       
       setCompetidores(competidoresActualizados);
 
       await api.delete(`/olimpistas/${id}`);
+
 
       alert('Competidor eliminado exitosamente');
       
@@ -203,7 +211,7 @@ const GestionCompetidores: React.FC = () => {
   
   const competidoresFiltrados = competidores.filter(comp =>
     comp.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
-    comp.documento?.includes(filtro) ||
+    comp.ci.includes(filtro) ||
     comp.institucion.toLowerCase().includes(filtro.toLowerCase()) ||
     comp.area.toLowerCase().includes(filtro.toLowerCase())
   );
@@ -273,7 +281,7 @@ const GestionCompetidores: React.FC = () => {
         <CompetitorTable 
           competitors={competidoresFiltrados}
           onEdit={handleEditCompetitor}
-          onDelete={handleDeleteCompetitor}
+          onDelete={(id) => handleDeleteCompetitor(String(id))}
         />
       </div>
 

@@ -7,7 +7,7 @@ import { EditCompetitorModal } from './EditCompetitorModal'; // Importar el moda
 interface CompetitorTableProps {
   competitors: Competidor[];
   onEdit: (competitor: Competidor) => void;
-  onDelete: (id: number) => void;
+  onDelete: (ci: string) => void;
 }
 
 export function CompetitorTable({ competitors, onEdit, onDelete }: CompetitorTableProps) {
@@ -30,9 +30,9 @@ export function CompetitorTable({ competitors, onEdit, onDelete }: CompetitorTab
     setCurrentCompetitor(null);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (ci: string) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este competidor?')) {
-      onDelete(id);
+      onDelete(ci);
     }
   };
 
@@ -44,6 +44,7 @@ export function CompetitorTable({ competitors, onEdit, onDelete }: CompetitorTab
           <thead className="competitor-table-header">
             <tr>
               <th className="competitor-table-th">NOMBRE</th>
+              <th className="competitor-table-th">APELLIDOS</th> {/* <<< CAMBIO 3: NUEVA COLUMNA */}
               <th className="competitor-table-th">DOCUMENTO</th>
               <th className="competitor-table-th">INSTITUCIÓN</th>
               <th className="competitor-table-th">ÁREA</th>
@@ -56,14 +57,15 @@ export function CompetitorTable({ competitors, onEdit, onDelete }: CompetitorTab
           </thead>
           <tbody className="competitor-table-body">
             {competitors.map((competitor) => (
-              <tr key={competitor.id_olimpista} className="competitor-table-row">
+              <tr key={competitor.ci} className="competitor-table-row">
                 <td className="competitor-table-td competitor-table-td-name">{competitor.nombre}</td>
-                <td className="competitor-table-td">{competitor.documento}</td>
+                <td className="competitor-table-td">{competitor.apellidos}</td> 
+                <td className="competitor-table-td">{competitor.ci}</td>
                 <td className="competitor-table-td">{competitor.institucion}</td>
                 <td className="competitor-table-td">{competitor.area}</td>
                 <td className="competitor-table-td">{competitor.nivel}</td>
-                <td className="competitor-table-td">{competitor.gradoEscolaridad}</td>
-                <td className="competitor-table-td">{competitor.contactoTutor}</td>
+                <td className="competitor-table-td">{competitor.grado}</td>
+                <td className="competitor-table-td">{competitor.contacto_tutor}</td>
                 <td className="competitor-table-td">{competitor.departamentoNombre}</td>
                 <td className="competitor-table-td">
                   <div className="competitor-table-actions">
@@ -77,7 +79,7 @@ export function CompetitorTable({ competitors, onEdit, onDelete }: CompetitorTab
                     <button 
                       className="competitor-table-btn competitor-table-btn-delete" 
                       title="Eliminar"
-                      onClick={() => handleDelete(competitor.id_olimpista)}
+                      onClick={() => handleDelete(competitor.ci)}
                     >
                       <TrashIcon size={16} />
                     </button>

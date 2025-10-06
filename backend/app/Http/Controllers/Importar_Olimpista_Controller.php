@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ImportarOlimpista;
+use App\Models\Importar_Olimpista;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class ImportarOlimpistaController extends Controller
+class Importar_Olimpista_Controller extends Controller
 {
     public function importar(Request $request)
     {
@@ -59,20 +59,20 @@ class ImportarOlimpistaController extends Controller
                 try {
                     $data = array_combine($header, $row);
                     // ---- VALIDACIONES ----
-                    // 1. Campos obligatorios
+                    //Campos obligatorios
                     if (empty($data['ci']) || empty($data['nombre']) || empty($data['institucion'])) {
                         $errores[] = "Línea $linea: Faltan campos obligatorios (ci, nombre o institucion)";
                         continue;
                     }
 
-                    // 2. CI duplicado en el mismo archivo
+                    //CI duplicado en el mismo archivo
                     if (in_array($data['ci'], $ciVistos)) {
                         $errores[] = "Línea $linea: CI duplicado en el archivo ({$data['ci']})";
                         continue;
                     }
                     $ciVistos[] = $data['ci'];
 
-                    // 3. Fila duplicada completa en el archivo
+                    //Fila duplicada completa en el archivo
                     $filaHash = md5(json_encode($row));
                     if (in_array($filaHash, $filasVistas)) {
                         $errores[] = "Línea $linea: Fila duplicada en el archivo";
@@ -80,13 +80,13 @@ class ImportarOlimpistaController extends Controller
                     }
                     $filasVistas[] = $filaHash;
 
-                    // 4. CI duplicado en BD
-                    if (ImportarOlimpista::where('ci', $data['ci'])->exists()) {
+                    //CI duplicado en BD
+                    if (Importar_Olimpista::where('ci', $data['ci'])->exists()) {
                         $errores[] = "Línea $linea: CI ya existe en la base de datos ({$data['ci']})";
                         continue;
                     }
 
-                    // 5. Convertir departamento a número si está escrito en letras
+                    //Convertir departamento a número si está escrito en letras
                     $id_departamento = $data['id_departamento'] ?? null;
                     if ($id_departamento && !is_numeric($id_departamento)) {
                         $depLower = mb_strtolower(trim($id_departamento), 'UTF-8');
@@ -99,9 +99,10 @@ class ImportarOlimpistaController extends Controller
                     }
 
                     // ---- GUARDAR ----
-                    $olimpista = ImportarOlimpista::create([
-                        'ci' => $data['ci'],
+                    $olimpista = Importar_Olimpista::create([
                         'nombre' => $data['nombre'],
+                        'apellidos' => $data['apellidos'],
+                        'ci' => $data['ci'],
                         'institucion' => $data['institucion'],
                         'area' => $data['area'] ?? null,
                         'nivel' => $data['nivel'] ?? null,
