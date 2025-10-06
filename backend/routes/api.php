@@ -61,7 +61,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // --- RUTAS DE GESTIÓN GENERAL (PARA USUARIOS AUTENTICADOS) ---
     Route::get('/olimpistas', [Gestion_Olimpista_Controller::class, 'index']);
-    Route::get('/olimpistas/{id}', [Gestion_Olimpista_Controller::class, 'show']);
     Route::put('/olimpistas/{id}', [Gestion_Olimpista_Controller::class, 'update']);
     Route::delete('/olimpistas/{id}', [Gestion_Olimpista_Controller::class, 'destroy']);
     Route::post('/olimpistas/importar', [Importar_Olimpista_Controller::class, 'importar']);
