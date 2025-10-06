@@ -38,17 +38,17 @@ export function ResponsableTable({ responsables, onEdit, onDelete }: Responsable
         <>
             <div className="competitor-table-container">
                 <table className="competitor-table">
-                    <thead className="competitor-table-header">
+                   <thead className="competitor-table-header">
                         <tr>
                             <th className="competitor-table-th">NOMBRE</th>
-                            <th className="competitor-table-th">APELLIDOS</th> {/* <-- AGREGADO */}
-                            <th className="competitor-table-th">CI</th>        {/* <-- CORREGIDO */}
+                            <th className="competitor-table-th">APELLIDOS</th>
+                            <th className="competitor-table-th">CI</th>
                             <th className="competitor-table-th">EMAIL</th>
                             <th className="competitor-table-th">ÁREA</th>
                             <th className="competitor-table-th">ACCIONES</th>
-                            {/* ELIMINADO: Columna CARGO */}
                         </tr>
                     </thead>
+
                     <tbody className="competitor-table-body">
                         {responsables.map((responsable) => (
                             // CORREGIDO: Usamos id_usuario como key
