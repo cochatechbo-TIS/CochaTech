@@ -28,13 +28,25 @@ const GestionCompetidores: React.FC = () => {
   // URL base de la API
   const API_BASE = 'http://localhost:8000/api';
 
-  const api = React.useMemo(() => axios.create({
-    baseURL: API_BASE,
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    }
-  }), [API_BASE]);
+  const api = React.useMemo(() => {
+      // 1. Obtener el token del almacenamiento local
+      const token = localStorage.getItem('authToken'); 
+      
+      const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+      };
+
+      // 2. Si el token existe, añade el header de Autorización
+      if (token) {
+          headers['Authorization'] = `Bearer ${token}`; 
+      }
+
+      return axios.create({
+          baseURL: API_BASE,
+          headers: headers, // Usamos el nuevo objeto headers
+      });
+  }, [API_BASE]); 
 
   const fetchCompetidores = useCallback(async () => {
 
