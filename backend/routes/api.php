@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\EstudianteController;
 use App\Http\Controllers\Gestion_Olimpista_Controller;
-use App\Http\Controllers\ImportarOlimpistaController;
+use App\Http\Controllers\Importar_Olimpista_Controller;
 use App\Http\Controllers\Api\UserController; // <-- AÑADIDO: Importa el nuevo UserController
 
 // ESTA ES LA RUTA DE LOGIN QUE NECESITAS
@@ -64,7 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/olimpistas/{id}', [Gestion_Olimpista_Controller::class, 'show']);
     Route::put('/olimpistas/{id}', [Gestion_Olimpista_Controller::class, 'update']);
     Route::delete('/olimpistas/{id}', [Gestion_Olimpista_Controller::class, 'destroy']);
-    Route::post('/olimpistas/importar', [ImportarOlimpistaController::class, 'importar']);
+    Route::post('/olimpistas/importar', [Importar_Olimpista_Controller::class, 'importar']);
     Route::get('/usuario', [UsuarioController::class, 'index']);     
     Route::post('/usuario', [UsuarioController::class, 'store']);     
     Route::put('/usuario/{id}', [UsuarioController::class, 'update']); 

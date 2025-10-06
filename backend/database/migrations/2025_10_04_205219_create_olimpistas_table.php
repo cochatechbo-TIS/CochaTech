@@ -8,8 +8,9 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('olimpistas', function (Blueprint $table) {
             $table->id('id_olimpista'); 
-            $table->string('ci', 15);
             $table->string('nombre', 50);
+            $table->string('apellidos', 50);
+            $table->string('ci', 15);
             $table->string('institucion', 150)->nullable();
             $table->string('area', 50)->nullable();
             $table->string('nivel', 50)->nullable();

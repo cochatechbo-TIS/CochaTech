@@ -20,8 +20,9 @@ class AdminUserSeeder extends Seeder // <-- Nombre de clase correcto
                     'apellidos' => 'Principal',
                     'password' => 'password',
                     'id_rol' => $adminRole->id_rol,
-                    'activo' => true,
-                    'telefono' => '00000000'
+                    'telefono' => '00000000',
+                    'ci' => '1234567',
+                    'area' => 'Administración'
                 ]
             );
         }

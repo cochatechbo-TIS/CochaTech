@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ImportarOlimpista;
+use App\Models\Importar_Olimpista;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class ImportarOlimpistaController extends Controller
+class Importar_Olimpista_Controller extends Controller
 {
     public function importar(Request $request)
     {
@@ -81,7 +81,7 @@ class ImportarOlimpistaController extends Controller
                     $filasVistas[] = $filaHash;
 
                     //CI duplicado en BD
-                    if (ImportarOlimpista::where('ci', $data['ci'])->exists()) {
+                    if (Importar_Olimpista::where('ci', $data['ci'])->exists()) {
                         $errores[] = "Línea $linea: CI ya existe en la base de datos ({$data['ci']})";
                         continue;
                     }
@@ -99,9 +99,10 @@ class ImportarOlimpistaController extends Controller
                     }
 
                     // ---- GUARDAR ----
-                    $olimpista = ImportarOlimpista::create([
-                        'ci' => $data['ci'],
+                    $olimpista = Importar_Olimpista::create([
                         'nombre' => $data['nombre'],
+                        'apellidos' => $data['apellidos'],
+                        'ci' => $data['ci'],
                         'institucion' => $data['institucion'],
                         'area' => $data['area'] ?? null,
                         'nivel' => $data['nivel'] ?? null,
