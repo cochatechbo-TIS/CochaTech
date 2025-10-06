@@ -7,6 +7,7 @@ use App\Http\Controllers\EstudianteController;
 use App\Http\Controllers\Gestion_Olimpista_Controller;
 use App\Http\Controllers\Importar_Olimpista_Controller;
 use App\Http\Controllers\Api\UserController; // <-- AÑADIDO: Importa el nuevo UserController
+use App\Http\Controllers\Responsable_Area_Controller;
 
 // ESTA ES LA RUTA DE LOGIN QUE NECESITAS
 Route::post('/login', function (Request $request) {
@@ -68,6 +69,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/usuario', [UsuarioController::class, 'store']);     
     Route::put('/usuario/{id}', [UsuarioController::class, 'update']); 
     Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']);
+    Route::get('/responsable', [Responsable_Area_Controller::class, 'index']);     
+    Route::post('/responsable', [Responsable_Area_Controller::class, 'store']);     
+    Route::put('/responsable/{id}', [Responsable_Area_Controller::class, 'update']); 
+    Route::delete('/responsable/{id}', [Responsable_Area_Controller::class, 'destroy']);
 
 
     
