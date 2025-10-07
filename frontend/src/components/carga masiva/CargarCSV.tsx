@@ -1,5 +1,6 @@
 // src/components/carga-masiva/CargarCSV.tsx
 import React, { useRef } from 'react';
+import axios from 'axios'; // ✅ Importar axios
 import './CargarCSV.css';
 
 interface CargarCSVProps {
@@ -10,57 +11,119 @@ interface CargarCSVProps {
 function CargarCSV({ onVerLista, onGenerarListas }: CargarCSVProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const API_BASE = 'http://localhost:8000/api'; // ✅ define tu base URL
+
+  // ✅ Cliente axios autenticado
+  const api = React.useMemo(() => {
+    const token = localStorage.getItem('authToken');
+
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    return axios.create({
+      baseURL: API_BASE,
+      headers: headers,
+    });
+  }, [API_BASE]);
+
+  // ✅ Función para subir archivo CSV al backend (con token)
+  const uploadFile = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file); // debe coincidir con $request->file('file') en Laravel
+
+    try {
+      const response = await api.post('/olimpistas/importar', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data', // necesario para FormData
+        },
+      });
+
+      const data = response.data;
+
+      if (response.status === 200) {
+        let successMessage = `✅ ¡Archivo cargado exitosamente!
+Total insertados: ${data.total_insertados}
+Total errores: ${data.total_errores}`;
+
+        if (data.total_errores > 0) {
+          successMessage += `\n⚠️ Revisa los ${data.total_errores} errores.`;
+        }
+
+        alert(successMessage);
+        console.log('Datos de inserción:', data);
+      } else {
+        alert(`❌ Error en la carga: ${data.message || 'Error desconocido'}`);
+        console.error('Error del servidor:', data);
+      }
+
+      return true;
+    } catch (error: unknown) {
+      console.error('Error al cargar CSV:', error);
+
+      let errorMessage = 'Error de conexión o autenticación.';
+
+      if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.message || error.message || errorMessage;
+
+        if (error.response?.status === 401) {
+          errorMessage = 'No autorizado. Tu sesión puede haber expirado.';
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      alert(errorMessage);
+      return false;
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileObj = e.target.files?.[0];
     if (fileObj && fileObj.name.endsWith('.csv')) {
-      if (window.confirm(`¿Estás seguro de que deseas cargar el archivo ${fileObj.name}? Esta acción podría sobrescribir datos existentes.`)) {
-        // Simular carga exitosa
-        alert('¡Archivo cargado exitosamente!');
-        // Limpiar el input
-        if (inputRef.current) {
-          inputRef.current.value = '';
-        }
-      } else {
-        // Limpiar el input si el usuario cancela
-        if (inputRef.current) {
-          inputRef.current.value = '';
-        }
+      if (window.confirm(`¿Deseas cargar el archivo ${fileObj.name}? Esta acción guardará los datos en la base de datos.`)) {
+        await uploadFile(fileObj);
+      }
+
+      // Limpiar input (sea éxito o cancelación)
+      if (inputRef.current) {
+        inputRef.current.value = '';
       }
     }
   };
 
-  const handleSelectCSV = () => {
-    inputRef.current?.click();
-  };
+  const handleSelectCSV = () => inputRef.current?.click();
 
   const handleVerLista = () => {
-    if (onVerLista) {
-      onVerLista();
-    } else {
-      alert('Función VER LISTA - En desarrollo');
-    }
-  };
+  if (onVerLista) {
+    onVerLista();
+  } else {
+    alert('Función VER LISTA - En desarrollo');
+  }
+};
 
   const handleGenerarListas = () => {
-    if (onGenerarListas) {
-      onGenerarListas();
-    } else {
-      alert('Función GENERAR LISTAS POR ÁREA Y NIVEL - En desarrollo');
-    }
-  };
+  if (onGenerarListas) {
+    onGenerarListas();
+  } else {
+    alert('Función GENERAR LISTAS POR ÁREA Y NIVEL - En desarrollo');
+  }
+};
 
   return (
     <div className="management-container">
-      {/* Header con título y descripción */}
       <div className="csv-header">
         <h1 className="csv-title">Carga de Olimpistas</h1>
         <p className="csv-description">
-          Sube un archivo CSV con los datos de los olimpistas. El archivo debe contener las siguientes columnas: 
-          Nombre completo, CI, Tutor legal, Contacto del tutor, Unidad educativa, Departamento, Grado, Área de competencia, Nivel, Tutor académico (opcional).
+          Sube un archivo CSV con los datos de los olimpistas. El archivo debe contener las siguientes columnas:
+          Nombre, Apellidos, CI, Tutor legal, Contacto del tutor, Unidad educativa, Departamento, Grado, Área de competencia, Nivel, Tutor académico (opcional).
         </p>
       </div>
 
-      {/* Los 3 botones de acción */}
       <div className="carga-action-buttons">
         <button className="btn-primary" onClick={handleSelectCSV}>
           SELECCIONAR CSV
@@ -71,7 +134,7 @@ function CargarCSV({ onVerLista, onGenerarListas }: CargarCSVProps) {
         <button className="btn-secondary" onClick={handleGenerarListas}>
           GENERAR LISTAS POR ÁREA Y NIVEL
         </button>
-        
+
         <input
           type="file"
           accept=".csv"
