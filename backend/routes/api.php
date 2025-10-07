@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\EstudianteController;
 use App\Http\Controllers\Gestion_Olimpista_Controller;
 use App\Http\Controllers\Importar_Olimpista_Controller;
-use App\Http\Controllers\Api\UserController; // <-- AÑADIDO: Importa el nuevo UserController
 use App\Http\Controllers\Responsable_Area_Controller;
 
 // ESTA ES LA RUTA DE LOGIN QUE NECESITAS
@@ -74,10 +73,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/responsable/{id}', [Responsable_Area_Controller::class, 'update']); 
     Route::delete('/responsable/{id}', [Responsable_Area_Controller::class, 'destroy']);
 
-
-    
-    // --- RUTAS SOLO PARA ADMINISTRADORES ---
-    // Este grupo anidado requiere, además de estar autenticado, tener el rol de admin
     Route::middleware('is_admin')->group(function () {
         // Ruta para crear un nuevo usuario
         // POST -> http://localhost:8000/api/admin/users
