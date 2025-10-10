@@ -1,7 +1,15 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Menu, X, LogOut } from 'lucide-react';
-import { User } from "lucide-react";
+import { Menu, X, LogOut, User,
+    // NUEVOS ÍCONOS:
+    LayoutDashboard,            // Para 'Inicio'
+    Users,   // Para 'Registro'
+    List,      // Para 'Listas'
+    ChartColumn,   // Para 'Evaluación'
+    Trophy,           // Para 'Final'
+    FileText,       // Para 'Reportes'
+    History          // Para 'Historial'
+} from 'lucide-react';
 
 const Navbar = () => {
   const location = useLocation();
@@ -10,15 +18,13 @@ const Navbar = () => {
   const [isMobileView, setIsMobileView] = useState(false);
 
   const navItems = [
-    { name: 'Inicio', path: '/inicio' }, // ya no usamos "/" porque eso será login
-    { name: 'Carga Masiva', path: '/carga-masiva' },
-    { name: 'Competidores', path: '/competidores' },
-    { name: 'Responsables', path: '/responsables' },
-    { name: 'Evaluadores', path: '/evaluadores' },
-    { name: 'Medallero', path: '/medallero' },
-    { name: 'Listas', path: '/listas' },
-    { name: 'Validación', path: '/validacion' },
-    { name: 'Reportes', path: '/reportes' }
+    { name: 'Inicio', path: '/inicio', icon: LayoutDashboard }, // Guardar el componente, no el elemento
+    { name: 'Registro', path: '/registro', icon: Users },
+    { name: 'Listas', path: '/listas', icon: List },
+    { name: 'Evaluación', path: '/evaluacion', icon: ChartColumn },
+    { name: 'Final', path: '/final', icon: Trophy },
+    { name: 'Reportes', path: '/reportes', icon: FileText },
+    { name: 'Historial', path: '/historial', icon: History }
   ];
 
   // Detectar cambio de tamaño de ventana
@@ -62,11 +68,15 @@ const Navbar = () => {
               <div className="navbar-items">
                 {navItems.map((item) => (
                   <Link
-                    key={item.name}
-                    to={item.path}
-                    className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
-                  >
-                    {item.name}
+        key={item.name}
+        to={item.path}
+        // Nota: Tendrás que definir bien las clases 'nav-item' y 'active' 
+        // para dar el estilo (azul, centrado, borde inferior, etc.)
+        className={`nav-item flex items-center ${isActive(item.path) ? 'active' : ''}`}
+      >
+      {/* Aquí renderizamos el ícono */}
+      {item.icon && <item.icon size={20} className="navbar-icon" />}
+      {item.name}
                   </Link>
                 ))}
               </div>

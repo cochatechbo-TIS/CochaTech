@@ -2,10 +2,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Registro from './pages/Registro'
-//import GestionCompetidores from './pages/GestionCompetidores';
-import GestionResponsables from './pages/GestionResponsable';
 import './App.css';
-import CargaMasiva from './components/carga masiva/CargarCSV';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute'; // <-- IMPORTANTE
 
@@ -33,16 +30,16 @@ const Inicio = () => (
 
 )*/
 
-const Evaluadores = () => (
+const Evaluacion = () => (
   <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Gestión de Evaluadores</h1>
+    <h1 className="text-3xl font-bold text-gray-800 mb-4">Evaluación</h1>
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
 );
 
-const Medallero = () => (
+const Final = () => (
   <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Medallero</h1>
+    <h1 className="text-3xl font-bold text-gray-800 mb-4">Final</h1>
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
 );
@@ -54,16 +51,16 @@ const Listas = () => (
   </div>
 );
 
-const Validacion = () => (
+const Reportes = () => (
   <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Validación</h1>
+    <h1 className="text-3xl font-bold text-gray-800 mb-4">Reportes</h1>
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
 );
 
-const Reportes = () => (
+const Historial = () => (
   <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Reportes</h1>
+    <h1 className="text-3xl font-bold text-gray-800 mb-4">Historial</h1>
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
 );
@@ -82,15 +79,13 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<Layout showNavbar={true}><Login /></Layout>}/>
         <Route path="/inicio" element={<Layout showNavbar={true}><Inicio /></Layout>} />
-        <Route path="/carga-masiva" element={<Layout showNavbar={true}><CargaMasiva /></Layout>} />
-        <Route path="/competidores" element={<Layout showNavbar={true}><Registro /></Layout>} />
-        <Route path="/responsables" element={<Layout showNavbar={true}><GestionResponsables /></Layout>} />
-        <Route path="/evaluadores" element={<Layout showNavbar={true}><Evaluadores /></Layout>} />
-        <Route path="/medallero" element={<Layout showNavbar={true}><Medallero /></Layout>} />
+        <Route path="/registro" element={<Layout showNavbar={true}><Registro /></Layout>} />
         <Route path="/listas" element={<Layout showNavbar={true}><Listas /></Layout>} />
-        <Route path="/validacion" element={<Layout showNavbar={true}><Validacion /></Layout>} />
+        <Route path="/evaluacion" element={<Layout showNavbar={true}><Evaluacion /></Layout>} />
+        <Route path="/final" element={<Layout showNavbar={true}><Final /></Layout>} />
         <Route path="/reportes" element={<Layout showNavbar={true}><Reportes /></Layout>} />
-        
+        <Route path="/historial" element={<Layout showNavbar={true}><Historial /></Layout>} />
+
         {/* La ruta raíz ahora redirige a /inicio si estás logueado */}
         <Route path="/" element={<Navigate to="/inicio" replace />} />
       </Route>
