@@ -11,12 +11,14 @@ class AreaSeeder extends Seeder
     {
         DB::table('area')->truncate();
         DB::table('area')->insert([
-            ['id_area' => 1, 'nombre' => 'quimica'],
-            ['id_area' => 2, 'nombre' => 'fisica'],
-            ['id_area' => 3, 'nombre' => 'matematica'],
-            ['id_area' => 4, 'nombre' => 'biologia'],
-            ['id_area' => 5, 'nombre' => 'informatica'],
-            ['id_area' => 6, 'nombre' => 'robotica'],
+            ['id_area' => 1, 'nombre' => 'Química'],
+            ['id_area' => 2, 'nombre' => 'Física'],
+            ['id_area' => 3, 'nombre' => 'Matemáticas'],
+            ['id_area' => 4, 'nombre' => 'Biología'],
+            ['id_area' => 5, 'nombre' => 'Informática'],
+            ['id_area' => 6, 'nombre' => 'Robótica'],
+            ['id_area' => 7, 'nombre' => 'Astronomía'],
+            ['id_area' => 8, 'nombre' => 'Geografía'],
         ]);
     }
 }

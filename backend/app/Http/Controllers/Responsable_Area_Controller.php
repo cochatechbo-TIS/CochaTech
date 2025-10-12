@@ -1,13 +1,15 @@
 <?php
 
 namespace App\Http\Controllers;
-
+    
 use App\Models\Responsable_Area;
 use App\Models\Usuario;
+use App\Models\Area;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class Responsable_Area_Controller extends Controller
 {
@@ -101,22 +103,33 @@ class Responsable_Area_Controller extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    
+    public function update(Request $request)
     {
         try {
-            $responsable = Responsable_Area::with('usuario')->find($id);
+            // Obtener el id_usuario del request
+            $id_usuario = $request->id_usuario; // <--- aquí se define
+
+            if (!$id_usuario) {
+                return response()->json(['message' => 'El id_usuario es obligatorio'], 422);
+            }
+
+            $responsable = Responsable_Area::with('usuario')
+                ->where('id_usuario', $id_usuario)
+                ->first();
 
             if (!$responsable || $responsable->usuario->id_rol != 2) {
                 return response()->json(['message' => 'Solo se pueden actualizar responsables'], 403);
             }
 
-            $data = $request->only(['nombre','apellidos','ci','email','telefono','id_area']);
+            $data = $request->only(['nombre','apellidos','ci','email','telefono','area','id_area']);
             $validator = Validator::make($data, [
                 'nombre' => 'nullable|string|max:50',
                 'apellidos' => 'nullable|string|max:100',
                 'ci' => 'nullable|string|max:15',
                 'email' => 'nullable|email|max:50|unique:usuario,email,'.$responsable->usuario->id_usuario.',id_usuario',
                 'telefono' => 'nullable|string|max:8',
+                'area' => 'nullable|string|exists:area,nombre',
                 'id_area' => 'nullable|exists:area,id_area',
             ]);
 
@@ -124,14 +137,23 @@ class Responsable_Area_Controller extends Controller
                 return response()->json(['message'=>'Errores de validación','errors'=>$validator->errors()], 422);
             }
 
+            // Si viene el nombre del área, buscar su ID
+            if (isset($data['area']) && !isset($data['id_area'])) {
+                $area = Area::where('nombre', $data['area'])->first();
+                if ($area) {
+                    $data['id_area'] = $area->id_area;
+                }
+            }
+
             $responsable->usuario->update($data);
+
             if (isset($data['id_area'])) {
-                $responsable->update(['id_area'=>$data['id_area']]);
+                $responsable->update(['id_area' => $data['id_area']]);
             }
 
             return response()->json([
-                'message'=>'Responsable actualizado correctamente',
-                'data'=>$responsable->load('usuario','area')
+                'message' => 'Responsable actualizado correctamente',
+                'data' => $responsable->load('usuario', 'area')
             ]);
         } catch (\Throwable $e) {
             Log::error('Error actualizando responsable: '.$e->getMessage());
@@ -139,19 +161,38 @@ class Responsable_Area_Controller extends Controller
         }
     }
 
-    public function destroy($id)
-    {
-        $responsable = Responsable_Area::with('usuario')->find($id);
+
+
+
+public function destroy($id_usuario)
+{
+    DB::beginTransaction();
+    try {
+        $responsable = Responsable_Area::with('usuario')
+            ->where('id_usuario', $id_usuario)
+            ->first();
 
         if (!$responsable || $responsable->usuario->id_rol != 2) {
-            return response()->json(['message'=>'Solo se pueden eliminar responsables'], 403);
+            DB::rollBack();
+            return response()->json(['message' => 'Solo se pueden eliminar responsables'], 403);
         }
 
-        $responsable->usuario->delete();
+        // Primero eliminar el registro en responsable_area (o responsable)
         $responsable->delete();
 
-        return response()->json(['message'=>'Responsable eliminado correctamente']);
+        // Después eliminar el usuario
+        $responsable->usuario->delete();
+
+        DB::commit();
+        return response()->json(['message' => 'Responsable eliminado correctamente']);
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        Log::error('Error eliminando responsable: '.$e->getMessage());
+        return response()->json(['message' => 'Error eliminando responsable', 'error' => $e->getMessage()], 500);
     }
+}
+
+
 
     private function generatePassword($length = 8)
     {

@@ -162,14 +162,13 @@ const GestionResponsables: React.FC = () => {
         telefono: newResponsable.telefono,
         area: newResponsable.area,
       });
-      if (response.data && response.data.data) {
-        const responsableCreado = response.data.data;
-        setResponsables((prev) => [...prev, responsableCreado]);
+      if (response.data) {
+          setResponsables((prev) => [...prev, newResponsable]);
+          alert("Responsable creado exitosamente");
+        } else {
+          alert("No se recibió confirmación del servidor.");
+        }
 
-        alert(" Responsable creado exitosamente");
-      } else {
-        alert(" No se recibió confirmación del servidor.");
-      }
     } catch (error: unknown) {
       console.error("Error al crear responsable:", error);
 
