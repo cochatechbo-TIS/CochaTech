@@ -37,7 +37,7 @@ const Navbar = () => {
   };
 
   const handleProfile = () => {
-    navigate('/perfil');
+    //navigate('/perfil');
     closeMobileMenu();
   };
 

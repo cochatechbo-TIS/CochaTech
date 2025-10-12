@@ -26,7 +26,7 @@ html, body {
   background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
   color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 100%;     /* 👈 mejor que 100vw, así evita scroll lateral */
+  width: 100%;
   margin: 0;
   padding: 0;
 }
@@ -38,22 +38,25 @@ html, body {
 
 .navbar-content {
   display: flex;
-  align-items: center;
+  text-align: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 25px;
   width: 100%;
   margin: 0;
 }
 .navbar-start {
 display: flex;
 align-items: center;
-gap: 0.5rem; /* Espacio pequeño entre el ícono y el logo */
+gap: 1rem;
 }
 
 .navbar-items {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  position: absolute; /* Posiciona absolutamente para centrar */
+  left: 50%; /* Centra horizontalmente */
+  transform: translateX(-50%); /* Ajusta el centrado */
 }
 
 .navbar-brand {
@@ -69,6 +72,8 @@ margin-right: 2rem;
 }
 .nav-item {
   padding: 0.5rem 1rem;
+  align-items: center;
+  gap: 0.5rem; /* 👈 AUMENTA este valor para más espacio */
   font-size: 0.9rem;
   font-weight: 500;
   transition: all 0.2s ease;
@@ -280,7 +285,9 @@ margin-right: 2rem;
 
 .page-content-wrapper {
     margin: 0 auto; 
-    padding: 0 25px;}
+    padding: 0 25px;
+    max-width: 100%; /* Elimina cualquier limitación de ancho */
+  }
 
 .page-header {
   margin-bottom: 24px;
@@ -859,15 +866,6 @@ margin-right: 2rem;
   color: #3b82f6;
 }
 
-/* Asegurar que el navbar tenga la altura correcta */
-.navbar-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 1200px;
-  margin: 0 auto;
-  height: 60px; /* Altura fija para el navbar */
-}
 
 /* Estilos para el menú en mobile */
 .user-info-mobile .user-avatar {
