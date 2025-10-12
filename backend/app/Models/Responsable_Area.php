@@ -4,30 +4,28 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class  Responsable_Area extends Model
+class Responsable_Area extends Model
 {
-    protected $table = 'usuario';
-    protected $primaryKey = 'id_usuario';
+    protected $table = 'responsable';
+    protected $primaryKey = 'id_responsable';
     public $incrementing = true;
     protected $keyType = 'int';
     public $timestamps = false;
 
     protected $fillable = [
-        'nombre',
-        'apellidos',
-        'ci',
-        'email',
-        'password',
-        'telefono',
-        'area',
-        'id_rol',
-        'ultimo_acceso',
-        'fecha_registro'
+        'id_usuario',
+        'id_area'
     ];
 
-    // Relación con la tabla rol
-    public function rol()
+    // Relación con usuario
+    public function usuario()
     {
-        return $this->belongsTo(Rol::class, 'id_rol');
+        return $this->belongsTo(Usuario::class, 'id_usuario', 'id_usuario');
+    }
+
+    // Relación con área
+    public function area()
+    {
+        return $this->belongsTo(Area::class, 'id_area', 'id_area');
     }
 }
