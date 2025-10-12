@@ -4,10 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Departamento extends Model
+class Area extends Model
 {
-    protected $table = 'departamento';
-    protected $primaryKey = 'id_departamento';
+    protected $table = 'area';
+    protected $primaryKey = 'id_area';
     public $incrementing = true;
     protected $keyType = 'int';
     public $timestamps = false;
@@ -16,9 +16,9 @@ class Departamento extends Model
         'nombre'
     ];
 
-    // Relación inversa: un departamento puede tener muchos olimpistas
+    // Relación inversa: un área puede tener muchos olimpistas
     public function olimpistas()
     {
-        return $this->hasMany(Gestion_Olimpista::class, 'id_departamento');
+        return $this->hasMany(Gestion_Olimpista::class, 'id_area');
     }
 }

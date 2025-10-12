@@ -38,8 +38,8 @@ class Importar_Olimpista_Controller extends Controller
             $insertados = [];
             $errores = [];
             $linea = 1;
-            $ciVistos = [];   // Para evitar duplicados de CI dentro del archivo
-            $filasVistas = []; // Para evitar filas repetidas completas
+            $ciVistos = [];
+            $filasVistas = [];
 
             // Mapeo de departamentos
             $mapDepartamentos = [
@@ -58,21 +58,21 @@ class Importar_Olimpista_Controller extends Controller
                 $linea++;
                 try {
                     $data = array_combine($header, $row);
-                    // ---- VALIDACIONES ----
-                    //Campos obligatorios
+
+                    // Campos obligatorios
                     if (empty($data['ci']) || empty($data['nombre']) || empty($data['institucion'])) {
                         $errores[] = "Línea $linea: Faltan campos obligatorios (ci, nombre o institucion)";
                         continue;
                     }
 
-                    //CI duplicado en el mismo archivo
+                    // CI duplicado en el mismo archivo
                     if (in_array($data['ci'], $ciVistos)) {
                         $errores[] = "Línea $linea: CI duplicado en el archivo ({$data['ci']})";
                         continue;
                     }
                     $ciVistos[] = $data['ci'];
 
-                    //Fila duplicada completa en el archivo
+                    // Fila duplicada completa
                     $filaHash = md5(json_encode($row));
                     if (in_array($filaHash, $filasVistas)) {
                         $errores[] = "Línea $linea: Fila duplicada en el archivo";
@@ -80,13 +80,13 @@ class Importar_Olimpista_Controller extends Controller
                     }
                     $filasVistas[] = $filaHash;
 
-                    //CI duplicado en BD
+                    // CI duplicado en BD
                     if (Importar_Olimpista::where('ci', $data['ci'])->exists()) {
                         $errores[] = "Línea $linea: CI ya existe en la base de datos ({$data['ci']})";
                         continue;
                     }
 
-                    //Convertir departamento a número si está escrito en letras
+                    // Convertir departamento a número
                     $id_departamento = $data['id_departamento'] ?? null;
                     if ($id_departamento && !is_numeric($id_departamento)) {
                         $depLower = mb_strtolower(trim($id_departamento), 'UTF-8');
@@ -98,17 +98,18 @@ class Importar_Olimpista_Controller extends Controller
                         }
                     }
 
-                    // ---- GUARDAR ----
+                    // Guardar en BD
                     $olimpista = Importar_Olimpista::create([
-                        'nombre' => $data['nombre'],
-                        'apellidos' => $data['apellidos'],
-                        'ci' => $data['ci'],
-                        'institucion' => $data['institucion'],
-                        'area' => $data['area'] ?? null,
-                        'nivel' => $data['nivel'] ?? null,
-                        'grado' => $data['grado'] ?? null,
-                        'contacto_tutor' => $data['contacto_tutor'] ?? null,
-                        'id_departamento' => $id_departamento,
+                    'nombre' => $data['nombre'],
+                    'apellidos' => $data['apellidos'] ?? null,
+                    'ci' => $data['ci'],
+                    'institucion' => $data['institucion'],
+                    'id_area' => $data['area'],   // <- cambiar 'area' por 'id_area'
+                    'id_nivel' => $data['nivel'], // <- cambiar 'nivel' por 'id_nivel'
+                    'grado' => $data['grado'] ?? null,
+                    'contacto_tutor' => $data['contacto_tutor'] ?? null,
+                    'nombre_tutor' => $data['nombre_tutor'] ?? null,
+                    'id_departamento' => $id_departamento,
                     ]);
 
                     $insertados[] = $olimpista;
@@ -128,6 +129,7 @@ class Importar_Olimpista_Controller extends Controller
                 'insertados' => $insertados,
                 'errores' => $errores,
             ]);
+
         } catch (\Throwable $e) {
             Log::error("Error en importación: " . $e->getMessage());
             return response()->json([

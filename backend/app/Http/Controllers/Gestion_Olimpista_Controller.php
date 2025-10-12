@@ -5,23 +5,42 @@ namespace App\Http\Controllers;
 use App\Models\Gestion_Olimpista;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Validator;
 
 class Gestion_Olimpista_Controller extends Controller
 {
-    // Recuperar todos los olimpistas con su departamento
+    // Recuperar todos los olimpistas con relaciones
     public function index()
     {
-        $olimpistas = Gestion_Olimpista::with('departamento')->get();
+        $olimpistas = Gestion_Olimpista::with(['departamento', 'area', 'nivel'])->get();
+
+        // Transformar cada olimpista para enviar solo los nombres de nivel y departamento
+        $olimpistasTransformados = $olimpistas->map(function($olimpista) {
+            return [
+                'id_olimpista' => $olimpista->id_olimpista,
+                'ci' => $olimpista->ci,
+                'nombre' => $olimpista->nombre,
+                'apellidos' => $olimpista->apellidos,
+                'institucion' => $olimpista->institucion,
+                'area' => $olimpista->area->nombre ?? null,        // solo nombre del area
+                'nivel' => $olimpista->nivel->nombre ?? null,      // solo nombre del nivel
+                'grado' => $olimpista->grado,
+                'contacto_tutor' => $olimpista->contacto_tutor,
+                'nombre_tutor' => $olimpista->nombre_tutor,
+                'id_departamento' => $olimpista->id_departamento,
+                'departamento' => $olimpista->departamento->nombre_departamento ?? null // solo nombre
+            ];
+        });
 
         return response()->json([
             'message' => 'Lista de olimpistas recuperada correctamente',
-            'data' => $olimpistas
+            'data' => $olimpistasTransformados
         ]);
     }
 
-        // Recuperar un olimpista por ID (no por CI)
-        public function update(Request $request, $id)
+
+    // Actualizar un olimpista
+    public function update(Request $request, $id)
     {
         try {
             $olimpista = Gestion_Olimpista::find($id);
@@ -30,28 +49,28 @@ class Gestion_Olimpista_Controller extends Controller
                 return response()->json(['message' => 'Olimpista no encontrado'], 404);
             }
 
-            // Solo aceptar los campos previstos para evitar mass-assignment inseguro
             $data = $request->only([
-                'ci', 'nombre','apellidos', 'institucion', 'area',
-                'nivel', 'grado', 'contacto_tutor', 'id_departamento'
+                'ci', 'nombre', 'apellidos', 'institucion', 
+                'id_area', 'id_nivel', 'grado', 
+                'contacto_tutor', 'nombre_tutor', 'id_departamento'
             ]);
 
-            // Validación básica (evita errores por FK inválida, unique, etc)
-            $validator = \Validator::make($data, [
+            $validator = Validator::make($data, [
                 'nombre' => 'nullable|string|max:100',
                 'apellidos' => 'nullable|string|max:100',
-                'ci' => 'nullable|string|max:15|unique:olimpistas,ci,'.$id.',id_olimpista',
+                'ci' => 'nullable|string|max:15|unique:olimpista,ci,'.$id.',id_olimpista',
                 'institucion' => 'nullable|string|max:150',
-                'area' => 'nullable|string|max:50',
-                'nivel' => 'nullable|string|max:50',
+                'id_area' => 'nullable|integer|exists:area,id_area',
+                'id_nivel' => 'nullable|integer|exists:nivel,id_nivel',
                 'grado' => 'nullable|string|max:50',
                 'contacto_tutor' => 'nullable|string|max:150',
+                'nombre_tutor' => 'nullable|string|max:150',
                 'id_departamento' => 'nullable|integer|exists:departamento,id_departamento',
             ]);
 
             if ($validator->fails()) {
                 return response()->json([
-                    'message' => 'Validation error',
+                    'message' => 'Error de validación',
                     'errors' => $validator->errors()
                 ], 422);
             }
@@ -64,8 +83,7 @@ class Gestion_Olimpista_Controller extends Controller
                 'data' => $olimpista
             ]);
         } catch (\Throwable $e) {
-            // Guarda el error completo en el log y devuelve el mensaje al cliente (solo en dev)
-            Log::error('Update error: '.$e->getMessage(), ['exception' => $e]);
+            Log::error('Error actualizando olimpista: '.$e->getMessage(), ['exception' => $e]);
             return response()->json([
                 'message' => 'Error actualizando olimpista',
                 'error' => $e->getMessage()
@@ -73,7 +91,7 @@ class Gestion_Olimpista_Controller extends Controller
         }
     }
 
-    // Eliminar un olimpista por ID
+    // Eliminar un olimpista
     public function destroy($id)
     {
         $olimpista = Gestion_Olimpista::find($id);
@@ -88,5 +106,4 @@ class Gestion_Olimpista_Controller extends Controller
             'message' => 'Olimpista eliminado correctamente'
         ]);
     }
-
 }

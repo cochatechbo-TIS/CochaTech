@@ -9,6 +9,7 @@ class DepartamentoSeeder extends Seeder
 {
     public function run(): void
     {
+        DB::table('departamento')->truncate();
         DB::table('departamento')->insert([
             ['id_departamento' => 1, 'nombre_departamento' => 'La Paz'],
             ['id_departamento' => 2, 'nombre_departamento' => 'Santa Cruz'],

@@ -1,12 +1,13 @@
 <?php
 
-namespace Database\Seeders; // <-- Namespace correcto
+namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Rol;
+use Illuminate\Support\Facades\Hash;
 
-class AdminUserSeeder extends Seeder // <-- Nombre de clase correcto
+class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
@@ -18,11 +19,10 @@ class AdminUserSeeder extends Seeder // <-- Nombre de clase correcto
                 [
                     'nombre' => 'Admin',
                     'apellidos' => 'Principal',
-                    'password' => 'password',
+                    'password' => Hash::make('password'),
                     'id_rol' => $adminRole->id_rol,
                     'telefono' => '00000000',
                     'ci' => '1234567',
-                    'area' => 'Administración'
                 ]
             );
         }
