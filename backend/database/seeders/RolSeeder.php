@@ -1,20 +1,21 @@
 <?php
 
-namespace Database\Seeders; // <-- Verifica que esta línea sea correcta
+namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Rol;
+use Illuminate\Support\Facades\DB;
 
-class RolSeeder extends Seeder // <-- Verifica que el nombre de la clase coincida con el del archivo
+class RolSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        Rol::firstOrCreate(['nombre_rol' => 'administrador']);
-        Rol::firstOrCreate(['nombre_rol' => 'responsable']);
-        Rol::firstOrCreate(['nombre_rol' => 'evaluador']);
+        // Vaciar la tabla antes de insertar (opcional si quieres IDs fijos)
+        DB::table('rol')->truncate();
+
+        DB::table('rol')->insert([
+            ['id_rol' => 1, 'nombre_rol' => 'administrador'],
+            ['id_rol' => 2, 'nombre_rol' => 'responsable'],
+            ['id_rol' => 3, 'nombre_rol' => 'evaluador'],
+        ]);
     }
 }
