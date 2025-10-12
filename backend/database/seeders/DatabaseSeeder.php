@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
             DepartamentoSeeder::class,
             RolSeeder::class,
             AdminUserSeeder::class,
+            AreaSeeder::class,
+            NivelSeeder::class,
         ]);
     }
 }
