@@ -1,14 +1,9 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import MenuDesplegable from './MenuDesplegable';
 import { Menu, X, LogOut, User,
-    // NUEVOS ÍCONOS:
-    LayoutDashboard,            // Para 'Inicio'
-    Users,   // Para 'Registro'
-    List,      // Para 'Listas'
-    ChartColumn,   // Para 'Evaluación'
-    Trophy,           // Para 'Final'
-    FileText,       // Para 'Reportes'
-    History          // Para 'Historial'
+    LayoutDashboard, Users, List, ChartColumn, 
+    Trophy, FileText, History 
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -18,7 +13,7 @@ const Navbar = () => {
   const [isMobileView, setIsMobileView] = useState(false);
 
   const navItems = [
-    { name: 'Inicio', path: '/inicio', icon: LayoutDashboard }, // Guardar el componente, no el elemento
+    { name: 'Inicio', path: '/inicio', icon: LayoutDashboard },
     { name: 'Registro', path: '/registro', icon: Users },
     { name: 'Listas', path: '/listas', icon: List },
     { name: 'Evaluación', path: '/evaluacion', icon: ChartColumn },
@@ -27,7 +22,25 @@ const Navbar = () => {
     { name: 'Historial', path: '/historial', icon: History }
   ];
 
-  // Detectar cambio de tamaño de ventana
+  const handleLogout = () => {
+    // Limpiar tokens del localStorage
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userData');
+    sessionStorage.removeItem('authToken');
+    
+    // También puedes limpiar cookies si usas
+    // document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    
+    // Redirigir al login
+    navigate('/');
+    closeMobileMenu();
+  };
+
+  const handleProfile = () => {
+    navigate('/perfil');
+    closeMobileMenu();
+  };
+
   useEffect(() => {
     const checkScreenSize = () => {
       setIsMobileView(window.innerWidth < 1024);
@@ -40,27 +53,32 @@ const Navbar = () => {
 
   const isActive = (path: string) => location.pathname === path;
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
-
-  // Saber si estamos en login
   const isLoginPage = location.pathname === '/';
 
   return (
     <nav className="navbar">
       <div className="navbar-content">
-        {/* Logo */}
-        <span className="navbar-brand">Oh! SanSi</span>
+        <div className="navbar-start">
+          {!isLoginPage && isMobileView && (
+            <button
+              className="navbar-toggle"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          )}
+          <span className="navbar-brand">Oh! SanSi</span>
+        </div>
 
-        {/* Si estamos en LOGIN */}
         {isLoginPage && (
-          <div className="ml-auto">
-            <button className="login-btn" onClick={() => navigate("/inicio")}>
-      <User size={18} />
-      Iniciar sesión
-    </button>
+          <div className="navbar-end">
+            <button className="login-btn" onClick={() => navigate("/")}>
+              <User size={18} />
+              Iniciar sesión
+            </button>
           </div>
         )}
 
-        {/* Si estamos en OTRA RUTA (mostrar menús normales) */}
         {!isLoginPage && (
           <>
             {/* Menu Items - Desktop */}
@@ -68,15 +86,12 @@ const Navbar = () => {
               <div className="navbar-items">
                 {navItems.map((item) => (
                   <Link
-        key={item.name}
-        to={item.path}
-        // Nota: Tendrás que definir bien las clases 'nav-item' y 'active' 
-        // para dar el estilo (azul, centrado, borde inferior, etc.)
-        className={`nav-item flex items-center ${isActive(item.path) ? 'active' : ''}`}
-      >
-      {/* Aquí renderizamos el ícono */}
-      {item.icon && <item.icon size={20} className="navbar-icon" />}
-      {item.name}
+                    key={item.name}
+                    to={item.path}
+                    className={`nav-item flex items-center ${isActive(item.path) ? 'active' : ''}`}
+                  >
+                    {item.icon && <item.icon size={20} className="navbar-icon" />}
+                    {item.name}
                   </Link>
                 ))}
               </div>
@@ -84,63 +99,71 @@ const Navbar = () => {
 
             {/* User Info - Desktop */}
             {!isMobileView && (
-              <div className="user-info">
-                <span>Administrador</span>
-                <span className="user-badge">admin</span>
-                <button className="logout-btn">
-                  <LogOut size={16} />
-                  <span>Salir</span>
-                </button>
+              <div className="user-info-desktop">
+                <span className="user-role">Rol: Administrador</span>
+                <MenuDesplegable 
+                  onLogout={handleLogout}
+                  onProfile={handleProfile}
+                />
               </div>
             )}
 
-            {/* Botón Hamburguesa - Mobile */}
-            {isMobileView && (
-              <button
-                className="navbar-toggle"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              >
-                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
+            {/* User Info - Mobile (siempre visible en mobile) */}
+            {isMobileView && !isLoginPage && (
+              <div className="user-info-mobile">
+                <span className="user-role-mobile">Rol:Administrador</span>
+                <MenuDesplegable 
+                  onLogout={handleLogout}
+                  onProfile={handleProfile}
+                />
+              </div>
             )}
           </>
         )}
       </div>
 
       {/* Menú Mobile - Solo rutas distintas al login */}
-      {!isLoginPage && isMobileView && isMobileMenuOpen && (
-        <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
-          <div
-            className="mobile-menu-content"
-            onClick={(e) => e.stopPropagation()}
+{!isLoginPage && isMobileView && isMobileMenuOpen && (
+  <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
+    <div
+      className="mobile-menu-content"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Encabezado con Oh! SanSi y Rol */}
+      <div className="mobile-menu-header">
+        <div className="mobile-menu-title">Oh! SanSi</div>
+        <div className="user-role">Rol: Administrador</div>
+      </div>
+      {/* Items de navegación */}
+      <div className="mobile-nav-items">
+        {navItems.map((item) => (
+          <Link
+            key={item.name}
+            to={item.path}
+            className={`mobile-nav-item ${
+              isActive(item.path) ? 'active' : ''
+            }`}
+            onClick={closeMobileMenu}
           >
-            <div className="mobile-nav-items">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`mobile-nav-item ${
-                    isActive(item.path) ? 'active' : ''
-                  }`}
-                  onClick={closeMobileMenu}
-                >
-                  {item.name}
-                </Link>
-              ))}
-
-              {/* User Info en mobile */}
-              <div className="mobile-user-info">
-                <span>Administrador</span>
-                <span className="user-badge">admin</span>
-                <button className="logout-btn mobile-logout">
-                  <LogOut size={16} />
-                  <span>Salir</span>
-                </button>
-              </div>
-            </div>
-          </div>
+            {item.icon && <item.icon size={20} className="navbar-icon" />}
+            {item.name}
+          </Link>
+        ))}
         </div>
-      )}
+
+      {/* Sección de Cerrar Sesión - Abajo y centrado */}
+      <div className="mobile-logout-section">
+        <button 
+          onClick={handleLogout} 
+          className="mobile-logout-btn"
+        >
+          <LogOut size={18} />
+          <span>Cerrar Sesión</span>
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </nav>
   );
 };

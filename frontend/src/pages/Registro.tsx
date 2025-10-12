@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { RegistroNavigation } from '../components/registro/RegistroNavigation'; 
 import GestionCompetidores from './GestionCompetidores';
 import GestionResponsables from './GestionResponsable';
-import { GestionEvaluadores } from './GestionEvaluadores';
+import GestionEvaluadores from './GestionEvaluadores';
 
 type RegistroTab = 'olimpistas' | 'responsables' | 'evaluadores';
 

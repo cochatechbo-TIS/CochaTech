@@ -1,6 +1,5 @@
-// src/interfaces/Responsable.ts
-export interface Responsable {
-    id_usuario: number; // La clave primaria del usuario/responsable
+export interface Usuario {
+    id_usuario: number; // La clave primaria del usuario
     nombre: string;     // Nombre (como viene del backend)
     apellidos: string;  // Apellidos (como viene del backend)
     ci: string;         // El documento de identidad (como viene del backend)

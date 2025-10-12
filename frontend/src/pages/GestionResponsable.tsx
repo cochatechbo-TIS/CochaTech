@@ -2,12 +2,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios"; // Necesitas importar axios
 import { ResponsableTable } from "../components/responsables/ResponsableTable";
-import { EditResponsableModal } from "../components/responsables/EditResponsableModa";
-import type { Responsable } from "../interfaces/Responsable";
+import { EditResponsableModal } from "../components/responsables/EditResponsableModal";
+import type { Usuario } from "../interfaces/Usuario";
 
 const GestionResponsables: React.FC = () => {
   // 1. ESTADOS
-  const [responsables, setResponsables] = useState<Responsable[]>([]);
+  const [responsables, setResponsables] = useState<Usuario[]>([]);
   const [filtro, setFiltro] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -45,8 +45,8 @@ const GestionResponsables: React.FC = () => {
       const response = await api.get("/responsable");
 
       /// Mapeo de datos (simplificado para coincidir con la nueva interfaz y tabla)
-      const responsablesMapeados: Responsable[] = response.data.data.map(
-        (resp: Responsable) => ({
+      const responsablesMapeados: Usuario[] = response.data.data.map(
+        (resp: Usuario) => ({
           id_usuario: resp.id_usuario,
           nombre: resp.nombre || "", // Nombre de pila
           apellidos: resp.apellidos || "", // Apellidos
@@ -90,7 +90,7 @@ const GestionResponsables: React.FC = () => {
 
   // Función de edición (usaremos el ID del responsable)
 
-    const handleEditResponsable = async (editedResponsable: Responsable) => {
+    const handleEditResponsable = async (editedResponsable: Usuario) => {
     console.log("Guardando edición de responsable:", editedResponsable);
 
     const responsablesAnteriores = [...responsables];
@@ -150,7 +150,7 @@ const GestionResponsables: React.FC = () => {
 
 
   // Función de creación
-    const handleCreateResponsable = async (newResponsable: Responsable) => {
+    const handleCreateResponsable = async (newResponsable: Usuario) => {
     try {
       setLoading(true);
       setError("");
@@ -286,7 +286,7 @@ const GestionResponsables: React.FC = () => {
         </div>
 
         <ResponsableTable
-          responsables={responsablesFiltrados}
+          usuario={responsablesFiltrados}
           onEdit={handleEditResponsable}
           onDelete={handleDeleteResponsable}
         />
@@ -303,7 +303,7 @@ const GestionResponsables: React.FC = () => {
 
       {/* Modal para crear nuevo responsable (o editar, si se usa para ambos) */}
       <EditResponsableModal
-        responsable={null} // null para el modo creación
+        usuario={null} // null para el modo creación
         onSave={handleCreateResponsable}
         onCancel={() => setIsCreateModalOpen(false)}
         isOpen={isCreateModalOpen}

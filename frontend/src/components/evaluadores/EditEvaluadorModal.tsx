@@ -1,11 +1,11 @@
 // src/components/responsables/EditResponsableModal.tsx
 import React, { useState } from 'react';
 import { XIcon } from 'lucide-react';
-import type { Responsable } from '../../interfaces/Responsable';
+import type { Usuario } from '../../interfaces/Usuario';
 
-interface EditResponsableModalProps {
-    responsable: Responsable | null;
-    onSave: (responsable: Responsable) => void;
+interface EditEvaluadorModalProps {
+    usuario: Usuario | null;
+    onSave: (responsable: Usuario) => void;
     onCancel: () => void;
     isOpen: boolean;
 }
@@ -22,16 +22,16 @@ const areas = [
 
 // Se eliminó la constante 'cargos'
 
-export function EditResponsableModal({ 
-    responsable, 
+export function EditEvaluadorModal({ 
+    usuario, 
     onSave, 
     onCancel, 
     isOpen
-}: EditResponsableModalProps) {
+}: EditEvaluadorModalProps) {
     
     // Inicialización del estado
-    const [editedResponsable, setEditedResponsable] = useState<Responsable>(
-        responsable || {
+    const [editedUsuario, setEditedUsuario] = useState<Usuario>(
+        usuario || {
             id_usuario: 0, // Valor por defecto
             nombre: '',
             apellidos: '', // <-- Inicializado
@@ -46,10 +46,10 @@ export function EditResponsableModal({
 
     // Sincronizar estado cuando se abre el modal o cambia el responsable
     React.useEffect(() => {
-        if (responsable) {
-            setEditedResponsable(responsable);
+        if (usuario) {
+            setEditedUsuario(usuario);
         } else {
-            setEditedResponsable({
+            setEditedUsuario({
                 id_usuario: 0,
                 nombre: '',
                 apellidos: '', // <-- Inicializado
@@ -61,18 +61,18 @@ export function EditResponsableModal({
                 documento: '', // Alias
             });
         }
-    }, [responsable]);
+    }, [usuario]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         // Manejamos null para telefono si el campo se deja vacío
         const finalValue = name === 'telefono' && value === '' ? null : value;
-        setEditedResponsable(prev => ({ ...prev, [name]: finalValue }));
+        setEditedUsuario(prev => ({ ...prev, [name]: finalValue }));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSave(editedResponsable);
+        onSave(editedUsuario);
     };
 
     if (!isOpen) return null;
@@ -82,7 +82,7 @@ export function EditResponsableModal({
             <div className="modal-container">
                 <div className="modal-header">
                     <h3 className="modal-title">
-                        {responsable ? 'Editar Responsable' : 'Nuevo Responsable'}
+                        {usuario ? 'Editar Evaluador' : 'Nuevo Evaluador'}
                     </h3>
                     <button
                         onClick={onCancel}
@@ -102,7 +102,7 @@ export function EditResponsableModal({
                             <input
                                 type="text"
                                 name="nombre"
-                                value={editedResponsable.nombre}
+                                value={editedUsuario.nombre}
                                 onChange={handleChange}
                                 className="modal-input"
                                 placeholder="Ingrese nombre de pila"
@@ -118,7 +118,7 @@ export function EditResponsableModal({
                             <input
                                 type="text"
                                 name="apellidos"
-                                value={editedResponsable.apellidos}
+                                value={editedUsuario.apellidos}
                                 onChange={handleChange}
                                 className="modal-input"
                                 placeholder="Ingrese apellidos"
@@ -134,7 +134,7 @@ export function EditResponsableModal({
                             <input
                                 type="text"
                                 name="ci" 
-                                value={editedResponsable.ci}
+                                value={editedUsuario.ci}
                                 onChange={handleChange}
                                 className="modal-input"
                                 placeholder="Número de documento"
@@ -149,7 +149,7 @@ export function EditResponsableModal({
                             <input
                                 type="email"
                                 name="email"
-                                value={editedResponsable.email}
+                                value={editedUsuario.email}
                                 onChange={handleChange}
                                 className="modal-input"
                                 placeholder="correo@ejemplo.com"
@@ -165,7 +165,7 @@ export function EditResponsableModal({
                             <input
                                 type="tel"
                                 name="telefono"
-                                value={editedResponsable.telefono || ''}
+                                value={editedUsuario.telefono || ''}
                                 onChange={handleChange}
                                 className="modal-input"
                                 placeholder="555-1234"
@@ -178,7 +178,7 @@ export function EditResponsableModal({
                             </label>
                             <select
                                 name="area"
-                                value={editedResponsable.area}
+                                value={editedUsuario.area}
                                 onChange={handleChange}
                                 className="modal-input"
                                 required
@@ -205,7 +205,7 @@ export function EditResponsableModal({
                             type="submit"
                             className="modal-btn modal-btn-primary"
                         >
-                            {responsable ? 'Actualizar' : 'Crear'}
+                            {usuario ? 'Actualizar' : 'Crear'}
                         </button>
                     </div>
                 </form>

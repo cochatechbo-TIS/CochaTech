@@ -2,15 +2,15 @@
 import { useState } from "react";
 import { PencilIcon, TrashIcon } from "lucide-react";
 import type { Usuario } from "../../interfaces/Usuario";
-import { EditResponsableModal } from "./EditResponsableModal";
+import { EditEvaluadorModal } from "./EditEvaluadorModal";
 
 interface UsuarioTableProps {
   usuario: Usuario[];
-  onEdit: (responsable: Usuario) => void;
+  onEdit: (usuario: Usuario) => void;
   onDelete: (id: number) => void;
 }
 
-export function ResponsableTable({
+export function EvaluadorTable({
   usuario,
   onEdit,
   onDelete,
@@ -91,7 +91,7 @@ export function ResponsableTable({
       </div>
 
       {currentUsuario && (
-        <EditResponsableModal
+        <EditEvaluadorModal
           usuario={currentUsuario}
           onSave={handleEditSave}
           onCancel={handleEditCancel}

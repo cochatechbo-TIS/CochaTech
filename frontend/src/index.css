@@ -26,7 +26,7 @@ html, body {
   background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
   color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 100vw;     /* 👈 mejor que 100vw, así evita scroll lateral */
+  width: 100%;     /* 👈 mejor que 100vw, así evita scroll lateral */
   margin: 0;
   padding: 0;
 }
@@ -44,6 +44,11 @@ html, body {
   width: 100%;
   margin: 0;
 }
+.navbar-start {
+display: flex;
+align-items: center;
+gap: 0.5rem; /* Espacio pequeño entre el ícono y el logo */
+}
 
 .navbar-items {
   display: flex;
@@ -55,9 +60,13 @@ html, body {
   font-size: 1.5rem;
   font-weight: bold;
   color: white;
-  margin-right: 2rem;
+  margin-right: 0;
 }
-
+@media (min-width: 1025px) {
+.navbar-brand {
+margin-right: 2rem;
+}
+}
 .nav-item {
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
@@ -76,8 +85,9 @@ html, body {
 .nav-item.active {
   background-color: transparent;
   color: white;
-  font-weight: 600;
+  font-weight: 700;
 }
+
 /* Hamburger Button - Hidden by default */
 .navbar-toggle {
  display: flex;
@@ -106,18 +116,37 @@ html, body {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  background-color:#1d4ed8;
-  padding: 20px;
+  width: 250px;
+  height: 100vh;
+  background-color:white;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 16px;
   overflow-y: auto;
-  max-height: 80vh;
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  animation: slideDown 0.3s ease-out;
+  transition: transform 50s ease-out; 
+  border-radius: 0; 
+  transform: translateX(0); /* 👉 Inicialmente oculto */
+  transition: transform 0.3s ease-in-out; /* 👈 Transición suave */
+}
+
+.mobile-menu-header {
+  background: white;
+  padding: 1rem 2.2rem 1.2rem 2.2rem; /* Reducido: top, right, bottom, left */
+  color: #212121;
+  border-bottom: 1px solid #e5e7eb; /* Línea divisoria inferior */
+}
+.mobile-menu-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+.mobile-menu-divider {
+  height: 1px;
+  background-color: #e5e7eb;
+  margin: 0.4rem 0;
 }
 
 .mobile-nav-items {
@@ -126,20 +155,48 @@ html, body {
   gap: 8px;
 }
 
-.mobile-nav-item {
-  padding: 12px 16px;
+.mobile-logout-section {
+  padding: 1rem; /* Reducido padding superior */
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: center; /* Centra el botón horizontalmente */
+}
+
+.mobile-logout-btn {
+  display:flex;
+  align-items: center;
+  justify-content: center; /* Centrado horizontal */
+  gap: 0.75rem;
+  width: 75%;
+  padding: 0.5rem 0.2rem;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+}
+
+.mobile-nav-item {
+  display: flex;
+  gap: 1.6rem; /* Más espacio entre ícono y texto */
+  padding: 12px 16px;
+  color: #374151;
   text-decoration: none;
   font-weight: 500;
   border-radius: 6px;
   transition: all 0.2s;
   text-align: left;
+  line-height: 1; /* Evita altura de línea extra */
 }
 
 .mobile-nav-item:hover,
 .mobile-nav-item.active {
-  background-color: #2563eb;
-  color:white;
+  background-color: #eff6ff;
+  color:#1d4ed8;
 }
 
 .mobile-user-info {
@@ -212,7 +269,6 @@ html, body {
   height: 1rem;
   stroke: #ffffff; /* 👈 ícono en blanco */
 }
-/* src/index.css */
 
 /* Estilos generales de la página gestionCompetidores */
 .gestion-competidores-page {
@@ -224,8 +280,7 @@ html, body {
 
 .page-content-wrapper {
     margin: 0 auto; 
-    padding: 0 25px; /* Padding lateral de seguridad */
-}
+    padding: 0 25px;}
 
 .page-header {
   margin-bottom: 24px;
@@ -679,8 +734,147 @@ html, body {
     font-weight: 600; 
     border-bottom: 2px solid #1d4ed8;
 }
-/* En tu archivo .css o módulo de estilos */
-.navbar-icon {
-  /* margin-right: 12px es equivalente a mr-3 */
-  margin-right: 9px; 
+/* User Info Desktop */
+.user-info-desktop {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #dc2626; /* Rojo como en la imagen */
+  white-space: nowrap;
+  background-color: #fef2f2; /* Fondo rojo claro */
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid #dc2626;
+}
+
+/* User Info Mobile */
+.user-info-mobile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.user-role-mobile {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #dc004e;
+  white-space: nowrap;
+  background-color: #fef2f2;
+  padding: 0.2rem 0.5rem;
+  border-radius: 20px;
+  border: 1px solid #dc2626;
+}
+/* Menu Desplegable Styles - ACTUALIZADO */
+.user-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.user-icon-button {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.25rem;
+  border-radius: 50%;
+  border: 1px solid #d1d5db;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.user-icon-button:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+/* Avatar redondo */
+.user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%; /* Hace el contenedor redondo */
+  background-color: #3b82f6; /* Fondo azul como en la imagen */
+  color: white;
+}
+
+.user-icon {
+  color: rgb(0, 0, 0); /* Ícono blanco sobre fondo azul */
+}
+
+.chevron-icon {
+  transition: transform 0.2s;
+  color: #6b7280;
+}
+
+.chevron-icon.rotate {
+  transform: rotate(180deg);
+}
+
+/* Dropdown menu - MEJORADO */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  min-width: 130px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: #374151;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background-color: #f8fafc;
+  color: #3b82f6;
+}
+
+/* Asegurar que el navbar tenga la altura correcta */
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 60px; /* Altura fija para el navbar */
+}
+
+/* Estilos para el menú en mobile */
+.user-info-mobile .user-avatar {
+  width: 28px;
+  height: 28px;
+}
+
+.user-info-mobile .user-icon {
+  size: 18px;
 }
