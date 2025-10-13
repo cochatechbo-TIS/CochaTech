@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class Evaluador_Controller extends Controller
 {
@@ -40,6 +41,8 @@ class Evaluador_Controller extends Controller
 
     public function store(Request $request)
     {
+        DB::beginTransaction(); // Iniciar transacción
+
         try {
             $data = $request->only([
                 'nombre', 'apellidos', 'ci', 'email', 'telefono', 'area', 'nivel', 'disponible'
@@ -48,7 +51,7 @@ class Evaluador_Controller extends Controller
             $validator = Validator::make($data, [
                 'nombre' => 'required|string|max:50',
                 'apellidos' => 'required|string|max:100',
-                'ci' => 'required|string|max:15',
+                'ci' => 'required|string|max:15|unique:usuario,ci',
                 'email' => 'required|email|max:50|unique:usuario,email',
                 'telefono' => 'nullable|string|max:15',
                 'area' => 'required|string|exists:area,nombre',
@@ -58,16 +61,23 @@ class Evaluador_Controller extends Controller
 
             if ($validator->fails()) {
                 return response()->json([
-                    'message' => 'Errores de validación',
+                    'message' => 'Errores de validación, verifica CI o email.',
                     'errors' => $validator->errors()
                 ], 422);
             }
 
+            // Buscar el área (case-insensitive)
             $area = Area::whereRaw('LOWER(nombre) = ?', [strtolower($data['area'])])->first();
-            if (!$area) return response()->json(['message'=>'Área no encontrada'], 422);
+            if (!$area) {
+                return response()->json(['message' => 'Área no encontrada'], 422);
+            }
 
-            $nivel = isset($data['nivel']) ? Nivel::whereRaw('LOWER(nombre)=?', [strtolower($data['nivel'])])->first() : null;
+            // Buscar el nivel si se proporcionó
+            $nivel = isset($data['nivel'])
+                ? Nivel::whereRaw('LOWER(nombre) = ?', [strtolower($data['nivel'])])->first()
+                : null;
 
+            // Crear usuario
             $plainPassword = $this->generatePassword();
             $usuario = Usuario::create([
                 'nombre' => $data['nombre'],
@@ -75,10 +85,11 @@ class Evaluador_Controller extends Controller
                 'ci' => $data['ci'],
                 'email' => $data['email'],
                 'telefono' => $data['telefono'] ?? null,
-                'id_rol' => 3, // Por ejemplo, rol evaluador
+                'id_rol' => 3, // Evaluador
                 'password' => Hash::make($plainPassword),
             ]);
 
+            // Crear evaluador
             $evaluador = Evaluador::create([
                 'id_usuario' => $usuario->id_usuario,
                 'id_area' => $area->id_area,
@@ -86,15 +97,43 @@ class Evaluador_Controller extends Controller
                 'disponible' => $data['disponible'] ?? true,
             ]);
 
+            // Enviar correo
+            try {
+                Mail::raw(
+                    "Hola {$usuario->nombre},\n\n".
+                    "Tu cuenta como evaluador de {$area->nombre} ha sido creada en Oh!SanSi.\n".
+                    "Correo: {$usuario->email}\n".
+                    "Contraseña: {$plainPassword}\n\n".
+                    "Atentamente,\nEl equipo de CochaTech",
+                    function ($message) use ($usuario) {
+                        $message->to($usuario->email)
+                                ->subject('Credenciales de acceso - CochaTech');
+                    }
+                );
+            } catch (\Throwable $mailError) {
+                DB::rollBack(); //  Si el correo falla, revertimos todo
+                Log::error('Error enviando correo: '.$mailError->getMessage());
+                return response()->json([
+                    'message' => 'No se pudo enviar el correo. Registro cancelado.',
+                    'error' => $mailError->getMessage()
+                ], 500);
+            }
+
+            DB::commit(); // Confirmar cambios si todo salió bien
+
             return response()->json([
-                'message' => 'Evaluador registrado correctamente',
+                'message' => 'Evaluador registrado y correo enviado correctamente',
                 'usuario' => $usuario,
                 'evaluador' => $evaluador,
                 'password_generada' => $plainPassword
             ]);
         } catch (\Throwable $e) {
+            DB::rollBack(); // Asegurar rollback ante cualquier otro error
             Log::error('Error registrando evaluador: '.$e->getMessage());
-            return response()->json(['message'=>'Error registrando evaluador','error'=>$e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Error registrando evaluador',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
