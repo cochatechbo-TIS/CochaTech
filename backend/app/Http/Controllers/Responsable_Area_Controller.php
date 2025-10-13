@@ -95,7 +95,7 @@ class Responsable_Area_Controller extends Controller
             try {
                 Mail::raw(
                     "Hola {$usuario->nombre},\n\n".
-                    "Tu cuenta ha sido creada en Oh!SanSi.\n".
+                    "Tu cuenta como Responsable de {$area->nombre} ha sido creada en Oh!SanSi.\n".
                     "Correo: {$usuario->email}\n".
                     "Contraseña: {$plainPassword}\n\n".
                     "Atentamente,\nEl equipo de CochaTech",
