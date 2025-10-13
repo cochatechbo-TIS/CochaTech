@@ -3,28 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\Importar_Olimpista;
-use App\Models\AreaNivel;
+use App\Models\Area_Nivel;
 use Illuminate\Http\Request;
 
-class AreaNivelController extends Controller
+class Area_Nivel_Controller extends Controller
 {
     public function generarYListar()
     {
-        // 1️⃣ Obtener combinaciones únicas de area y nivel desde olimpistas
+        // Obtener combinaciones únicas de area y nivel desde olimpistas
         $combinaciones = Importar_Olimpista::select('id_area', 'id_nivel')
             ->distinct()
             ->get();
 
-        // 2️⃣ Insertar si no existe en area_nivel
+        // Insertar si no existe en area_nivel
         foreach ($combinaciones as $c) {
-            AreaNivel::firstOrCreate([
+            Area_Nivel::firstOrCreate([
                 'id_area' => $c->id_area,
                 'id_nivel' => $c->id_nivel,
             ]);
         }
 
-        // 3️⃣ Obtener la lista final con nombres de area y nivel
-        $lista = AreaNivel::with(['area', 'nivel'])->get()->map(function ($item) {
+        // Obtener la lista final con nombres de area y nivel
+        $lista = Area_Nivel::with(['area', 'nivel'])->get()->map(function ($item) {
             return [
                 'id' => $item->id,
                 'id_area' => $item->id_area,

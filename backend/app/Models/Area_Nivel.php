@@ -4,10 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class AreaNivel extends Model
+class Area_Nivel extends Model
 {
     protected $table = 'area_nivel';
-    protected $primaryKey = 'id_area_nivel'; // 👈 clave primaria real
+    protected $primaryKey = 'id_area_nivel'; // clave primaria real
     public $incrementing = true;
     protected $keyType = 'int';
     public $timestamps = false;

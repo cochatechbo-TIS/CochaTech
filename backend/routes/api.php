@@ -8,7 +8,7 @@ use App\Http\Controllers\Gestion_Olimpista_Controller;
 use App\Http\Controllers\Importar_Olimpista_Controller;
 use App\Http\Controllers\Responsable_Area_Controller;
 use App\Http\Controllers\Evaluador_Controller;
-use App\Http\Controllers\AreaNivelController;
+use App\Http\Controllers\Area_Nivel_Controller;
 
 // ESTA ES LA RUTA DE LOGIN QUE NECESITAS
 Route::post('/login', function (Request $request) {
@@ -80,7 +80,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/evaluador/{id}', [Evaluador_Controller::class, 'update']); 
     Route::delete('/evaluador/{id}', [Evaluador_Controller::class, 'destroy']);
 
-    Route::post('/area-nivel', [AreaNivelController::class, 'generarYListar']);
+     Route::post('/area-nivel', [Area_Nivel_Controller::class, 'generarYListar']);
 
     Route::middleware('is_admin')->group(function () {
         // Ruta para crear un nuevo usuario
