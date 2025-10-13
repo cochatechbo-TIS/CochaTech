@@ -10,34 +10,38 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+
 
 class Responsable_Area_Controller extends Controller
 {
     public function index()
-{
-    $responsables = Responsable_Area::with(['usuario.rol', 'area'])->get();
-
-    $data = $responsables->map(function ($responsable) {
-        return [
-            'id_usuario' => $responsable->usuario->id_usuario,
-            'nombre' => $responsable->usuario->nombre,
-            'apellidos' => $responsable->usuario->apellidos,
-            'ci' => $responsable->usuario->ci,
-            'email' => $responsable->usuario->email,
-            'telefono' => $responsable->usuario->telefono,
-            'area' => $responsable->area->nombre,
-            'id_rol' => $responsable->usuario->id_rol,
-        ];
-    });
-
-    return response()->json([
-        'message' => 'Lista de responsables recuperada correctamente',
-        'data' => $data
-    ]);
-}
-
-   public function store(Request $request)
     {
+        $responsables = Responsable_Area::with(['usuario.rol', 'area'])->get();
+
+        $data = $responsables->map(function ($responsable) {
+            return [
+                'id_usuario' => $responsable->usuario->id_usuario,
+                'nombre' => $responsable->usuario->nombre,
+                'apellidos' => $responsable->usuario->apellidos,
+                'ci' => $responsable->usuario->ci,
+                'email' => $responsable->usuario->email,
+                'telefono' => $responsable->usuario->telefono,
+                'area' => $responsable->area->nombre,
+                'id_rol' => $responsable->usuario->id_rol,
+            ];
+        });
+
+        return response()->json([
+            'message' => 'Lista de responsables recuperada correctamente',
+            'data' => $data
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        DB::beginTransaction(); 
+
         try {
             $data = $request->only([
                 'nombre', 'apellidos', 'ci', 'email', 'telefono', 'area'
@@ -46,7 +50,7 @@ class Responsable_Area_Controller extends Controller
             $validator = Validator::make($data, [
                 'nombre' => 'required|string|max:50',
                 'apellidos' => 'required|string|max:100',
-                'ci' => 'required|string|max:15',
+                'ci' => 'required|string|max:15|unique:usuario,ci',
                 'email' => 'required|email|max:50|unique:usuario,email',
                 'telefono' => 'nullable|string|max:15',
                 'area' => 'required|string|max:50',
@@ -54,7 +58,7 @@ class Responsable_Area_Controller extends Controller
 
             if ($validator->fails()) {
                 return response()->json([
-                    'message' => 'Errores de validación',
+                    'message' => 'Errores de validación, verifica ci o email',
                     'errors' => $validator->errors()
                 ], 422);
             }
@@ -69,7 +73,7 @@ class Responsable_Area_Controller extends Controller
                 ]);
             }
 
-            // Crear el usuario
+            // Crear usuario
             $plainPassword = $this->generatePassword();
             $usuario = \App\Models\Usuario::create([
                 'nombre' => $data['nombre'],
@@ -81,20 +85,45 @@ class Responsable_Area_Controller extends Controller
                 'password' => Hash::make($plainPassword),
             ]);
 
-            // Crear la relación responsable - área
+            // Crear relación responsable - área
             $responsable = \App\Models\Responsable_Area::create([
                 'id_usuario' => $usuario->id_usuario,
                 'id_area' => $area->id_area
             ]);
 
+            // Enviar correo
+            try {
+                Mail::raw(
+                    "Hola {$usuario->nombre},\n\n".
+                    "Tu cuenta ha sido creada en Oh!SanSi.\n".
+                    "Correo: {$usuario->email}\n".
+                    "Contraseña: {$plainPassword}\n\n".
+                    "Atentamente,\nEl equipo de CochaTech",
+                    function ($message) use ($usuario) {
+                        $message->to($usuario->email)
+                                ->subject('Credenciales de acceso - CochaTech');
+                    }
+                );
+            } catch (\Throwable $mailError) {
+                DB::rollBack(); // revertir si falla el correo
+                Log::error('Error enviando correo: '.$mailError->getMessage());
+                return response()->json([
+                    'message' => 'No se pudo enviar el correo. Registro cancelado.',
+                    'error' => $mailError->getMessage()
+                ], 500);
+            }
+
+            DB::commit(); // confirmar si todo va bien
+
             return response()->json([
-                'message' => 'Responsable registrado correctamente',
+                'message' => 'Responsable registrado y correo enviado correctamente',
                 'usuario' => $usuario,
                 'area' => $area,
                 'responsable' => $responsable,
                 'password_generada' => $plainPassword
             ]);
         } catch (\Throwable $e) {
+            DB::rollBack(); // aseguramos rollback ante cualquier error
             Log::error('Error registrando responsable: '.$e->getMessage());
             return response()->json([
                 'message' => 'Error registrando responsable',
@@ -161,38 +190,33 @@ class Responsable_Area_Controller extends Controller
         }
     }
 
+    public function destroy($id_usuario)
+    {
+        DB::beginTransaction();
+        try {
+            $responsable = Responsable_Area::with('usuario')
+                ->where('id_usuario', $id_usuario)
+                ->first();
 
+            if (!$responsable || $responsable->usuario->id_rol != 2) {
+                DB::rollBack();
+                return response()->json(['message' => 'Solo se pueden eliminar responsables'], 403);
+            }
 
+            // Primero eliminar el registro en responsable_area (o responsable)
+            $responsable->delete();
 
-public function destroy($id_usuario)
-{
-    DB::beginTransaction();
-    try {
-        $responsable = Responsable_Area::with('usuario')
-            ->where('id_usuario', $id_usuario)
-            ->first();
+            // Después eliminar el usuario
+            $responsable->usuario->delete();
 
-        if (!$responsable || $responsable->usuario->id_rol != 2) {
+            DB::commit();
+            return response()->json(['message' => 'Responsable eliminado correctamente']);
+        } catch (\Throwable $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Solo se pueden eliminar responsables'], 403);
+            Log::error('Error eliminando responsable: '.$e->getMessage());
+            return response()->json(['message' => 'Error eliminando responsable', 'error' => $e->getMessage()], 500);
         }
-
-        // Primero eliminar el registro en responsable_area (o responsable)
-        $responsable->delete();
-
-        // Después eliminar el usuario
-        $responsable->usuario->delete();
-
-        DB::commit();
-        return response()->json(['message' => 'Responsable eliminado correctamente']);
-    } catch (\Throwable $e) {
-        DB::rollBack();
-        Log::error('Error eliminando responsable: '.$e->getMessage());
-        return response()->json(['message' => 'Error eliminando responsable', 'error' => $e->getMessage()], 500);
     }
-}
-
-
 
     private function generatePassword($length = 8)
     {
