@@ -126,7 +126,7 @@ const GestionResponsables: React.FC = () => {
   // Función de eliminación (usaremos el ID del responsable)
     const handleDeleteResponsable = async (id: number) => {
     const responsablesAnteriores = [...responsables];
-    if (!window.confirm(`¿Estás seguro de que deseas eliminar al responsable ID ${id}?`)) {
+    if (!window.confirm(`¿Estás seguro de que deseas eliminar al responsable?`)) {
         return;
     }
 

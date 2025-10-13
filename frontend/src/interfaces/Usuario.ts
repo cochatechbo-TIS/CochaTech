@@ -14,5 +14,7 @@ export interface Usuario {
     // otros campos opcionales del modelo de la DB
     created_at?: string;
     updated_at?: string;
-    // NOTA: 'cargo' se ha eliminado.
+// CAMPOS ESPECÍFICOS DE EVALUADOR (Hacemos opcionales)
+    disponible?: boolean; // Para evaluadores (por ejemplo, true/false)
+    id_nivel?: number;    // Para evaluadores (clave foránea a la tabla Nivel)
 }

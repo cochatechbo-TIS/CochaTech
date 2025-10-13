@@ -57,7 +57,6 @@ export function EditCompetitorModal({
   React.useEffect(() => {
     setEditedCompetitor({ 
       ...competitor,
-      // Usamos CI directamente y eliminamos 'documento'
       // documento: competitor.ci, 
       grado: competitor.grado,
       contacto_tutor: competitor.contacto_tutor,

@@ -1,156 +1,221 @@
 // src/pages/GestionEvaluadores.tsx
-import React, { useState, useEffect, useCallback } from "react";
-//import axios from "axios";
-import { EvaluadorTable } from "../components/evaluadores/EvaluadorTable";
-import { EditEvaluadorModal } from "../components/evaluadores/EditEvaluadorModal";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import axios from "axios";
+import { EvaluadorTable } from "../components/evaluadores/EvaluadorTable"; // Asegúrate de que este componente exista
+import { EditEvaluadorModal } from "../components/evaluadores/EditEvaluadorModal"; // Asegúrate de que este componente exista
 import type { Usuario } from "../interfaces/Usuario";
 
 const GestionEvaluadores: React.FC = () => {
   // 1. ESTADOS
-  const [evaluador, setEvaluador] = useState<Usuario[]>([]);
+  const [evaluadores, setEvaluadores] = useState<Usuario[]>([]);
   const [filtro, setFiltro] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // URL base (cuando conectes la API)
-  //const API_BASE = "http://localhost:8000/api";
+  const API_BASE = "http://localhost:8000/api"; // URL base de la API
 
-  // 2. CONFIGURACIÓN AXIOS (solo la dejamos lista)
-  //const api = axios.create({
-  //  baseURL: API_BASE,
-   // headers: {
-   //   "Content-Type": "application/json",
-   //   Accept: "application/json",
-  //  },
-  //});
+  // 2. CONFIGURACIÓN AXIOS CON AUTH
+  const api = useMemo(() => {
+    const token = localStorage.getItem("authToken");
 
-  // 3. FUNCIÓN DE CARGA DE DATOS (simulada)
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    return axios.create({
+      baseURL: API_BASE,
+      headers: headers,
+    });
+  }, []);
+
+  // 3. FUNCIÓN DE CARGA DE DATOS
   const fetchEvaluadores = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
 
-      console.log("Simulando carga de evaluadores...");
+      console.log("Cargando evaluadores...");
+      // RUTA DE TU API PARA LISTAR EVALUADORES
+      const response = await api.get("/evaluador"); 
 
-      // 🔹 Aquí normalmente iría la llamada a tu API:
-      // const response = await api.get("/evaluador");
-      // const evaluadoresMapeados: Usuario[] = response.data.data.map((resp: Usuario) => ({
-      //   id_usuario: resp.id_usuario,
-      //   nombre: resp.nombre || "",
-      //   apellidos: resp.apellidos || "",
-      //   ci: resp.ci || "",
-      //   email: resp.email || "",
-      //   telefono: resp.telefono || null,
-      //   area: resp.area || "",
-      //   id_rol: resp.id_rol,
-      // }));
+      /// Mapeo de datos (incluyendo campos de evaluador y manejo de 'area' flexible)
+      const evaluadoresMapeados: Usuario[] = response.data.data.map(
+        (evaluador: Usuario) => ({
+          id_usuario: evaluador.id_usuario,
+          nombre: evaluador.nombre || "",
+          apellidos: evaluador.apellidos || "",
+          ci: evaluador.ci || "", 
+          email: evaluador.email || "",
+          telefono: evaluador.telefono || null,
+          // Mapeo flexible del área como en tu ejemplo de Evaluadores
+          area: evaluador.area || "",
+          id_rol: evaluador.id_rol,
+          // Campos específicos de Evaluador
+          disponible: evaluador.disponible ?? true,
+          id_nivel: evaluador.id_nivel || null,
+        })
+      );
 
-      // 🔸 DATOS DE PRUEBA (mientras no tengas base de datos)
-      const evaluadoresMapeados: Usuario[] = [
-        {
-          id_usuario: 1,
-          nombre: "Andrea",
-          apellidos: "Torrez Yañez",
-          ci: "1234567",
-          email: "andrea.torrez@example.com",
-          telefono: "76543210",
-          area: "Sistemas",
-          id_rol: 3,
-        },
-        {
-          id_usuario: 2,
-          nombre: "Carlos",
-          apellidos: "Pérez Gutiérrez",
-          ci: "9876543",
-          email: "carlos.perez@example.com",
-          telefono: "78912345",
-          area: "Administración",
-          id_rol: 3,
-        },
-        {
-          id_usuario: 3,
-          nombre: "María",
-          apellidos: "López Flores",
-          ci: "4567890",
-          email: "maria.lopez@example.com",
-          telefono: "71234567",
-          area: "Contabilidad",
-          id_rol: 3,
-        },
-      ];
+      console.log("Evaluadores cargados:", evaluadoresMapeados.length);
+      setEvaluadores(evaluadoresMapeados);
+    } catch (e: unknown) {
+      console.error("Error fetching evaluadores:", e);
+      let errorMessage =
+        "No se pudo conectar con el servidor o no tienes permisos.";
 
-      // Asignar los datos de prueba
-      setEvaluador(evaluadoresMapeados);
-      console.log("Evaluadores simulados cargados:", evaluadoresMapeados);
-    } catch (e) {
-      console.error("Error simulando evaluadores:", e);
-      setError("Error al cargar los evaluadores de prueba.");
+      if (axios.isAxiosError(e)) {
+        errorMessage = e.response?.data?.message || e.message || errorMessage;
+      } else if (e instanceof Error) {
+        errorMessage = e.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [api]);
 
-  // 4. CARGAR AL MONTAR EL COMPONENTE
+  // 4. EJECUTAR LA CARGA AL MONTAR
   useEffect(() => {
     fetchEvaluadores();
   }, [fetchEvaluadores]);
 
-  // 5. FUNCIONES DE EDICIÓN, ELIMINACIÓN Y CREACIÓN (también simuladas)
+  // 5. MANEJADORES DE ACCIONES
+
+  // Función de edición (usando optimistic updates)
   const handleEditEvaluador = async (editedEvaluador: Usuario) => {
-    console.log("Guardando edición (simulada):", editedEvaluador);
+    console.log("Guardando edición de evaluador:", editedEvaluador);
 
-    // 🔹 En tu backend usarías:
-    // await api.put(`/evaluadores/${editedEvaluador.id_usuario}`, editedEvaluador);
+    const evaluadoresAnteriores = [...evaluadores];
 
-    setEvaluador((prev) =>
-      prev.map((r) =>
-        r.id_usuario === editedEvaluador.id_usuario ? editedEvaluador : r
-      )
-    );
+    try {
+      // Optimistic update
+      setEvaluadores(prev =>
+        prev.map(r =>
+          r.id_usuario === editedEvaluador.id_usuario ? editedEvaluador : r
+        )
+      );
 
-    alert("Evaluador actualizado (simulación)");
+      // RUTA DE EDICIÓN PARA EVALUADOR
+      await api.put(`/evaluador/${editedEvaluador.id_usuario}`, editedEvaluador);
+
+      alert('Evaluador actualizado correctamente.');
+    } catch (err: unknown) {
+      console.error("Error al actualizar evaluador:", err);
+
+      setEvaluadores(evaluadoresAnteriores); // Revertir
+
+      let errorMessage = 'Error al actualizar evaluador. El cambio fue revertido.';
+
+      if (axios.isAxiosError(err)) {
+        errorMessage = err.response?.data?.message || errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      alert(errorMessage);
+    }
   };
 
+  // Función de eliminación (usando optimistic updates)
   const handleDeleteEvaluador = async (id: number) => {
-    if (!window.confirm(`¿Eliminar evaluador ID ${id}?`)) return;
+    const evaluadoresAnteriores = [...evaluadores];
+    if (!window.confirm(`¿Estás seguro de que deseas eliminar al evaluador?`)) {
+      return;
+    }
 
-    console.log("Eliminando (simulada):", id);
-    // 🔹 En tu backend usarías:
-    // await api.delete(`/evaluador/${id}`);
+    try {
+      // Optimistic update
+      setEvaluadores(prev => prev.filter(r => r.id_usuario !== id));
 
-    setEvaluador((prev) => prev.filter((r) => r.id_usuario !== id));
-    alert("Evaluador eliminado (simulación)");
+      // RUTA DE ELIMINACIÓN PARA EVALUADOR
+      await api.delete(`/evaluador/${id}`);
+      alert("Evaluador eliminado exitosamente.");
+
+    } catch (err: unknown) {
+      console.error("Error al eliminar evaluador:", err);
+      setEvaluadores(evaluadoresAnteriores); // Revertir
+
+      let errorMessage = "Error al eliminar evaluador. El cambio fue revertido.";
+      if (axios.isAxiosError(err)) {
+        errorMessage = err.response?.data?.message || errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      alert(errorMessage);
+    }
   };
 
+
+  // Función de creación
   const handleCreateEvaluador = async (newEvaluador: Usuario) => {
-    console.log("Creando nuevo evaluador (simulada):", newEvaluador);
+    try {
+      setLoading(true);
+      setError("");
 
-    // 🔹 En tu backend usarías:
-    // const response = await api.post("/evaluador", newEvaluador);
+      // RUTA DE CREACIÓN PARA EVALUADOR - ENVIANDO DATOS ESPECÍFICOS
+      const response = await api.post("/evaluador", {
+        nombre: newEvaluador.nombre,
+        apellidos: newEvaluador.apellidos,
+        ci: newEvaluador.ci,
+        email: newEvaluador.email,
+        telefono: newEvaluador.telefono,
+        area: newEvaluador.area, 
+        id_nivel: newEvaluador.id_nivel, // Campo de Evaluador
+        disponible: newEvaluador.disponible ?? true, // Campo de Evaluador
+        id_rol: 3, // Asumiendo que 3 es el ID de rol para Evaluador
+      });
 
-    const nuevo: Usuario = {
-      ...newEvaluador,
-      id_usuario: Date.now(), // ID temporal
-      id_rol: 2,
-    };
+      if (response.data) {
+        // Asignar el ID (idealmente el devuelto por el servidor) y agregarlo
+        const evaluadorCreado: Usuario = {
+            ...newEvaluador,
+            id_usuario: response.data.data?.id_usuario || Date.now(), // Usar el ID del servidor si existe
+            id_rol: 3,
+        };
+        setEvaluadores((prev) => [...prev, evaluadorCreado]);
+        alert("Evaluador creado exitosamente");
+      } else {
+        alert("No se recibió confirmación del servidor.");
+      }
 
-    setEvaluador((prev) => [...prev, nuevo]);
-    setIsCreateModalOpen(false);
-    alert("Evaluador agregado (simulación)");
+    } catch (error: unknown) {
+      console.error("Error al crear evaluador:", error);
+
+      let errorMessage = "Error al registrar el evaluador.";
+
+      if (axios.isAxiosError(error)) {
+        errorMessage =
+          error.response?.data?.message || error.message || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      alert(errorMessage);
+      setError(errorMessage);
+    } finally {
+      setIsCreateModalOpen(false);
+      setLoading(false);
+    }
   };
 
   // 6. FILTRO DE BÚSQUEDA
-  const evaluadoresFiltrados = evaluador.filter(
-    (resp) =>
-      resp.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
-      resp.apellidos.toLowerCase().includes(filtro.toLowerCase()) ||
-      resp.ci.includes(filtro) ||
-      resp.email.toLowerCase().includes(filtro.toLowerCase()) ||
-      resp.area.toLowerCase().includes(filtro.toLowerCase())
+  const evaluadoresFiltrados = evaluadores.filter(
+    (evaluador) =>
+      evaluador.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
+      evaluador.apellidos.toLowerCase().includes(filtro.toLowerCase()) ||
+      evaluador.ci.includes(filtro) || 
+      evaluador.email.toLowerCase().includes(filtro.toLowerCase()) ||
+      evaluador.area.toLowerCase().includes(filtro.toLowerCase())
   );
 
-  // 7. RENDERIZADO
+  // 7. RENDERIZADO (Usando el patrón de tu código)
   if (loading) {
     return (
       <div className="gestion-competidores-page">
@@ -181,6 +246,7 @@ const GestionEvaluadores: React.FC = () => {
       </div>
     );
   }
+
 
   return (
     <div className="gestion-competidores-page">
@@ -247,8 +313,7 @@ const GestionEvaluadores: React.FC = () => {
       {evaluadoresFiltrados.length > 0 && (
         <div className="pagination-section">
           <span className="pagination-info">
-            Mostrando {evaluadoresFiltrados.length} de {evaluador.length}{" "}
-            evaluadores
+            Mostrando {evaluadoresFiltrados.length} de {evaluadores.length} evaluadores
           </span>
         </div>
       )}
