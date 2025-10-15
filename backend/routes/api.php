@@ -66,26 +66,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/olimpistas/{id}', [Gestion_Olimpista_Controller::class, 'update']);
     Route::delete('/olimpistas/{id}', [Gestion_Olimpista_Controller::class, 'destroy']);
     Route::post('/olimpistas/importar', [Importar_Olimpista_Controller::class, 'importar']);
-    Route::get('/usuario', [UsuarioController::class, 'index']);     
-    Route::post('/usuario', [UsuarioController::class, 'store']);     
-    Route::put('/usuario/{id}', [UsuarioController::class, 'update']); 
-    Route::delete('/usuario/{id}', [UsuarioController::class, 'destroy']);
+
     Route::get('/responsable', [Responsable_Area_Controller::class, 'index']);     
     Route::post('/responsable', [Responsable_Area_Controller::class, 'store']);     
     Route::put('/responsable/{id}', [Responsable_Area_Controller::class, 'update']); 
-    Route::delete('/responsable/{id}', [Responsable_Area_Controller::class, 'destroy']);
-    
+    Route::delete('/responsable/{id}', [Responsable_Area_Controller::class, 'destroy']);   
     Route::get('/evaluador', [Evaluador_Controller::class, 'index']);     
     Route::post('/evaluador', [Evaluador_Controller::class, 'store']);     
     Route::put('/evaluador/{id}', [Evaluador_Controller::class, 'update']); 
     Route::delete('/evaluador/{id}', [Evaluador_Controller::class, 'destroy']);
-
-     Route::post('/area-nivel', [Area_Nivel_Controller::class, 'generarYListar']);
-
+    Route::post('/area-nivel', [Area_Nivel_Controller::class, 'generarYListar']);
     Route::middleware('is_admin')->group(function () {
         // Ruta para crear un nuevo usuario
         // POST -> http://localhost:8000/api/admin/users
-    Route::post('/admin/users', [UserController::class, 'store']);
+    
 
         // Aquí podrías añadir más rutas de admin en el futuro, como:
         // Route::get('/admin/users', [UserController::class, 'index']); // Para listar todos los usuarios

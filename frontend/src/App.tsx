@@ -5,7 +5,7 @@ import Registro from './pages/Registro'
 import './App.css';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute'; // <-- IMPORTANTE
-
+import Listas from './components/Lista Competidores/ListaCompetidores';
 // Componentes placeholder para las otras páginas
 const Inicio = () => (
   <div className="p-8 text-center">
@@ -44,12 +44,12 @@ const Final = () => (
   </div>
 );
 
-const Listas = () => (
+/*const Listas = () => (
   <div className="p-8">
     <h1 className="text-3xl font-bold text-gray-800 mb-4">Listas de Competidores (RF4)</h1>
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
-);
+);*/
 
 const Reportes = () => (
   <div className="p-8">

@@ -1,6 +1,7 @@
 // src/components/carga-masiva/CargarCSV.tsx
 import React, { useRef } from 'react';
 import axios from 'axios'; // ✅ Importar axios
+import { useNavigate } from "react-router-dom";
 import './CargarCSV.css';
 
 interface CargarCSVProps {
@@ -8,8 +9,9 @@ interface CargarCSVProps {
   onGenerarListas?: () => void;
 }
 
-function CargarCSV({ onVerLista, onGenerarListas }: CargarCSVProps) {
+function CargarCSV({ onVerLista }: CargarCSVProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   const API_BASE = 'http://localhost:8000/api'; // ✅ define tu base URL
 
@@ -106,13 +108,9 @@ Total errores: ${data.total_errores}`;
   }
 };
 
-  const handleGenerarListas = () => {
-  if (onGenerarListas) {
-    onGenerarListas();
-  } else {
-    alert('Función GENERAR LISTAS POR ÁREA Y NIVEL - En desarrollo');
-  }
-};
+ const handleGenerarListas = () => {
+    navigate("/listas");
+  };
 
   return (
     <div className="management-container">
