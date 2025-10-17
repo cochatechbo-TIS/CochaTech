@@ -53,7 +53,7 @@ const Navbar = () => {
 
   const isActive = (path: string) => location.pathname === path;
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
-  const isLoginPage = location.pathname === '/';
+  const isLoginPage = location.pathname === '/' || location.pathname === '/login';
 
   return (
     <nav className="navbar">

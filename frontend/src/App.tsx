@@ -72,7 +72,7 @@ function App() {
     <Routes>
       {/* RUTAS PÚBLICAS */}
       {/* El login no usa el Layout principal para no mostrar la barra de navegación */}
-      <Route path="/login" element={<Login />} />
+      <Route path="/login" element={<Layout showNavbar={true}><Login /></Layout>} />
 
       {/* RUTAS PROTEGIDAS */}
       {/* Todas las rutas dentro de 'ProtectedRoute' requerirán que el usuario esté logueado */}
