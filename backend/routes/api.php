@@ -26,15 +26,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/responsable', [Responsable_Area_Controller::class, 'store']);
         Route::put('/responsable/{id}', [Responsable_Area_Controller::class, 'update']);
         Route::delete('/responsable/{id}', [Responsable_Area_Controller::class, 'destroy']);
-    });
 
-    // Grupo para ADMIN y RESPONSABLE
-    Route::middleware('role:administrador,responsable')->group(function () {
         Route::get('/evaluador', [Evaluador_Controller::class, 'index']);
         Route::post('/evaluador', [Evaluador_Controller::class, 'store']);
         Route::put('/evaluador/{id}', [Evaluador_Controller::class, 'update']);
         Route::delete('/evaluador/{id}', [Evaluador_Controller::class, 'destroy']);
 
+    });
+
+    // Grupo para ADMIN y RESPONSALE
+    Route::middleware('role:administrador,responsable')->group(function () {
+       
         Route::post('/area-nivel', [Area_Nivel_Controller::class, 'generarYListar']);
     });
 });
