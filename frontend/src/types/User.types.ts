@@ -18,7 +18,7 @@ export interface BaseUser {
  * Usado en la tabla de GestionResponsables.
  */
 export interface Responsable extends BaseUser {
-  area: string; // Este dato viene del 'GET /responsable'
+  area: string; 
 }
 
 /**
@@ -27,9 +27,9 @@ export interface Responsable extends BaseUser {
  */
 export interface Evaluador extends BaseUser {
   area: string;
-  nivel: string | null; // El nombre del nivel
-  id_nivel: number | null;
-  disponible: boolean;
+  // nivel: string | null;     <-- ELIMINADO
+  // id_nivel: number | null;  <-- ELIMINADO
+  // disponible: boolean;      <-- ELIMINADO
 }
 
 /**
@@ -37,13 +37,11 @@ export interface Evaluador extends BaseUser {
  */
 export interface AuthUser {
   id_usuario: number;
-  // OJO: Tu authService usa 'full_name', pero tu backend parece enviar 'nombre' y 'apellidos'.
-  // Ajusta esto según lo que realmente envíe tu AuthController.php.
   nombre: string;
   apellidos: string;
   email: string;
   rol: {
     id_rol: number;
-    nombre_rol: string; // "administrador", "responsable", "evaluador"
+    nombre_rol: string; 
   };
 }

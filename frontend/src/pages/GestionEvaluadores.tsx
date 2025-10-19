@@ -1,25 +1,17 @@
 // src/pages/GestionEvaluadores.tsx
 import React, { useState, useEffect, useCallback } from "react";
-// CORRECCIÓN: Importa el api centralizado
 import api from "../services/api";
-// Mantenido SOLO para 'isAxiosError'
 import axios from "axios";
 import { EvaluadorTable } from "../components/evaluadores/EvaluadorTable";
 import { EditEvaluadorModal } from "../components/evaluadores/EditEvaluadorModal";
-// CORRECCIÓN: Importa el tipo específico
 import type { Evaluador } from "../../types/User.types";
 
 const GestionEvaluadores: React.FC = () => {
-  // CORRECCIÓN: Usa el tipo 'Evaluador'
   const [evaluadores, setEvaluadores] = useState<Evaluador[]>([]);
   const [filtro, setFiltro] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
-  // --- ELIMINADO ---
-  // Ya no necesitamos API_BASE ni el useMemo para crear 'api' localmente
-  // --- FIN ELIMINADO ---
 
   const fetchEvaluadores = useCallback(async () => {
     try {
@@ -27,25 +19,22 @@ const GestionEvaluadores: React.FC = () => {
       setError("");
       console.log("Cargando evaluadores...");
 
-      // Usa el 'api' importado directamente
       const response = await api.get("/evaluador");
 
-      // CORRECCIÓN: Mapea a la interfaz 'Evaluador'
-      // Ajusta según la respuesta REAL de tu API GET /evaluador
+      // Mapeo actualizado (sin nivel/disponible)
       const evaluadoresMapeados: Evaluador[] = response.data.data.map(
-        (evaluador: any): Evaluador => ({ // Usar 'any' temporalmente
-          id_usuario: evaluador.id_usuario,
-          nombre: evaluador.nombre || "",
-          apellidos: evaluador.apellidos || "",
-          ci: evaluador.ci || "",
-          email: evaluador.email || "",
-          telefono: evaluador.telefono || null,
-          area: evaluador.area || "", // Nombre del área
-          id_rol: evaluador.id_rol, // Asegúrate que el backend lo envíe si lo necesitas
-          // Campos específicos de Evaluador
-          disponible: evaluador.disponible ?? true, // Asume true si no viene
-          id_nivel: evaluador.id_nivel || null,
-          nivel: evaluador.nivel || null, // Nombre del nivel
+        (ev: any): Evaluador => ({ 
+          id_usuario: ev.id_usuario,
+          nombre: ev.nombre || "",
+          apellidos: ev.apellidos || "",
+          ci: ev.ci || "",
+          email: ev.email || "",
+          telefono: ev.telefono || null,
+          area: ev.area || "", 
+          id_rol: ev.id_rol,
+          // nivel: ev.nivel || null,      <-- ELIMINADO
+          // id_nivel: ev.id_nivel || null,  <-- ELIMINADO
+          // disponible: ev.disponible,    <-- ELIMINADO
         })
       );
 
@@ -59,7 +48,6 @@ const GestionEvaluadores: React.FC = () => {
         errorMessage = e.response?.data?.message || e.message || errorMessage;
         if (e.response?.status === 401) {
           errorMessage = "Error de autorización. Intenta iniciar sesión de nuevo.";
-          // Opcional: Podrías llamar a logout() aquí
         }
       } else if (e instanceof Error) {
         errorMessage = e.message;
@@ -68,47 +56,38 @@ const GestionEvaluadores: React.FC = () => {
     } finally {
       setLoading(false);
     }
-     // CORRECCIÓN: 'api' ya no es una dependencia
   }, []);
 
   useEffect(() => {
     fetchEvaluadores();
   }, [fetchEvaluadores]);
 
-  // --- Manejadores de Acciones ---
 
-  // CORRECCIÓN: Usa el tipo 'Evaluador'
   const handleEditEvaluador = async (editedEvaluador: Evaluador) => {
     console.log("Guardando edición de evaluador:", editedEvaluador);
     const evaluadoresAnteriores = [...evaluadores];
 
     try {
-      // Optimistic update
       setEvaluadores(prev =>
-        prev.map(r =>
-          r.id_usuario === editedEvaluador.id_usuario ? editedEvaluador : r
+        prev.map(e =>
+          e.id_usuario === editedEvaluador.id_usuario ? editedEvaluador : e
         )
       );
 
-      // Usa el 'api' importado
+      // El objeto 'editedEvaluador' ya no tiene nivel/disponible
       await api.put(`/evaluador/${editedEvaluador.id_usuario}`, {
-          // Enviar solo los campos editables esperados por el backend
-          nombre: editedEvaluador.nombre,
-          apellidos: editedEvaluador.apellidos,
-          ci: editedEvaluador.ci, // Generalmente no editable, pero si lo es, envíalo
-          email: editedEvaluador.email,
-          telefono: editedEvaluador.telefono,
-          // Asegúrate de enviar NOMBRE o ID según espere el backend
-          area: editedEvaluador.area,
-          nivel: editedEvaluador.nivel, // O id_nivel si el backend lo prefiere
-          disponible: editedEvaluador.disponible,
+        nombre: editedEvaluador.nombre,
+        apellidos: editedEvaluador.apellidos,
+        ci: editedEvaluador.ci,
+        email: editedEvaluador.email,
+        telefono: editedEvaluador.telefono,
+        area: editedEvaluador.area,
       });
 
       alert('Evaluador actualizado correctamente.');
-      // Opcional: fetchEvaluadores(); para recargar
     } catch (err: unknown) {
       console.error("Error al actualizar evaluador:", err);
-      setEvaluadores(evaluadoresAnteriores); // Revertir
+      setEvaluadores(evaluadoresAnteriores); 
       let errorMessage = 'Error al actualizar evaluador. El cambio fue revertido.';
       if (axios.isAxiosError(err)) {
         errorMessage = err.response?.data?.message || err.response?.data?.errors?.email?.[0] || errorMessage;
@@ -129,16 +108,12 @@ const GestionEvaluadores: React.FC = () => {
 
     const evaluadoresAnteriores = [...evaluadores];
     try {
-      // Optimistic update
-      setEvaluadores(prev => prev.filter(r => r.id_usuario !== id_usuario));
-
-      // Usa el 'api' importado
+      setEvaluadores(prev => prev.filter(e => e.id_usuario !== id_usuario));
       await api.delete(`/evaluador/${id_usuario}`);
       alert("Evaluador eliminado exitosamente.");
-
     } catch (err: unknown) {
       console.error("Error al eliminar evaluador:", err);
-      setEvaluadores(evaluadoresAnteriores); // Revertir
+      setEvaluadores(evaluadoresAnteriores);
       let errorMessage = "Error al eliminar evaluador. El cambio fue revertido.";
       if (axios.isAxiosError(err)) {
         errorMessage = err.response?.data?.message || errorMessage;
@@ -149,57 +124,39 @@ const GestionEvaluadores: React.FC = () => {
     }
   };
 
-  // CORRECCIÓN: Usa un tipo parcial para los datos de creación
+  // El tipo de 'newEvaluadorData' ya no tendrá nivel/disponible
   const handleCreateEvaluador = async (newEvaluadorData: Omit<Evaluador, 'id_usuario' | 'id_rol'>) => {
-    // Opcional: Validación básica en frontend
      if (!newEvaluadorData.nombre || !newEvaluadorData.apellidos || !newEvaluadorData.ci || !newEvaluadorData.email || !newEvaluadorData.area) {
-         alert("Por favor, completa los campos requeridos (Nombre, Apellidos, CI, Email, Área).");
-         return;
+        alert("Por favor, completa todos los campos requeridos.");
+        return;
      }
 
     try {
-      // No necesitamos setLoading(true) si el modal lo indica
       setError("");
+      
+      // El 'newEvaluadorData' enviado ya no tiene nivel/disponible
+      const response = await api.post("/evaluador", newEvaluadorData);
 
-      // Usa el 'api' importado
-      // Enviar los datos que espera el endpoint POST /evaluador
-      const response = await api.post("/evaluador", {
-          nombre: newEvaluadorData.nombre,
-          apellidos: newEvaluadorData.apellidos,
-          ci: newEvaluadorData.ci,
-          email: newEvaluadorData.email,
-          telefono: newEvaluadorData.telefono,
-          // Asegúrate de enviar NOMBRE o ID según espere el backend
-          area: newEvaluadorData.area,
-          nivel: newEvaluadorData.nivel, // O id_nivel si el backend lo prefiere
-          disponible: newEvaluadorData.disponible ?? true, // Valor por defecto
-      });
-
-      // El backend devuelve el usuario y el evaluador creados
       if (response.data && response.data.usuario && response.data.evaluador) {
-        // Construye el objeto Evaluador completo
+        // Construye el objeto Evaluador completo (sin nivel/disponible)
         const nuevoEvaluador: Evaluador = {
-            id_usuario: response.data.usuario.id_usuario,
-            nombre: response.data.usuario.nombre,
-            apellidos: response.data.usuario.apellidos,
-            ci: response.data.usuario.ci,
-            email: response.data.usuario.email,
-            telefono: response.data.usuario.telefono,
-            id_rol: response.data.usuario.id_rol,
-            // Datos específicos del evaluador devueltos
-            area: response.data.evaluador.area?.nombre || newEvaluadorData.area, // Usa la respuesta si existe
-            nivel: response.data.evaluador.nivel?.nombre || newEvaluadorData.nivel, // Usa la respuesta si existe
-            id_nivel: response.data.evaluador.id_nivel,
-            disponible: response.data.evaluador.disponible,
+          id_usuario: response.data.usuario.id_usuario,
+          nombre: response.data.usuario.nombre,
+          apellidos: response.data.usuario.apellidos,
+          ci: response.data.usuario.ci,
+          email: response.data.usuario.email,
+          telefono: response.data.usuario.telefono,
+          id_rol: response.data.usuario.id_rol,
+          // El backend ahora devuelve 'area' en el controlador
+          area: response.data.evaluador.id_area ? newEvaluadorData.area : '', 
         };
-        // Añade al estado local
         setEvaluadores((prev) => [...prev, nuevoEvaluador]);
         alert("Evaluador creado exitosamente");
-        setIsCreateModalOpen(false); // Cierra el modal
+        setIsCreateModalOpen(false); 
       } else {
         console.warn("Respuesta inesperada al crear evaluador:", response.data);
         alert("Respuesta inesperada del servidor. Recargando lista...");
-        fetchEvaluadores(); // Recarga por si acaso
+        fetchEvaluadores();
       }
     } catch (error: unknown) {
       console.error("Error al crear evaluador:", error);
@@ -215,29 +172,22 @@ const GestionEvaluadores: React.FC = () => {
         errorMessage = error.message;
       }
       alert(errorMessage);
-      // No establezcas setError aquí si el modal maneja sus errores
-    } finally {
-      // No necesitamos setLoading(false) aquí
-      // No cierres el modal si quieres que siga abierto en error
-      // setIsCreateModalOpen(false);
     }
   };
 
-  // --- Filtro ---
+
   const evaluadoresFiltrados = evaluadores.filter(
-    (evaluador) =>
-      evaluador.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
-      evaluador.apellidos.toLowerCase().includes(filtro.toLowerCase()) ||
-      evaluador.ci.includes(filtro) ||
-      evaluador.email.toLowerCase().includes(filtro.toLowerCase()) ||
-      evaluador.area.toLowerCase().includes(filtro.toLowerCase()) ||
-      (evaluador.nivel && evaluador.nivel.toLowerCase().includes(filtro.toLowerCase()))
+    (ev) =>
+      ev.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
+      ev.apellidos.toLowerCase().includes(filtro.toLowerCase()) ||
+      ev.ci.includes(filtro) ||
+      ev.email.toLowerCase().includes(filtro.toLowerCase()) ||
+      ev.area.toLowerCase().includes(filtro.toLowerCase())
   );
 
-  // --- Renderizado Condicional (Loading/Error) ---
   if (loading) {
     return (
-      <div className="gestion-page-container"> {/* Clase genérica */}
+      <div className="gestion-page-container">
         <div className="flex justify-center items-center p-8 text-lg">
           Cargando evaluadores...
         </div>
@@ -262,22 +212,19 @@ const GestionEvaluadores: React.FC = () => {
     );
   }
 
-  // --- Renderizado Principal ---
   return (
-    <div className="gestion-page-container"> {/* Clase genérica */}
-      {/* Barra de Búsqueda y Botón Nuevo */}
+    <div className="gestion-page-container">
       <div className="search-section">
         <div className="search-container">
           <div className="search-input-wrapper">
             <input
               type="text"
-              placeholder="Buscar (Nombre, CI, Email, Área, Nivel)..."
+              placeholder="Buscar (Nombre, CI, Email, Área)..."
               className="search-input"
               value={filtro}
               onChange={(e) => setFiltro(e.target.value)}
             />
             <div className="search-icon">
-              {/* SVG Icon */}
               <svg className="search-svg h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -287,44 +234,37 @@ const GestionEvaluadores: React.FC = () => {
 
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="primary-button" // Asegúrate que esta clase exista
+          className="primary-button"
         >
-          {/* SVG Icon */}
           <svg className="button-icon h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
           <span>Nuevo Evaluador</span>
         </button>
       </div>
 
-      {/* Tabla de Evaluadores */}
       <EvaluadorTable
-        usuarios={evaluadoresFiltrados} // Pasar la lista filtrada
+        usuarios={evaluadoresFiltrados}
         onEdit={handleEditEvaluador}
-        onDelete={handleDeleteEvaluador} // Pasar la función directamente
+        onDelete={handleDeleteEvaluador}
       />
 
-      {/* Paginación / Info */}
       {evaluadores.length > 0 && (
         <div className="pagination-section">
           <span className="pagination-info">
             Mostrando {evaluadoresFiltrados.length} de {evaluadores.length} evaluadores totales.
           </span>
-          {/* Aquí irían los controles de paginación si los implementas */}
         </div>
       )}
 
-       {/* Mensaje si no hay evaluadores */}
        {!loading && evaluadores.length === 0 && (
          <div className="text-center p-8 text-gray-500">
              No hay evaluadores registrados todavía.
          </div>
        )}
 
-      {/* Modal para Crear (se reutiliza el de editar en modo 'creación') */}
-      {/* Asegúrate que EditEvaluadorModal maneje 'usuario={null}' */}
       <EditEvaluadorModal
-        usuario={null} // Indica modo creación
+        evaluador={null} 
         onSave={handleCreateEvaluador}
         onCancel={() => setIsCreateModalOpen(false)}
         isOpen={isCreateModalOpen}
