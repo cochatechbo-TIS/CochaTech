@@ -876,3 +876,110 @@ margin-right: 2rem;
 .user-info-mobile .user-icon {
   size: 18px;
 }
+/* ============================================= */
+/* ===== ESTILOS PARA TABLAS (RESP/EVAL) ===== */
+/* ============================================= */
+
+.table-container {
+  background-color: white;
+  border-radius: 8px;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-header {
+  background-color: #1d4ed8; /* Fondo azul */
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.table-th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff; /* Letras blancas */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  vertical-align: center;
+}
+
+.table-body {
+  background-color: white;
+}
+
+.table-row {
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #e5e7eb;
+}
+.table-row:last-child {
+  border-bottom: none;
+}
+.table-row:hover {
+  background-color: #f8fafc;
+}
+
+.table-td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+  vertical-align: top;
+  text-align: left;
+}
+
+.table-td-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.table-btn {
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+}
+
+.table-btn-edit {
+  background-color: transparent;
+  color: #2563eb;
+}
+.table-btn-edit:hover {
+  color: #1e3a8a;
+  background-color: transparent;
+}
+
+.table-btn-delete {
+  background-color: transparent;
+  color: #dc2626;
+}
+.table-btn-delete:hover {
+  background-color: transparent;
+  color: #7f1d1d;
+}
+
+.text-center {
+  text-align: center;
+}
+.text-green-500 {
+  color: #22c55e;
+}
+.text-red-500 {
+  color: #ef4444;
+}
+.inline-block {
+  display: inline-block;
+}

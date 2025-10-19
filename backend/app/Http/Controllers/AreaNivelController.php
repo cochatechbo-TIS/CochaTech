@@ -2,30 +2,54 @@
 
 namespace App\Http\Controllers;
 
+<<<<<<< HEAD:backend/app/Http/Controllers/Area_Nivel_Controller.php
 use App\Models\Importar_Olimpista;
 use App\Models\Area_Nivel;
 use App\Models\Responsable_Area;
 use App\Models\Area;
+=======
+// CORRECCIÓN: Actualizados ambos modelos
+use App\Models\Olimpista;
+use App\Models\AreaNivel;
+>>>>>>> eede6f8adc5183f96e7510158aef59ad1b7e0197:backend/app/Http/Controllers/AreaNivelController.php
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class Area_Nivel_Controller extends Controller
+class AreaNivelController extends Controller
 {
     public function generarYListar()
     {
+<<<<<<< HEAD:backend/app/Http/Controllers/Area_Nivel_Controller.php
         // Genera las combinaciones area-nivel desde olimpistas
         $combinaciones = Importar_Olimpista::select('id_area', 'id_nivel')->distinct()->get();
+=======
+        // Obtener combinaciones únicas de area y nivel desde olimpistas
+        // CORRECCIÓN: Cambiado de Importar_Olimpista a Olimpista
+        $combinaciones = Olimpista::select('id_area', 'id_nivel')
+            ->distinct()
+            ->get();
+>>>>>>> eede6f8adc5183f96e7510158aef59ad1b7e0197:backend/app/Http/Controllers/AreaNivelController.php
 
         foreach ($combinaciones as $c) {
-            Area_Nivel::firstOrCreate([
+            // CORRECCIÓN: Cambiado de Area_Nivel a AreaNivel
+            AreaNivel::firstOrCreate([
                 'id_area' => $c->id_area,
                 'id_nivel' => $c->id_nivel,
             ]);
         }
 
+<<<<<<< HEAD:backend/app/Http/Controllers/Area_Nivel_Controller.php
         $lista = Area_Nivel::with(['area', 'nivel'])->get()->map(function ($item) {
             return [
                 'id' => $item->id_area_nivel,
+=======
+        // Obtener la lista final con nombres de area y nivel
+        // CORRECCIÓN: Cambiado de Area_Nivel a AreaNivel
+        $lista = AreaNivel::with(['area', 'nivel'])->get()->map(function ($item) {
+            return [
+                // CORRECCIÓN: 'id' no existe, usamos la clave primaria real
+                'id' => $item->id_area_nivel, 
+>>>>>>> eede6f8adc5183f96e7510158aef59ad1b7e0197:backend/app/Http/Controllers/AreaNivelController.php
                 'id_area' => $item->id_area,
                 'nombre_area' => $item->area->nombre,
                 'id_nivel' => $item->id_nivel,

@@ -1,59 +1,45 @@
 // src/pages/GestionResponsables.tsx
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import axios from "axios"; // Necesitas importar axios
+import React, { useState, useEffect, useCallback } from "react";
+// CORRECCIÓN: Importa el api centralizado
+import api from "../services/api";
+// Mantenido SOLO para 'isAxiosError'
+import axios from "axios";
 import { ResponsableTable } from "../components/responsables/ResponsableTable";
 import { EditResponsableModal } from "../components/responsables/EditResponsableModal";
-import type { Usuario } from "../interfaces/Usuario";
+// CORRECCIÓN: Importa el tipo específico
+import type { Responsable } from "../../types/User.types";
 
 const GestionResponsables: React.FC = () => {
-  // 1. ESTADOS
-  const [responsables, setResponsables] = useState<Usuario[]>([]);
+  // CORRECCIÓN: Usa el tipo 'Responsable'
+  const [responsables, setResponsables] = useState<Responsable[]>([]);
   const [filtro, setFiltro] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const API_BASE = "http://localhost:8000/api"; // URL base de la API
+  // --- ELIMINADO ---
+  // Ya no necesitamos API_BASE ni el useMemo para crear 'api' localmente
+  // --- FIN ELIMINADO ---
 
-  // 2. CONFIGURACIÓN AXIOS CON AUTH (REUTILIZADA DE COMPETIDORES)
-  const api = useMemo(() => {
-    const token = localStorage.getItem("authToken");
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    };
-
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
-    return axios.create({
-      baseURL: API_BASE,
-      headers: headers,
-    });
-  }, []);
-
-  // 3. FUNCIÓN DE CARGA DE DATOS
   const fetchResponsables = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
-
       console.log("Cargando responsables...");
-      // RUTA DE TU API PARA LISTAR RESPONSABLES
+
+      // Usamos el 'api' importado directamente
       const response = await api.get("/responsable");
 
-      /// Mapeo de datos (simplificado para coincidir con la nueva interfaz y tabla)
-      const responsablesMapeados: Usuario[] = response.data.data.map(
-        (resp: Usuario) => ({
+      // CORRECCIÓN: Mapea a la interfaz 'Responsable'
+      const responsablesMapeados: Responsable[] = response.data.data.map(
+        (resp: any): Responsable => ({ // Usar 'any' temporalmente si la respuesta no coincide 100%
           id_usuario: resp.id_usuario,
-          nombre: resp.nombre || "", // Nombre de pila
-          apellidos: resp.apellidos || "", // Apellidos
-          ci: resp.ci || "", // Cédula de Identidad
+          nombre: resp.nombre || "",
+          apellidos: resp.apellidos || "",
+          ci: resp.ci || "",
           email: resp.email || "",
           telefono: resp.telefono || null,
-          area: resp.area || "",
+          area: resp.area || "", // El GET /responsable ya devuelve el nombre del área
           id_rol: resp.id_rol,
         })
       );
@@ -62,151 +48,178 @@ const GestionResponsables: React.FC = () => {
       setResponsables(responsablesMapeados);
     } catch (e: unknown) {
       console.error("Error fetching responsables:", e);
-      let errorMessage =
-        "No se pudo conectar con el servidor o no tienes permisos.";
+      let errorMessage = "No se pudo conectar con el servidor o no tienes permisos.";
 
       if (axios.isAxiosError(e)) {
-        // Verificamos si es un error de Axios
-        // Accedemos a los datos de la respuesta del error
         errorMessage = e.response?.data?.message || e.message || errorMessage;
+        if (e.response?.status === 401) {
+          errorMessage = "Error de autorización. Intenta iniciar sesión de nuevo.";
+          // Opcional: Podrías llamar a logout() aquí
+        }
       } else if (e instanceof Error) {
-        // Si es una instancia de Error JS estándar
         errorMessage = e.message;
       }
-      // Si no es un error de Axios ni una instancia de Error, usamos el mensaje por defecto.
-
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, [api]);
+    // CORRECCIÓN: 'api' ya no es una dependencia
+  }, []);
 
-  // 4. EJECUTAR LA CARGA AL MONTAR
   useEffect(() => {
     fetchResponsables();
   }, [fetchResponsables]);
 
-  // 5. MANEJADORES DE ACCIONES (Actualizados para usar el estado)
+  // --- Manejadores de Acciones ---
 
-  // Función de edición (usaremos el ID del responsable)
-
-    const handleEditResponsable = async (editedResponsable: Usuario) => {
+  // CORRECCIÓN: Usa el tipo 'Responsable'
+  const handleEditResponsable = async (editedResponsable: Responsable) => {
     console.log("Guardando edición de responsable:", editedResponsable);
-
     const responsablesAnteriores = [...responsables];
 
     try {
-        //optimiasmo
-        setResponsables(prev =>
+      // Optimistic update
+      setResponsables(prev =>
         prev.map(r =>
-            r.id_usuario === editedResponsable.id_usuario ? editedResponsable : r
+          r.id_usuario === editedResponsable.id_usuario ? editedResponsable : r
         )
-        );
+      );
 
-        await api.put(`/responsable/${editedResponsable.id_usuario}`, editedResponsable);
-
-        alert('Responsable actualizado correctamente.');
-    } catch (err: unknown) {
-        console.error("Error al actualizar responsable:", err);
-
-        setResponsables(responsablesAnteriores);
-
-        let errorMessage = 'Error al actualizar responsable. El cambio fue revertido.';
-
-        if (axios.isAxiosError(err)) {
-        errorMessage = err.response?.data?.message || errorMessage;
-        } else if (err instanceof Error) {
-        errorMessage = err.message;
-        }
-
-        alert(errorMessage);
-    }
-    };
-
-  // Función de eliminación (usaremos el ID del responsable)
-    const handleDeleteResponsable = async (id: number) => {
-    const responsablesAnteriores = [...responsables];
-    if (!window.confirm(`¿Estás seguro de que deseas eliminar al responsable?`)) {
-        return;
-    }
-
-    try {
-        setResponsables(prev => prev.filter(r => r.id_usuario !== id));
-        await api.delete(`/responsable/${id}`);
-        alert("Responsable eliminado exitosamente.");
-
-    } catch (err: unknown) {
-        console.error("Error al eliminar responsable:", err);
-        setResponsables(responsablesAnteriores);
-        let errorMessage = "Error al eliminar responsable. El cambio fue revertido.";
-        if (axios.isAxiosError(err)) {
-        errorMessage = err.response?.data?.message || errorMessage;
-        } else if (err instanceof Error) {
-        errorMessage = err.message;
-        }
-        alert(errorMessage);
-    }
-    };
-
-
-  // Función de creación
-    const handleCreateResponsable = async (newResponsable: Usuario) => {
-    try {
-      setLoading(true);
-      setError("");
-      const response = await api.post("/responsable", {
-        nombre: newResponsable.nombre,
-        apellidos: newResponsable.apellidos,
-        ci: newResponsable.ci,
-        email: newResponsable.email,
-        telefono: newResponsable.telefono,
-        area: newResponsable.area,
+      // Usa el 'api' importado
+      // El backend espera el ID en la URL y los datos en el cuerpo
+      await api.put(`/responsable/${editedResponsable.id_usuario}`, {
+          // Enviar solo los campos editables
+          nombre: editedResponsable.nombre,
+          apellidos: editedResponsable.apellidos,
+          ci: editedResponsable.ci,
+          email: editedResponsable.email,
+          telefono: editedResponsable.telefono,
+          // Si el área es editable, asegúrate de enviar el NOMBRE o ID según espere el backend
+          area: editedResponsable.area,
       });
-      if (response.data) {
-          setResponsables((prev) => [...prev, newResponsable]);
-          alert("Responsable creado exitosamente");
-        } else {
-          alert("No se recibió confirmación del servidor.");
-        }
 
-    } catch (error: unknown) {
-      console.error("Error al crear responsable:", error);
-
-      let errorMessage = "Error al registrar el responsable.";
-
-      if (axios.isAxiosError(error)) {
-        errorMessage =
-          error.response?.data?.message || error.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
+      alert('Responsable actualizado correctamente.');
+      // Opcional: fetchResponsables(); para recargar
+    } catch (err: unknown) {
+      console.error("Error al actualizar responsable:", err);
+      setResponsables(responsablesAnteriores); // Revertir
+      let errorMessage = 'Error al actualizar responsable. El cambio fue revertido.';
+      if (axios.isAxiosError(err)) {
+        errorMessage = err.response?.data?.message || err.response?.data?.errors?.email?.[0] || errorMessage; // Captura error de email único
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
       }
-
       alert(errorMessage);
-      setError(errorMessage);
-    } finally {
-
-      setIsCreateModalOpen(false);
-      setLoading(false);
     }
   };
 
+  const handleDeleteResponsable = async (id_usuario: number) => {
+    const responsableAEliminar = responsables.find(r => r.id_usuario === id_usuario);
+    if (!responsableAEliminar) return;
+
+    if (!window.confirm(`¿Estás seguro de que deseas eliminar a ${responsableAEliminar.nombre} ${responsableAEliminar.apellidos}?`)) {
+      return;
+    }
+
+    const responsablesAnteriores = [...responsables];
+    try {
+      // Optimistic update
+      setResponsables(prev => prev.filter(r => r.id_usuario !== id_usuario));
+
+      // Usa el 'api' importado
+      await api.delete(`/responsable/${id_usuario}`);
+      alert("Responsable eliminado exitosamente.");
+
+    } catch (err: unknown) {
+      console.error("Error al eliminar responsable:", err);
+      setResponsables(responsablesAnteriores); // Revertir
+      let errorMessage = "Error al eliminar responsable. El cambio fue revertido.";
+      if (axios.isAxiosError(err)) {
+        errorMessage = err.response?.data?.message || errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      alert(errorMessage);
+    }
+  };
+
+  // CORRECCIÓN: Usa un tipo parcial para los datos de creación
+  const handleCreateResponsable = async (newResponsableData: Omit<Responsable, 'id_usuario' | 'id_rol'>) => {
+    // Opcional: Validación básica en frontend
+     if (!newResponsableData.nombre || !newResponsableData.apellidos || !newResponsableData.ci || !newResponsableData.email || !newResponsableData.area) {
+         alert("Por favor, completa todos los campos requeridos.");
+         return;
+     }
+
+    try {
+      // No necesitamos setLoading(true) aquí si el modal ya lo indica
+      setError("");
+
+      // Usa el 'api' importado
+      const response = await api.post("/responsable", newResponsableData);
+
+      // Backend devuelve el usuario y el área creados/asignados
+      if (response.data && response.data.usuario && response.data.area) {
+        // Construye el objeto Responsable completo
+        const nuevoResponsable: Responsable = {
+          id_usuario: response.data.usuario.id_usuario,
+          nombre: response.data.usuario.nombre,
+          apellidos: response.data.usuario.apellidos,
+          ci: response.data.usuario.ci,
+          email: response.data.usuario.email,
+          telefono: response.data.usuario.telefono,
+          id_rol: response.data.usuario.id_rol,
+          area: response.data.area.nombre // Usa el nombre del área devuelto
+        };
+        // Añade al estado local
+        setResponsables((prev) => [...prev, nuevoResponsable]);
+        alert("Responsable creado exitosamente");
+        setIsCreateModalOpen(false); // Cierra el modal al éxito
+      } else {
+        // Si la respuesta no es la esperada, muestra error y recarga
+        console.warn("Respuesta inesperada al crear responsable:", response.data);
+        alert("Respuesta inesperada del servidor. Recargando lista...");
+        fetchResponsables();
+      }
+    } catch (error: unknown) {
+      console.error("Error al crear responsable:", error);
+      let errorMessage = "Error al registrar el responsable.";
+      if (axios.isAxiosError(error)) {
+          // Muestra errores de validación específicos si existen
+          const errors = error.response?.data?.errors;
+          if (errors) {
+              errorMessage = Object.values(errors).flat().join(' '); // Concatena todos los mensajes de error
+          } else {
+              errorMessage = error.response?.data?.message || error.message || errorMessage;
+          }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      // No establezcas setError aquí si el modal maneja sus propios errores
+      alert(errorMessage);
+    } finally {
+      // No necesitamos setLoading(false) si no lo activamos aquí
+      // No cierres el modal aquí si quieres que permanezca abierto en caso de error
+      // setIsCreateModalOpen(false);
+    }
+  };
+
+  // --- Filtro ---
   const responsablesFiltrados = responsables.filter(
     (resp) =>
       resp.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
       resp.apellidos.toLowerCase().includes(filtro.toLowerCase()) ||
-      resp.ci.includes(filtro) || // Usamos 'ci'
+      resp.ci.includes(filtro) ||
       resp.email.toLowerCase().includes(filtro.toLowerCase()) ||
       resp.area.toLowerCase().includes(filtro.toLowerCase())
   );
 
-  // 6. RENDERIZADO CONDICIONAL DE CARGA/ERROR
+  // --- Renderizado Condicional (Loading/Error) ---
   if (loading) {
     return (
-      <div className="gestion-competidores-page">
-        <div className="management-container">
-          <div className="flex justify-center items-center p-8">
-            <div className="text-lg">Cargando responsables...</div>
-          </div>
+      <div className="gestion-page-container"> {/* Clase genérica */}
+        <div className="flex justify-center items-center p-8 text-lg">
+          Cargando responsables...
         </div>
       </div>
     );
@@ -214,95 +227,84 @@ const GestionResponsables: React.FC = () => {
 
   if (error) {
     return (
-      <div className="gestion-competidores-page">
-        <div className="management-container">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            <strong>Error:</strong> {error}
-            <br />
-            <button
-              onClick={fetchResponsables}
-              className="mt-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-            >
-              Reintentar
-            </button>
-          </div>
+      <div className="gestion-page-container">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">{error}</span>
+          <button
+            onClick={fetchResponsables}
+            className="mt-2 bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm"
+          >
+            Reintentar
+          </button>
         </div>
       </div>
     );
   }
 
-  // 7. RENDERIZADO PRINCIPAL
+  // --- Renderizado Principal ---
   return (
-    <div className="gestion-competidores-page">
-      <div className="management-container">
-        <div className="search-section">
-          <div className="search-container">
-            <div className="search-input-wrapper">
-              <input
-                type="text"
-                placeholder="Buscar responsable..."
-                className="search-input"
-                value={filtro}
-                onChange={(e) => setFiltro(e.target.value)}
-              />
-              <div className="search-icon">
-                <svg
-                  className="search-svg"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </div>
+    <div className="gestion-page-container"> {/* Clase genérica */}
+      {/* Barra de Búsqueda y Botón Nuevo */}
+      <div className="search-section">
+        <div className="search-container">
+          <div className="search-input-wrapper">
+            <input
+              type="text"
+              placeholder="Buscar (Nombre, CI, Email, Área)..."
+              className="search-input"
+              value={filtro}
+              onChange={(e) => setFiltro(e.target.value)}
+            />
+            <div className="search-icon">
+              {/* SVG Icon */}
+              <svg className="search-svg h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
             </div>
           </div>
-
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="primary-button"
-          >
-            <svg
-              className="button-icon"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
-            <span>Nuevo Responsable</span>
-          </button>
         </div>
 
-        <ResponsableTable
-          usuario={responsablesFiltrados}
-          onEdit={handleEditResponsable}
-          onDelete={handleDeleteResponsable}
-        />
+        <button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="primary-button" // Asegúrate que esta clase exista en tu CSS
+        >
+          {/* SVG Icon */}
+          <svg className="button-icon h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          <span>Nuevo Responsable</span>
+        </button>
       </div>
 
-      {responsablesFiltrados.length > 0 && (
+      {/* Tabla de Responsables */}
+      <ResponsableTable
+        usuarios={responsablesFiltrados} // Pasar la lista filtrada
+        onEdit={handleEditResponsable}
+        onDelete={handleDeleteResponsable} // Pasar la función directamente
+      />
+
+      {/* Paginación / Info */}
+      {responsables.length > 0 && (
         <div className="pagination-section">
           <span className="pagination-info">
-            Mostrando {responsablesFiltrados.length} de {responsables.length}{" "}
-            responsables
+            Mostrando {responsablesFiltrados.length} de {responsables.length} responsables totales.
           </span>
+          {/* Aquí irían los controles de paginación si los implementas */}
         </div>
       )}
 
-      {/* Modal para crear nuevo responsable (o editar, si se usa para ambos) */}
+       {/* Mensaje si no hay responsables */}
+       {!loading && responsables.length === 0 && (
+         <div className="text-center p-8 text-gray-500">
+             No hay responsables registrados todavía.
+         </div>
+       )}
+
+      {/* Modal para Crear (se reutiliza el de editar en modo 'creación') */}
+      {/* Asegúrate que EditResponsableModal maneje 'usuario={null}' para modo creación */}
       <EditResponsableModal
-        usuario={null} // null para el modo creación
+        usuario={null} // Indica modo creación
         onSave={handleCreateResponsable}
         onCancel={() => setIsCreateModalOpen(false)}
         isOpen={isCreateModalOpen}

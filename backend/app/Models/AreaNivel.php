@@ -3,11 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Area_Nivel extends Model
+// CORRECCIÓN: Nombre de clase cambiado a PascalCase
+class AreaNivel extends Model
 {
-    protected $table = 'area_nivel';
+    protected $table = 'area_nivel';   
     protected $primaryKey = 'id_area_nivel';
+    public $incrementing = true;
+    protected $keyType = 'int';
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -16,12 +21,12 @@ class Area_Nivel extends Model
         'id_evaluador'
     ];
 
-    public function area()
+    public function area(): BelongsTo
     {
         return $this->belongsTo(Area::class, 'id_area', 'id_area');
     }
 
-    public function nivel()
+    public function nivel(): BelongsTo
     {
         return $this->belongsTo(Nivel::class, 'id_nivel', 'id_nivel');
     }

@@ -1,99 +1,110 @@
 // src/App.tsx
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
-import Registro from './pages/Registro'
+import Registro from './pages/Registro';
 import './App.css';
 import Login from './pages/Login';
-import ProtectedRoute from './components/ProtectedRoute'; // <-- IMPORTANTE
-import Listas from './components/Lista Competidores/ListaCompetidores';
-// Componentes placeholder para las otras páginas
+import ProtectedRoute from './components/ProtectedRoute';
+import Listas from './components/ListaCompetidores/ListaCompetidores';
+import { useAuth } from './context/AuthContext';
+
+// --- Placeholder Pages ---
+// (Estos ya los tenías, los mantengo)
 const Inicio = () => (
   <div className="p-8 text-center">
     <h1 className="text-3xl font-bold text-gray-800 mb-4">Bienvenido al Sistema Oh! SanSi</h1>
     <p className="text-gray-600">Sistema de gestión para olimpiadas académicas</p>
   </div>
 );
+const Evaluacion = () => <div className="p-8"><h1 className="text-3xl">Evaluación</h1></div>;
+const Final = () => <div className="p-8"><h1 className="text-3xl">Final</h1></div>;
+const Reportes = () => <div className="p-8"><h1 className="text-3xl">Reportes</h1></div>;
+const Historial = () => <div className="p-8"><h1 className="text-3xl">Historial</h1></div>;
+// --- Fin Placeholders ---
 
-
-//const CargaMasiva = () => (
- // <div className="p-8">
-  //  <h1 className="text-3xl font-bold text-gray-800 mb-4">Carga Masiva</h1>
-  //  <p className="text-gray-600">Funcionalidad en desarrollo...</p>
-  //</div>
-//)
-
-/*const Responsables = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Gestión de Responsables (RF3)</h1>
-    <p className="text-gray-600">Funcionalidad en desarrollo...</p>
-  </div>
-
-)*/
-
-const Evaluacion = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Evaluación</h1>
-    <p className="text-gray-600">Funcionalidad en desarrollo...</p>
-  </div>
-);
-
-const Final = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Final</h1>
-    <p className="text-gray-600">Funcionalidad en desarrollo...</p>
-  </div>
-);
-
-/*const Listas = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Listas de Competidores (RF4)</h1>
-    <p className="text-gray-600">Funcionalidad en desarrollo...</p>
-  </div>
-);*/
-
-const Reportes = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Reportes</h1>
-    <p className="text-gray-600">Funcionalidad en desarrollo...</p>
-  </div>
-);
-
-const Historial = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Historial</h1>
-    <p className="text-gray-600">Funcionalidad en desarrollo...</p>
-  </div>
-);
-
-// Componente para rutas protegidas
 
 function App() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Prevenir renderizado hasta que sepamos si está autenticado
+  if (isLoading) {
+    return <div>Cargando aplicación...</div>; // O un spinner
+  }
+
   return (
     <Routes>
-      {/* RUTAS PÚBLICAS */}
-      {/* El login no usa el Layout principal para no mostrar la barra de navegación */}
-      <Route path="/login" element={<Layout showNavbar={true}><Login /></Layout>} />
+      {/* --- RUTAS PÚBLICAS --- */}
+      {/* El Login NO usa el Layout principal */}
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <Login />} />
 
-      {/* RUTAS PROTEGIDAS */}
-      {/* Todas las rutas dentro de 'ProtectedRoute' requerirán que el usuario esté logueado */}
-      <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<Layout showNavbar={true}><Login /></Layout>}/>
-        <Route path="/inicio" element={<Layout showNavbar={true}><Inicio /></Layout>} />
-        <Route path="/registro" element={<Layout showNavbar={true}><Registro /></Layout>} />
-        <Route path="/listas" element={<Layout showNavbar={true}><Listas /></Layout>} />
-        <Route path="/evaluacion" element={<Layout showNavbar={true}><Evaluacion /></Layout>} />
-        <Route path="/final" element={<Layout showNavbar={true}><Final /></Layout>} />
-        <Route path="/reportes" element={<Layout showNavbar={true}><Reportes /></Layout>} />
-        <Route path="/historial" element={<Layout showNavbar={true}><Historial /></Layout>} />
-
-        {/* La ruta raíz ahora redirige a /inicio si estás logueado */}
-        <Route path="/" element={<Navigate to="/inicio" replace />} />
+      {/* --- RUTAS DE ADMINISTRADOR --- */}
+      <Route element={<ProtectedRoute allowedRoles={['administrador']} />}>
+        {/* Usamos 'Layout' para envolver todas las páginas de este rol */}
+        <Route path="/administrador" element={<Layout />}>
+          <Route path="inicio" element={<Inicio />} />
+          <Route path="registro" element={<Registro />} />
+          <Route path="evaluacion" element={<Evaluacion />} />
+          <Route path="listas" element={<Listas />} />
+          <Route path="final" element={<Final />} />
+          <Route path="reportes" element={<Reportes />} />
+          <Route path="historial" element={<Historial />} />
+          {/* Redirigir de /administrador a /administrador/inicio */}
+          <Route index element={<Navigate to="inicio" replace />} />
+        </Route>
       </Route>
 
-      {/* Ruta por defecto si ninguna coincide - redirige al login */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* --- RUTAS DE RESPONSABLE --- */}
+      <Route element={<ProtectedRoute allowedRoles={['responsable']} />}>
+        <Route path="/responsable" element={<Layout />}>
+          <Route path="inicio" element={<Inicio />} />
+          <Route path="listas" element={<Listas />} />
+          <Route path="reportes" element={<Reportes />} />
+          <Route index element={<Navigate to="inicio" replace />} />
+        </Route>
+      </Route>
+
+      {/* --- RUTAS DE EVALUADOR --- */}
+      <Route element={<ProtectedRoute allowedRoles={['evaluador']} />}>
+        <Route path="/evaluador" element={<Layout />}>
+          <Route path="inicio" element={<Inicio />} />
+          <Route path="evaluacion" element={<Evaluacion />} />
+          <Route path="reportes" element={<Reportes />} />
+          <Route index element={<Navigate to="inicio" replace />} />
+        </Route>
+      </Route>
+
+      {/* --- REDIRECCIÓN PRINCIPAL Y RUTAS NO ENCONTRADAS --- */}
+      
+      {/* Si estás en la ruta raíz '/', redirige al dashboard correcto o a login */}
+      <Route 
+        path="/" 
+        element={<RootRedirect />} 
+      />
+
+      {/* Cualquier otra ruta no definida */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
+
+// Componente auxiliar para manejar la redirección raíz
+const RootRedirect = () => {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  switch (user.rol.nombre_rol) {
+    case 'administrador':
+      return <Navigate to="/administrador/inicio" replace />;
+    case 'responsable':
+      return <Navigate to="/responsable/inicio" replace />;
+    case 'evaluador':
+      return <Navigate to="/evaluador/inicio" replace />;
+    default:
+      return <Navigate to="/login" replace />;
+  }
+};
 
 export default App;

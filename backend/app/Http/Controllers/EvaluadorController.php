@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Evaluador;
-use App\Models\Usuario;
+use App\Models\User; // <-- Modelo 'User' importado correctamente
 use App\Models\Area;
 use App\Models\Nivel;
 use Illuminate\Http\Request;
@@ -13,10 +13,12 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
-class Evaluador_Controller extends Controller
+// CORRECCIÓN: Nombre de clase cambiado a PascalCase
+class EvaluadorController extends Controller
 {
     public function index()
     {
+        // ... (el resto del método 'index' está bien)
         $evaluadores = Evaluador::with(['usuario', 'area', 'nivel'])->get();
 
         $data = $evaluadores->map(function ($evaluador) {
@@ -44,6 +46,7 @@ class Evaluador_Controller extends Controller
         DB::beginTransaction(); // Iniciar transacción
 
         try {
+            // ... (validación está bien)
             $data = $request->only([
                 'nombre', 'apellidos', 'ci', 'email', 'telefono', 'area', 'nivel', 'disponible'
             ]);
@@ -66,20 +69,23 @@ class Evaluador_Controller extends Controller
                 ], 422);
             }
 
-            // Buscar el área (case-insensitive)
+            // ... (búsqueda de área y nivel está bien)
             $area = Area::whereRaw('LOWER(nombre) = ?', [strtolower($data['area'])])->first();
             if (!$area) {
                 return response()->json(['message' => 'Área no encontrada'], 422);
             }
-
-            // Buscar el nivel si se proporcionó
             $nivel = isset($data['nivel'])
                 ? Nivel::whereRaw('LOWER(nombre) = ?', [strtolower($data['nivel'])])->first()
                 : null;
 
+
             // Crear usuario
             $plainPassword = $this->generatePassword();
-            $usuario = Usuario::create([
+            
+            // !! CORRECCIÓN CRÍTICA !!
+            // Se debe usar 'User::create' (del 'use App\Models\User')
+            // en lugar de 'Usuario::create' (que ya no existe).
+            $usuario = User::create([
                 'nombre' => $data['nombre'],
                 'apellidos' => $data['apellidos'],
                 'ci' => $data['ci'],
@@ -97,7 +103,7 @@ class Evaluador_Controller extends Controller
                 'disponible' => $data['disponible'] ?? true,
             ]);
 
-            // Enviar correo
+            // ... (el envío de correo y el resto de la lógica están bien)
             try {
                 Mail::raw(
                     "Hola {$usuario->nombre},\n\n".
@@ -139,6 +145,7 @@ class Evaluador_Controller extends Controller
 
     public function update(Request $request, $id_usuario)
     {
+        // ... (el resto del método 'update' está bien)
         try {
             
             $evaluador = Evaluador::with('usuario')->where('id_usuario', $id_usuario)->first();
@@ -198,6 +205,7 @@ class Evaluador_Controller extends Controller
 
     public function destroy($id_usuario)
     {
+        // ... (el resto del método 'destroy' está bien)
         DB::beginTransaction();
         try {
             $evaluador = Evaluador::with('usuario')->where('id_usuario', $id_usuario)->first();

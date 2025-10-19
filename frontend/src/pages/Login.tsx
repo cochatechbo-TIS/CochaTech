@@ -1,9 +1,9 @@
 // src/pages/Login.tsx
 import './login.css';
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
-import authService from '../services/authService'; // <-- IMPORTANTE
+import { useAuth } from '../context/AuthContext'; // <-- AÑADIDO: Usa el hook
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -11,7 +11,13 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth(); // <-- AÑADIDO: Obtiene la función login del contexto
+
+  // De dónde venía el usuario antes de ser redirigido a login?
+  const from = location.state?.from?.pathname || null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,31 +25,35 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      // Llama al servicio de autenticación
-      const data = await authService.login(email, password);
+      // Llama a la función login del contexto
+      const user = await login(email, password);
       
-      // Lee el rol desde la respuesta de la API
-      const userRole = data.user.rol.nombre_rol; // O como se llame el campo en tu DB
+      // Si el usuario venía de una ruta específica, intenta volver allí
+      if (from) {
+        navigate(from, { replace: true });
+        return;
+      }
 
-      // Redirige según el rol
+      // Si no, redirige según el rol a las NUEVAS rutas
+      const userRole = user.rol.nombre_rol;
+
       switch (userRole) {
         case 'administrador':
-          navigate('/inicio'); // Dashboard del admin
+          navigate('/administrador/inicio', { replace: true });
           break;
         case 'evaluador':
-          navigate('/evaluadores'); // Dashboard del evaluador
+          navigate('/evaluador/inicio', { replace: true });
           break;
         case 'responsable':
-          navigate('/responsables'); // Dashboard del responsable
+          navigate('/responsable/inicio', { replace: true });
           break;
         default:
-          navigate('/inicio'); // Ruta por defecto si el rol no se reconoce
+          navigate('/', { replace: true }); // Deja que RootRedirect decida
       }
 
     } catch (err: any) {
-      // Maneja errores (ej: 401 Credenciales incorrectas)
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
+      if (err.response && err.response.data && (err.response.data.message || err.response.data.email)) {
+        setError(err.response.data.message || err.response.data.email[0]);
       } else {
         setError('Ocurrió un error. Por favor, inténtelo de nuevo.');
       }
@@ -55,17 +65,16 @@ const Login: React.FC = () => {
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
   return (
+    // ... (El JSX de tu formulario de Login está perfecto, no necesita cambios)
     <div className="min-h-screen bg-white flex flex-col">
-      
       <div className="flex flex-1 items-center justify-center px-4">
-        <div className="w-full max-w-md bg-white rounded-lg shadow-md"> {/* Mantengo rounded-lg y shadow-md aquí */}
-          <div className="bg-blue-600 text-white p-4 rounded-t-lg"> {/* Nuevo div para cuadro azul del título */}
+        <div className="w-full max-w-md bg-white rounded-lg shadow-md">
+          <div className="bg-blue-600 text-white p-4 rounded-t-lg">
             <h2 className="text-2xl font-bold text-center mb-2">Oh! SanSi</h2>
-            <p className="text-center mb-0">Iniciar sesión (RFS)</p> {/* Removí mb-8 para ajustar espacio */}
+            <p className="text-center mb-0">Iniciar sesión (RFS)</p>
           </div>
-          <div className="p-8"> {/* Contenido del formulario en padding separado */}
+          <div className="p-8">
             {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label className="block text-gray-700 mb-2 text-sm font-medium">Correo electrónico</label>
@@ -83,7 +92,6 @@ const Login: React.FC = () => {
                   />
                 </div>
               </div>
-
               <div className="mb-6">
                 <label className="block text-gray-700 mb-2 text-sm font-medium">Contraseña</label>
                 <div className="relative">
@@ -107,7 +115,6 @@ const Login: React.FC = () => {
                   </button>
                 </div>
               </div>
-
               <button
                 type="submit"
                 disabled={loading}
@@ -115,9 +122,8 @@ const Login: React.FC = () => {
               >
                 {loading ? 'Cargando...' : 'Iniciar sesión →'}
               </button>
-
               <p className="text-center text-purple-600 mt-4 text-sm">
-                <Link to="/forgot-password" className="hover:underline">¿Olvidó su contraseña?</Link>
+                <Link to="/forgot-password">¿Olvidó su contraseña?</Link>
               </p>
             </form>
           </div>

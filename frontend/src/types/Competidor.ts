@@ -1,4 +1,4 @@
-// src/interfaces/Competidor.ts
+// src/types/Competidor.ts
 export interface Competidor {
   id_olimpista: number; // <--- AÑADIDO: Clave primaria que el backend espera
   ci: string; 

@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Gestion_Olimpista;
+// CORRECCIÓN: Cambiado de Gestion_Olimpista a Olimpista
+use App\Models\Olimpista;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
-class Gestion_Olimpista_Controller extends Controller
+class GestionOlimpistaController extends Controller
 {
     // Recuperar todos los olimpistas con relaciones
     public function index()
     {
-        $olimpistas = Gestion_Olimpista::with(['departamento', 'area', 'nivel'])->get();
+        // CORRECCIÓN: Cambiado de Gestion_Olimpista a Olimpista
+        $olimpistas = Olimpista::with(['departamento', 'area', 'nivel'])->get();
 
         // Transformar cada olimpista para enviar solo los nombres de nivel y departamento
         $olimpistasTransformados = $olimpistas->map(function($olimpista) {
@@ -22,7 +24,7 @@ class Gestion_Olimpista_Controller extends Controller
                 'nombre' => $olimpista->nombre,
                 'apellidos' => $olimpista->apellidos,
                 'institucion' => $olimpista->institucion,
-                'area' => $olimpista->area->nombre ?? null,        // solo nombre del area
+                'area' => $olimpista->area->nombre ?? null,      // solo nombre del area
                 'nivel' => $olimpista->nivel->nombre ?? null,      // solo nombre del nivel
                 'grado' => $olimpista->grado,
                 'contacto_tutor' => $olimpista->contacto_tutor,
@@ -43,7 +45,8 @@ class Gestion_Olimpista_Controller extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $olimpista = Gestion_Olimpista::find($id);
+            // CORRECCIÓN: Cambiado de Gestion_Olimpista a Olimpista
+            $olimpista = Olimpista::find($id);
 
             if (!$olimpista) {
                 return response()->json(['message' => 'Olimpista no encontrado'], 404);
@@ -94,7 +97,8 @@ class Gestion_Olimpista_Controller extends Controller
     // Eliminar un olimpista
     public function destroy($id)
     {
-        $olimpista = Gestion_Olimpista::find($id);
+        // CORRECCIÓN: Cambiado de Gestion_Olimpista a Olimpista
+        $olimpista = Olimpista::find($id);
 
         if (!$olimpista) {
             return response()->json(['message' => 'Olimpista no encontrado'], 404);

@@ -14,42 +14,47 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * AÑADIDO: Indica a Laravel que este modelo debe usar la tabla 'usuario'.
+     * La tabla de base de datos asociada con el modelo.
      */
     protected $table = 'usuario';
 
     /**
-     * AÑADIDO: Especifica el nombre de tu clave primaria personalizada.
+     * La clave primaria asociada con la tabla.
      */
     protected $primaryKey = 'id_usuario';
 
     /**
-     * AÑADIDO: Mapea la columna 'created_at' de Laravel a tu columna 'fecha_registro'.
+     * El nombre de la columna "created_at".
      */
     const CREATED_AT = 'fecha_registro';
 
     /**
-     * AÑADIDO: Mapea la columna 'updated_at' de Laravel a tu columna 'ultimo_acceso'.
+     * El nombre de la columna "updated_at".
      */
     const UPDATED_AT = 'ultimo_acceso';
 
     /**
-     * CORREGIDO: Los atributos que se pueden asignar masivamente.
-     * Deben coincidir con los nombres de las columnas de tu tabla.
+     * Los atributos que se pueden asignar masivamente.
+     *
      * @var array<int, string>
      */
     protected $fillable = [
         'nombre',
         'apellidos',
-        'email', // Asumiendo que renombraste 'correo' a 'email'
+        'ci',
+        'email',
         'password',
         'telefono',
-        'activo',
         'id_rol',
+        'activo',
+        // 'fecha_registro' y 'ultimo_acceso' usualmente no van aquí
+        // si son manejados automáticamente por Eloquent (timestamps).
+        // Los dejamos fuera de $fillable a menos que los asignes manualmente.
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * Los atributos que deben ocultarse para la serialización.
+     *
      * @var array<int, string>
      */
     protected $hidden = [
@@ -58,8 +63,8 @@ class User extends Authenticatable
     ];
 
     /**
-     * CORREGIDO: Get the attributes that should be cast.
-     * Se eliminó 'email_verified_at' porque no existe en tu tabla.
+     * Obtiene los atributos que deben ser casteados.
+     *
      * @return array<string, string>
      */
     protected function casts(): array
@@ -70,15 +75,12 @@ class User extends Authenticatable
     }
 
     /**
-     * CORREGIDO: Define la relación de que un Usuario "pertenece a" un Rol.
-     * Se especifican las claves foráneas y locales personalizadas.
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * Define la relación de que un Usuario "pertenece a" un Rol.
      */
     public function rol(): BelongsTo
     {
-        // Le decimos a Laravel:
-        // La llave foránea en esta tabla ('usuario') es 'id_rol'.
-        // Esa llave se conecta con la columna 'id_rol' en la tabla 'rol'.
+        // Llave foránea en 'usuario' es 'id_rol'
+        // Llave primaria en 'rol' es 'id_rol'
         return $this->belongsTo(Rol::class, 'id_rol', 'id_rol');
     }
 }
