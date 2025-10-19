@@ -1,7 +1,7 @@
 // src/components/competidores/CompetitorTable.tsx
 import { useState } from 'react';
 import { PencilIcon, TrashIcon } from 'lucide-react';
-import type { Competidor } from '../../interfaces/Competidor';
+import type { Competidor } from '../../types/Competidor';
 import { EditCompetitorModal } from './EditCompetitorModal'; // Importar el modal
 
 interface CompetitorTableProps {

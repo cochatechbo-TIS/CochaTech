@@ -11,14 +11,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Esta sección debe llamar ÚNICAMENTE a los seeders que nosotros definimos.
-        // Asegúrate de que no haya ninguna otra línea como User::factory()->create();
         $this->call([
             DepartamentoSeeder::class,
             RolSeeder::class,
+            AreaSeeder::class,     // <-- Debe ir antes de los usuarios
+            NivelSeeder::class,    // <-- Debe ir antes de los usuarios
+            
+            // Usuarios
             AdminUserSeeder::class,
-            AreaSeeder::class,
-            NivelSeeder::class,
+            ResponsableUserSeeder::class, // <-- AÑADIDO
+            EvaluadorUserSeeder::class,   // <-- AÑADIDO
         ]);
     }
 }

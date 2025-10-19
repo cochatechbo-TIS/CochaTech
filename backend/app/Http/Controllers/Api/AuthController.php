@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Usuario;
+use App\Models\User; // <-- Esto es correcto
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -23,7 +23,8 @@ class AuthController extends Controller
         ]);
 
         // 2. Buscar al usuario por su email
-        $user = Usuario::where('email', $request->email)->first();
+        // ¡¡CORRECCIÓN AQUÍ!! Usamos 'User' en lugar de 'Usuario'
+        $user = User::where('email', $request->email)->first();
 
         // 3. Verificar si el usuario existe y la contraseña es correcta
         if (! $user || ! Hash::check($request->password, $user->password)) {

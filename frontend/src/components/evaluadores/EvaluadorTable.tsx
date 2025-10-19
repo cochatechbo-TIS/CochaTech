@@ -1,84 +1,103 @@
-// src/components/responsables/ResponsableTable.tsx
+// src/components/evaluadores/EvaluadorTable.tsx
 import { useState } from "react";
-import { PencilIcon, TrashIcon } from "lucide-react";
-import type { Usuario } from "../../interfaces/Usuario";
+import { PencilIcon, TrashIcon, CheckCircleIcon, XCircleIcon } from "lucide-react";
+// CORRECCIÓN: Importa el tipo específico 'Evaluador'
+import type { Evaluador } from "../../types/User.types";
 import { EditEvaluadorModal } from "./EditEvaluadorModal";
 
-interface UsuarioTableProps {
-  usuario: Usuario[];
-  onEdit: (usuario: Usuario) => void;
-  onDelete: (id: number) => void;
+interface EvaluadorTableProps {
+  // CORRECCIÓN: Usa el tipo 'Evaluador' y renombra prop
+  usuarios: Evaluador[]; // Prop debería llamarse 'evaluadores'
+  onEdit: (evaluador: Evaluador) => void;
+  onDelete: (id_usuario: number) => void;
 }
 
 export function EvaluadorTable({
-  usuario,
+  usuarios: evaluadores, // Destructura y renombra
   onEdit,
   onDelete,
-}: UsuarioTableProps) {
+}: EvaluadorTableProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [currentUsuario, setCurrentUsuario] =
-    useState<Usuario | null>(null);
+  // CORRECCIÓN: Usa el tipo 'Evaluador'
+  const [currentEvaluador, setCurrentEvaluador] =
+    useState<Evaluador | null>(null);
 
-  const handleEditClick = (usuario: Usuario) => {
-    setCurrentUsuario(usuario);
+  // CORRECCIÓN: Recibe 'Evaluador'
+  const handleEditClick = (evaluador: Evaluador) => {
+    setCurrentEvaluador(evaluador);
     setIsEditModalOpen(true);
   };
 
-  const handleEditSave = (editedUsuario: Usuario) => {
-    onEdit(editedUsuario);
+  // CORRECCIÓN: Recibe 'Evaluador'
+  const handleEditSave = (editedEvaluador: Evaluador) => {
+    onEdit(editedEvaluador);
     setIsEditModalOpen(false);
-    setCurrentUsuario(null);
+    setCurrentEvaluador(null);
   };
 
   const handleEditCancel = () => {
     setIsEditModalOpen(false);
-    setCurrentUsuario(null);
+    setCurrentEvaluador(null);
   };
 
-  const handleDelete = (id: number) => {
-    onDelete(id);
+  const handleDelete = (id_usuario: number) => {
+    onDelete(id_usuario);
   };
 
   return (
     <>
-      <div className="competitor-table-container">
-        <table className="competitor-table">
-          <thead className="competitor-table-header">
+      <div className="table-container">
+        <table className="data-table">
+          <thead className="table-header">
             <tr>
-              <th className="competitor-table-th">NOMBRE</th>
-              <th className="competitor-table-th">APELLIDOS</th>
-              <th className="competitor-table-th">CI</th>
-              <th className="competitor-table-th">EMAIL</th>
-              <th className="competitor-table-th">ÁREA</th>
-              <th className="competitor-table-th">ACCIONES</th>
+              <th className="table-th">NOMBRE</th>
+              <th className="table-th">APELLIDOS</th>
+              <th className="table-th">CI</th>
+              <th className="table-th">EMAIL</th>
+              <th className="table-th">ÁREA</th>
+              {/* AÑADIDO: Columnas de Evaluador */}
+              <th className="table-th">NIVEL</th>
+              <th className="table-th">DISPONIBLE</th>
+              <th className="table-th">ACCIONES</th>
             </tr>
           </thead>
 
-          <tbody className="competitor-table-body">
-            {usuario.map((usuario) => (
-              <tr key={usuario.id_usuario} className="competitor-table-row">
-                <td className="competitor-table-td competitor-table-td-name">
-                  {usuario.nombre}
+          <tbody className="table-body">
+            {/* CORRECCIÓN: Itera sobre 'evaluadores' */}
+            {evaluadores.map((evaluador) => (
+              // CORRECCIÓN: Usa 'evaluador.id_usuario'
+              <tr key={evaluador.id_usuario} className="table-row">
+                <td className="table-td table-td-name">
+                  {evaluador.nombre}
                 </td>
-                <td className="competitor-table-td">
-                  {usuario.apellidos}
+                <td className="table-td">{evaluador.apellidos}</td>
+                <td className="table-td">{evaluador.ci}</td>
+                <td className="table-td">{evaluador.email}</td>
+                <td className="table-td">{evaluador.area}</td>
+                {/* AÑADIDO: Datos de Evaluador */}
+                <td className="table-td">{evaluador.nivel || 'N/A'}</td>
+                <td className="table-td text-center"> {/* Centrado para ícono */}
+                  {evaluador.disponible ? (
+                    <CheckCircleIcon size={18} className="text-green-500 inline-block" title="Sí" />
+                  ) : (
+                    <XCircleIcon size={18} className="text-red-500 inline-block" title="No" />
+                  )}
                 </td>
-                <td className="competitor-table-td">{usuario.ci}</td>
-                <td className="competitor-table-td">{usuario.email}</td>
-                <td className="competitor-table-td">{usuario.area}</td>
-                <td className="competitor-table-td">
-                  <div className="competitor-table-actions">
+                <td className="table-td">
+                  <div className="table-actions">
                     <button
-                      className="competitor-table-btn competitor-table-btn-edit"
+                      className="table-btn table-btn-edit"
                       title="Editar"
-                      onClick={() => handleEditClick(usuario)}
+                      // CORRECCIÓN: Pasa 'evaluador'
+                      onClick={() => handleEditClick(evaluador)}
                     >
                       <PencilIcon size={16} />
                     </button>
                     <button
-                      className="competitor-table-btn competitor-table-btn-delete"
+                      className="table-btn table-btn-delete"
                       title="Eliminar"
-                      onClick={() => handleDelete(usuario.id_usuario)}
+                      // CORRECCIÓN: Pasa 'evaluador.id_usuario'
+                      onClick={() => handleDelete(evaluador.id_usuario)}
                     >
                       <TrashIcon size={16} />
                     </button>
@@ -90,9 +109,12 @@ export function EvaluadorTable({
         </table>
       </div>
 
-      {currentUsuario && (
+      {/* Renderiza modal si hay evaluador actual */}
+      {/* CORRECCIÓN: Pasa 'currentEvaluador' */}
+      {currentEvaluador && (
         <EditEvaluadorModal
-          usuario={currentUsuario}
+          // CORRECCIÓN: Prop renombrada a 'evaluador'
+          evaluador={currentEvaluador}
           onSave={handleEditSave}
           onCancel={handleEditCancel}
           isOpen={isEditModalOpen}
