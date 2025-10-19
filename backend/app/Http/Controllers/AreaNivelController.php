@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-// CORRECCIÓN: Actualizados ambos modelos
 use App\Models\Olimpista;
 use App\Models\AreaNivel;
-AreaNivelController.php
+use App\Models\ResponsableArea;
+use App\Models\Area;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -14,8 +14,6 @@ class AreaNivelController extends Controller
     public function generarYListar()
     {
 
-        // Obtener combinaciones únicas de area y nivel desde olimpistas
-        // CORRECCIÓN: Cambiado de Importar_Olimpista a Olimpista
         $combinaciones = Olimpista::select('id_area', 'id_nivel')
             ->distinct()
             ->get();
@@ -73,7 +71,7 @@ class AreaNivelController extends Controller
             ->keyBy('id_nivel');
 
         // 3. Filtrar niveles con olimpistas
-        $registros = \App\Models\Area_Nivel::with(['nivel', 'evaluador'])
+        $registros = \App\Models\AreaNivel::with(['nivel', 'evaluador'])
             ->where('id_area', $id_area) // aquí también el ID
             ->whereIn('id_nivel', $conteos->keys())
             ->get()

@@ -35,11 +35,11 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     // Grupo para ADMIN 
     Route::middleware('role:administrador')->group(function () {
-       Route::get('/area/{nombre_area}/niveles', [Area_Nivel_Controller::class, 'listarPorArea']);       
+       Route::get('/area/{nombre_area}/niveles', [AreaNivelController::class, 'listarPorArea']);       
     });
     // Grupo Responsable 
     Route::middleware('role:responsable')->group(function () {
-       Route::get('/area-nivel/auth', [Area_Nivel_Controller::class, 'listarPorAreaAuth']);
+       Route::get('/area-nivel/auth', [AreaNivelController::class, 'listarPorAreaAuth']);
       
     });
 });
