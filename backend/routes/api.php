@@ -3,14 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
-
-// CORRECCIÓN: Imports actualizados a PascalCase
+// CORRECCIÓN: Imports actualizados a PascalCase nos se que es esto
 use App\Http\Controllers\GestionOlimpistaController;
 use App\Http\Controllers\ImportarOlimpistaController;
 use App\Http\Controllers\ResponsableAreaController;
 use App\Http\Controllers\EvaluadorController;
 use App\Http\Controllers\AreaNivelController;
-
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -35,11 +33,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/evaluador/{id}', [EvaluadorController::class, 'update']);
         Route::delete('/evaluador/{id}', [EvaluadorController::class, 'destroy']);
     });
-
-    // Grupo para ADMIN y RESPONSALE
-    Route::middleware('role:administrador,responsable')->group(function () {
-        
-        Route::post('/area-nivel', [AreaNivelController::class, 'generarYListar']);
+    // Grupo para ADMIN 
+    Route::middleware('role:administrador')->group(function () {
+       Route::get('/area/{nombre_area}/niveles', [Area_Nivel_Controller::class, 'listarPorArea']);       
+    });
+    // Grupo Responsable 
+    Route::middleware('role:responsable')->group(function () {
+       Route::get('/area-nivel/auth', [Area_Nivel_Controller::class, 'listarPorAreaAuth']);
+      
     });
 });
 

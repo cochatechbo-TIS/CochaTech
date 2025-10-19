@@ -2,16 +2,10 @@
 
 namespace App\Http\Controllers;
 
-<<<<<<< HEAD:backend/app/Http/Controllers/Area_Nivel_Controller.php
-use App\Models\Importar_Olimpista;
-use App\Models\Area_Nivel;
-use App\Models\Responsable_Area;
-use App\Models\Area;
-=======
 // CORRECCIÓN: Actualizados ambos modelos
 use App\Models\Olimpista;
 use App\Models\AreaNivel;
->>>>>>> eede6f8adc5183f96e7510158aef59ad1b7e0197:backend/app/Http/Controllers/AreaNivelController.php
+AreaNivelController.php
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -19,16 +13,12 @@ class AreaNivelController extends Controller
 {
     public function generarYListar()
     {
-<<<<<<< HEAD:backend/app/Http/Controllers/Area_Nivel_Controller.php
-        // Genera las combinaciones area-nivel desde olimpistas
-        $combinaciones = Importar_Olimpista::select('id_area', 'id_nivel')->distinct()->get();
-=======
+
         // Obtener combinaciones únicas de area y nivel desde olimpistas
         // CORRECCIÓN: Cambiado de Importar_Olimpista a Olimpista
         $combinaciones = Olimpista::select('id_area', 'id_nivel')
             ->distinct()
             ->get();
->>>>>>> eede6f8adc5183f96e7510158aef59ad1b7e0197:backend/app/Http/Controllers/AreaNivelController.php
 
         foreach ($combinaciones as $c) {
             // CORRECCIÓN: Cambiado de Area_Nivel a AreaNivel
@@ -38,18 +28,12 @@ class AreaNivelController extends Controller
             ]);
         }
 
-<<<<<<< HEAD:backend/app/Http/Controllers/Area_Nivel_Controller.php
-        $lista = Area_Nivel::with(['area', 'nivel'])->get()->map(function ($item) {
-            return [
-                'id' => $item->id_area_nivel,
-=======
         // Obtener la lista final con nombres de area y nivel
         // CORRECCIÓN: Cambiado de Area_Nivel a AreaNivel
         $lista = AreaNivel::with(['area', 'nivel'])->get()->map(function ($item) {
             return [
                 // CORRECCIÓN: 'id' no existe, usamos la clave primaria real
                 'id' => $item->id_area_nivel, 
->>>>>>> eede6f8adc5183f96e7510158aef59ad1b7e0197:backend/app/Http/Controllers/AreaNivelController.php
                 'id_area' => $item->id_area,
                 'nombre_area' => $item->area->nombre,
                 'id_nivel' => $item->id_nivel,
@@ -82,7 +66,7 @@ class AreaNivelController extends Controller
         $id_area = $area->id_area;
 
         // 2. Obtener cantidad de olimpistas agrupados por nivel
-        $conteos = \App\Models\Importar_Olimpista::select('id_nivel', \DB::raw('COUNT(*) as total'))
+        $conteos = \App\Models\Olimpista::select('id_nivel', \DB::raw('COUNT(*) as total'))
             ->where('id_area', $id_area) // aqu va el ID, NO el nombre
             ->groupBy('id_nivel')
             ->get()
@@ -114,7 +98,7 @@ class AreaNivelController extends Controller
         $user = auth()->user();
 
         // Buscar si es responsable de un área
-        $responsable = Responsable_Area::where('id_usuario', $user->id_usuario)->first();
+        $responsable = ResponsableArea::where('id_usuario', $user->id_usuario)->first();
 
         if (!$responsable) {
             return response()->json([
