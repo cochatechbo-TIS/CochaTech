@@ -36,4 +36,10 @@ class Evaluador extends Model
     {
         return $this->belongsTo(Nivel::class, 'id_nivel', 'id_nivel');
     }
+
+    public function getNombreCompletoAttribute()
+    {
+        return "{$this->nombre} {$this->apellidos}";
+    }
+
 }
