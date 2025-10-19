@@ -47,4 +47,9 @@ class Usuario extends Authenticatable
     {
         return $this->belongsTo(Rol::class, 'id_rol', 'id_rol');
     }
+    public function responsable()
+    {
+        return $this->hasOne(Responsable_Area::class, 'id_usuario', 'id_usuario');
+    }
+
 }

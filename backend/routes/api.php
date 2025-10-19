@@ -8,13 +8,18 @@ use App\Http\Controllers\Importar_Olimpista_Controller;
 use App\Http\Controllers\Responsable_Area_Controller;
 use App\Http\Controllers\Evaluador_Controller;
 use App\Http\Controllers\Area_Nivel_Controller;
+use App\Models\Importar_Olimpista;
+use App\Models\Area_Nivel;
+use App\Models\Responsable_Area;
+use App\Models\Area;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
-
     // Grupo solo para ADMIN
     Route::middleware('role:administrador')->group(function () {
         Route::get('/olimpistas', [Gestion_Olimpista_Controller::class, 'index']);
@@ -34,9 +39,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
     });
 
-    // Grupo para ADMIN y RESPONSALE
-    Route::middleware('role:administrador,responsable')->group(function () {
+    // Grupo para ADMIN 
+    Route::middleware('role:administrador')->group(function () {
+       Route::get('/area/{nombre_area}/niveles', [Area_Nivel_Controller::class, 'listarPorArea']);
        
-        Route::post('/area-nivel', [Area_Nivel_Controller::class, 'generarYListar']);
     });
+    // Grupo Responsable 
+    Route::middleware('role:responsable')->group(function () {
+       Route::get('/area-nivel/auth', [Area_Nivel_Controller::class, 'listarPorAreaAuth']);
+      
+    });
+
 });
+
+
