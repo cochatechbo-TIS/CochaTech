@@ -279,7 +279,7 @@ const GestionResponsables: React.FC = () => {
 
       {/* Tabla de Responsables */}
       <ResponsableTable
-        usuario={responsablesFiltrados} // Pasar la lista filtrada
+        usuarios={responsablesFiltrados} // Pasar la lista filtrada
         onEdit={handleEditResponsable}
         onDelete={handleDeleteResponsable} // Pasar la función directamente
       />

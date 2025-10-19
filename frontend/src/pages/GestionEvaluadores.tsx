@@ -299,7 +299,7 @@ const GestionEvaluadores: React.FC = () => {
 
       {/* Tabla de Evaluadores */}
       <EvaluadorTable
-        usuario={evaluadoresFiltrados} // Pasar la lista filtrada
+        usuarios={evaluadoresFiltrados} // Pasar la lista filtrada
         onEdit={handleEditEvaluador}
         onDelete={handleDeleteEvaluador} // Pasar la función directamente
       />
