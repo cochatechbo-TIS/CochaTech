@@ -1,84 +1,95 @@
-// src/components/responsables/ResponsableTable.tsx
+// src/components/evaluadores/EvaluadorTable.tsx
 import { useState } from "react";
 import { PencilIcon, TrashIcon } from "lucide-react";
-import type { Usuario } from "../../interfaces/Usuario";
+import type { Evaluador } from "../../types/User.types";
 import { EditEvaluadorModal } from "./EditEvaluadorModal";
-
-interface UsuarioTableProps {
-  usuario: Usuario[];
-  onEdit: (usuario: Usuario) => void;
-  onDelete: (id: number) => void;
+type EvaluadorCreationData = Omit<Evaluador, 'id_usuario' | 'id_rol'>;
+interface EvaluadorTableProps {
+  usuarios: Evaluador[];
+  onEdit: (evaluador: Evaluador) => void;
+  onDelete: (id_usuario: number) => void;
 }
 
 export function EvaluadorTable({
-  usuario,
+  usuarios: evaluadores,
   onEdit,
   onDelete,
-}: UsuarioTableProps) {
+}: EvaluadorTableProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [currentUsuario, setCurrentUsuario] =
-    useState<Usuario | null>(null);
+  const [currentEvaluador, setCurrentEvaluador] =
+    useState<Evaluador | null>(null);
 
-  const handleEditClick = (usuario: Usuario) => {
-    setCurrentUsuario(usuario);
+  const handleEditClick = (evaluador: Evaluador) => {
+    setCurrentEvaluador(evaluador);
     setIsEditModalOpen(true);
   };
 
-  const handleEditSave = (editedUsuario: Usuario) => {
-    onEdit(editedUsuario);
-    setIsEditModalOpen(false);
-    setCurrentUsuario(null);
+  const handleEditSave = (data: Evaluador | EvaluadorCreationData) => {
+    if ('id_usuario' in data) {
+      onEdit(data); 
+     } else {
+      // Esto solo sucedería si intentáramos guardar un objeto de creación en modo edición, lo cual es seguro ignorar aquí.
+      console.warn("Error de tipo: Se intentó pasar datos parciales a la edición.");
+      return;
+      }
+     setIsEditModalOpen(false);
+     setCurrentEvaluador(null);
+
   };
 
   const handleEditCancel = () => {
     setIsEditModalOpen(false);
-    setCurrentUsuario(null);
+    setCurrentEvaluador(null);
   };
 
-  const handleDelete = (id: number) => {
-    onDelete(id);
+  const handleDelete = (id_usuario: number) => {
+    onDelete(id_usuario);
   };
 
   return (
     <>
-      <div className="competitor-table-container">
-        <table className="competitor-table">
-          <thead className="competitor-table-header">
-            <tr>
-              <th className="competitor-table-th">NOMBRE</th>
-              <th className="competitor-table-th">APELLIDOS</th>
-              <th className="competitor-table-th">CI</th>
-              <th className="competitor-table-th">EMAIL</th>
-              <th className="competitor-table-th">ÁREA</th>
-              <th className="competitor-table-th">ACCIONES</th>
+      <div className="table-container">
+        <table className="data-table">
+          <thead className="table-header">
+            {/* APLICADA CORRECCIÓN DE WHITESPACE (TR Y TH JUNTOS) */}
+            <tr><th className="table-th">NOMBRE</th>
+              <th className="table-th">APELLIDOS</th>
+              <th className="table-th">CI</th>
+              <th className="table-th">EMAIL</th>
+              <th className="table-th">ÁREA</th>
+              {/* <th className="table-th">NIVEL</th>      <-- ELIMINADO */}
+              {/* <th className="table-th">DISPONIBLE</th> <-- ELIMINADO */}
+              <th className="table-th">ACCIONES</th>
             </tr>
           </thead>
 
-          <tbody className="competitor-table-body">
-            {usuario.map((usuario) => (
-              <tr key={usuario.id_usuario} className="competitor-table-row">
-                <td className="competitor-table-td competitor-table-td-name">
-                  {usuario.nombre}
+          <tbody className="table-body">
+            {evaluadores.map((evaluador) => (
+              <tr key={evaluador.id_usuario} className="table-row">
+                <td className="table-td table-td-name">
+                  {evaluador.nombre}
                 </td>
-                <td className="competitor-table-td">
-                  {usuario.apellidos}
-                </td>
-                <td className="competitor-table-td">{usuario.ci}</td>
-                <td className="competitor-table-td">{usuario.email}</td>
-                <td className="competitor-table-td">{usuario.area}</td>
-                <td className="competitor-table-td">
-                  <div className="competitor-table-actions">
+                <td className="table-td">{evaluador.apellidos}</td>
+                <td className="table-td">{evaluador.ci}</td>
+                <td className="table-td">{evaluador.email}</td>
+                <td className="table-td">{evaluador.area}</td>
+                
+                {/* Columna Nivel ELIMINADA */}
+                {/* Columna Disponible ELIMINADA */}
+                
+                <td className="table-td">
+                  <div className="table-actions">
                     <button
-                      className="competitor-table-btn competitor-table-btn-edit"
+                      className="table-btn table-btn-edit"
                       title="Editar"
-                      onClick={() => handleEditClick(usuario)}
+                      onClick={() => handleEditClick(evaluador)}
                     >
                       <PencilIcon size={16} />
                     </button>
                     <button
-                      className="competitor-table-btn competitor-table-btn-delete"
+                      className="table-btn table-btn-delete"
                       title="Eliminar"
-                      onClick={() => handleDelete(usuario.id_usuario)}
+                      onClick={() => handleDelete(evaluador.id_usuario)}
                     >
                       <TrashIcon size={16} />
                     </button>
@@ -90,9 +101,9 @@ export function EvaluadorTable({
         </table>
       </div>
 
-      {currentUsuario && (
+      {currentEvaluador && (
         <EditEvaluadorModal
-          usuario={currentUsuario}
+          evaluador={currentEvaluador}
           onSave={handleEditSave}
           onCancel={handleEditCancel}
           isOpen={isEditModalOpen}

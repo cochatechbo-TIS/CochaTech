@@ -5,28 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Importar_Olimpista extends Model
+// CORRECCIÓN: Nombre de clase cambiado a PascalCase
+class AreaNivel extends Model
 {
-    protected $table = 'olimpista'; // coincidencia con la tabla en migración
-    protected $primaryKey = 'id_olimpista';
+    protected $table = 'area_nivel';   
+    protected $primaryKey = 'id_area_nivel';
     public $incrementing = true;
     protected $keyType = 'int';
-    public $timestamps = false; // usas created_at manualmente en la migración
+
+    public $timestamps = false;
 
     protected $fillable = [
-        'nombre',
-        'apellidos',
-        'ci',
-        'institucion',
         'id_area',
         'id_nivel',
-        'grado',
-        'contacto_tutor',
-        'nombre_tutor',
-        'id_departamento'
+        'id_evaluador'
     ];
 
-    // Relaciones
     public function area(): BelongsTo
     {
         return $this->belongsTo(Area::class, 'id_area', 'id_area');
@@ -35,5 +29,10 @@ class Importar_Olimpista extends Model
     public function nivel(): BelongsTo
     {
         return $this->belongsTo(Nivel::class, 'id_nivel', 'id_nivel');
+    }
+
+    public function evaluador()
+    {
+        return $this->belongsTo(Evaluador::class, 'id_evaluador', 'id_evaluador');
     }
 }

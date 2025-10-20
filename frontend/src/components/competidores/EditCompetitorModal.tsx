@@ -1,7 +1,7 @@
 // src/components/competidores/EditCompetitorModal.tsx
 import React, { useState } from 'react';
 import { XIcon } from 'lucide-react';
-import type { Competidor } from '../../interfaces/Competidor';
+import type { Competidor } from '../../types/Competidor';
 
 // Mover los mapeos fuera del componente (constantes fijas)
 const departamentosMap = {

@@ -1,15 +1,18 @@
 // src/pages/GestionCompetidores.tsx
 import React, { useState, useEffect, useCallback } from 'react';
+// CORRECCIÓN: Importa el api centralizado
+import api from '../services/api';
+// Mantenido SOLO para 'isAxiosError'
 import axios from 'axios';
-
 import { CompetitorTable } from '../components/competidores/CompetitorTable';
-import CargarCSV from '../components/carga masiva/CargarCSV';
-import type { Competidor } from '../interfaces/Competidor';
+import CargarCSV from '../components/CargaMasiva/CargarCSV';
+// Asegúrate de que la ruta sea correcta y el archivo exista
+import type { Competidor } from '../types/Competidor';
 
-// Mapa de departamentos
+// Mapa de departamentos (inverso para mostrar nombres)
 const departamentosMapReverse: { [key: number]: string } = {
   1: 'La Paz',
-  2: 'Santa Cruz', 
+  2: 'Santa Cruz',
   3: 'Cochabamba',
   4: 'Oruro',
   5: 'Potosí',
@@ -25,225 +28,188 @@ const GestionCompetidores: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // URL base de la API
-  const API_BASE = 'http://localhost:8000/api';
-
-  const api = React.useMemo(() => {
-      // 1. Obtener el token del almacenamiento local
-      const token = localStorage.getItem('authToken'); 
-      
-      const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-      };
-
-      // 2. Si el token existe, añade el header de Autorización
-      if (token) {
-          headers['Authorization'] = `Bearer ${token}`; 
-      }
-
-      return axios.create({
-          baseURL: API_BASE,
-          headers: headers, // Usamos el nuevo objeto headers
-      });
-  }, [API_BASE]); 
+  // --- ELIMINADO ---
+  // Ya no necesitamos API_BASE ni el useMemo para crear 'api' localmente
+  // --- FIN ELIMINADO ---
 
   const fetchCompetidores = useCallback(async () => {
-
     try {
       setLoading(true);
       setError('');
-      
       console.log('Cargando competidores...');
+
+      // Usamos el 'api' importado directamente
       const response = await api.get('/olimpistas');
-      
-      // Mapear los datos del backend a nuestra interfaz
-      const competidoresMapeados = response.data.data.map((olimpista: Competidor) => ({
-        id_olimpista: olimpista.id_olimpista, // <-- ¡Asegúrate de que el backend envíe este campo!
+
+      // Mapeo de datos (Asegúrate que coincida con la respuesta real de tu API)
+      const competidoresMapeados = response.data.data.map((olimpista: any): Competidor => ({
+        id_olimpista: olimpista.id_olimpista,
         ci: olimpista.ci || '',
         nombre: olimpista.nombre || '',
         apellidos: olimpista.apellidos || '',
         institucion: olimpista.institucion || '',
+        // El backend ahora envía los nombres directamente
         area: olimpista.area || '',
         nivel: olimpista.nivel || '',
-        gradoEscolaridad: olimpista.grado || '',
         grado: olimpista.grado || '',
-        contactoTutor: olimpista.contacto_tutor || '',
         contacto_tutor: olimpista.contacto_tutor || '',
         id_departamento: olimpista.id_departamento,
-        departamento: olimpista.departamento,
-        departamentoNombre: olimpista.departamento?.nombre_departamento || 
-                           departamentosMapReverse[olimpista.id_departamento] || 
-                           ''
+        // El backend ahora envía el nombre del departamento
+        departamentoNombre: olimpista.departamento || '',
+        // Opcional: Mantener el objeto departamento si el backend lo envía y lo necesitas
+        departamento: olimpista.departamento ? {
+             id_departamento: olimpista.id_departamento,
+             nombre_departamento: olimpista.departamento
+           } : undefined,
       }));
-      
+
       console.log('Competidores cargados:', competidoresMapeados.length);
       setCompetidores(competidoresMapeados);
-      
+
     } catch (err: unknown) {
       console.error('Error fetching competidores:', err);
-      
       let errorMessage = 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.';
-      
+
       if (axios.isAxiosError(err)) {
-        errorMessage = err.response?.data?.message || 
-                      err.message || 
-                      errorMessage;
+        errorMessage = err.response?.data?.message || err.message || errorMessage;
+        // Error específico para token inválido o ausente
+        if (err.response?.status === 401) {
+            errorMessage = "Error de autorización. Intenta iniciar sesión de nuevo.";
+            // Opcional: Podrías llamar a logout() aquí si tienes acceso al contexto
+        }
       } else if (err instanceof Error) {
         errorMessage = err.message;
       }
-      
       setError(errorMessage);
-
     } finally {
       setLoading(false);
     }
-  }, [api]);
-
-  // Cargar competidores solo al montar el componente
+    // CORRECCIÓN: 'api' ya no es una dependencia porque viene del import
+  }, []);
 
   useEffect(() => {
     fetchCompetidores();
   }, [fetchCompetidores]);
 
-  // OPTIMIZADO: Actualizar competidor (ACTUALIZACIÓN LOCAL INMEDIATA)
-
   const handleEditCompetitor = async (editedCompetitor: Competidor) => {
-    // ... (mantén tu código existente de handleEditCompetitor)
-    const competidoresAnteriores = [...competidores]; 
-    
+    const competidoresAnteriores = [...competidores];
     try {
-      const competidoresActualizados = competidores.map(comp => 
-        comp.ci === editedCompetitor.ci  
-          ? { 
+      // Optimistic update (actualización local inmediata)
+      const competidoresActualizados = competidores.map(comp =>
+        comp.id_olimpista === editedCompetitor.id_olimpista // Usar ID primario para comparación
+          ? {
               ...editedCompetitor,
-              departamentoNombre: editedCompetitor.departamentoNombre || 
-                                departamentosMapReverse[editedCompetitor.id_departamento] || 
+              // Asegura que departamentoNombre se actualice si cambia id_departamento
+              departamentoNombre: editedCompetitor.departamentoNombre ||
+                                departamentosMapReverse[editedCompetitor.id_departamento] ||
                                 ''
             }
           : comp
       );
-      
       setCompetidores(competidoresActualizados);
 
-      const response = await api.put(`/olimpistas/${editedCompetitor.id_olimpista}`, {
-        ci: editedCompetitor.ci,
-        nombre: editedCompetitor.nombre,
-        institucion: editedCompetitor.institucion,
-        apellidos: editedCompetitor.apellidos, // <<< Campo nuevo en PUT
-        area: editedCompetitor.area,
-        nivel: editedCompetitor.nivel,
-        grado: editedCompetitor.grado,
-        contacto_tutor: editedCompetitor.contacto_tutor,
-        id_departamento: editedCompetitor.id_departamento
-      });
+      // Llamada a la API usando el 'api' importado
+      // El backend espera el ID en la URL y los datos en el cuerpo
+      await api.put(`/olimpistas/${editedCompetitor.id_olimpista}`, {
+      ci: editedCompetitor.ci,
+      nombre: editedCompetitor.nombre,
+      apellidos: editedCompetitor.apellidos,
+      institucion: editedCompetitor.institucion,
+      area: editedCompetitor.area,   // ← se envía el nombre
+      nivel: editedCompetitor.nivel, // ← se envía el nombre
+      grado: editedCompetitor.grado,
+      contacto_tutor: editedCompetitor.contacto_tutor,
+      id_departamento: editedCompetitor.id_departamento,
+    });
 
-      if (response.data.data) {
-        const competidorActualizado = response.data.data;
-        const competidoresFinales = competidoresActualizados.map(comp => 
-          comp.ci === editedCompetitor.ci 
-            ? { 
-                ...comp,
-                ...competidorActualizado,
-                departamentoNombre: competidorActualizado.departamento?.nombre_departamento || 
-                                  departamentosMapReverse[competidorActualizado.id_departamento] || 
-                                  editedCompetitor.departamentoNombre
-              }
-            : comp
-        );
-        setCompetidores(competidoresFinales);
-      }
-
-
+      // No es necesario volver a mapear si la API no devuelve datos actualizados
       alert('Competidor actualizado exitosamente');
-      
+      // Opcional: Volver a cargar los datos para asegurar consistencia
+      // fetchCompetidores();
+
     } catch (err: unknown) {
       console.error('Error updating competitor:', err);
+      // Revertir en caso de error
       setCompetidores(competidoresAnteriores);
-      
+
       let errorMessage = 'Error al actualizar competidor';
-      
+      if (axios.isAxiosError(err)) {
+        errorMessage = err.response?.data?.message || err.response?.data?.errors?.ci?.[0] || errorMessage; // Mostrar error de validación de CI si existe
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      alert(errorMessage);
+      // No re-lances el error si ya mostraste alerta
+      // throw err;
+    }
+  };
+
+  const handleDeleteCompetitor = async (ci: string) => { // Mantenemos CI como identificador para la UI
+    const competidoresAnteriores = [...competidores];
+    const competidorAEliminar = competidores.find(comp => comp.ci === ci);
+
+    if (!competidorAEliminar || !competidorAEliminar.id_olimpista) {
+      alert('Error: No se encontró el ID interno del competidor para eliminar.');
+      console.error('Competidor no encontrado o le falta id_olimpista:', competidorAEliminar);
+      return;
+    }
+
+    // Confirmación
+    if (!window.confirm(`¿Estás seguro de que deseas eliminar a ${competidorAEliminar.nombre} ${competidorAEliminar.apellidos}?`)) {
+        return;
+    }
+
+    try {
+      // Optimistic update
+      const competidoresActualizados = competidores.filter(comp =>
+        comp.id_olimpista !== competidorAEliminar.id_olimpista
+      );
+      setCompetidores(competidoresActualizados);
+
+      // Llamada a la API usando el 'api' importado y el ID primario
+      await api.delete(`/olimpistas/${competidorAEliminar.id_olimpista}`);
+      alert('Competidor eliminado exitosamente');
+
+    } catch (err: unknown) {
+      console.error('Error deleting competitor:', err);
+      // Revertir en caso de error
+      setCompetidores(competidoresAnteriores);
+
+      let errorMessage = 'Error al eliminar competidor. El cambio fue revertido.';
       if (axios.isAxiosError(err)) {
         errorMessage = err.response?.data?.message || errorMessage;
       } else if (err instanceof Error) {
         errorMessage = err.message;
       }
-      
       alert(errorMessage);
-      throw err;
+      // No re-lances el error
+      // throw err;
     }
   };
 
-  // OPTIMIZADO: Eliminar competidor (ELIMINACIÓN LOCAL INMEDIATA)
-  const handleDeleteCompetitor = async (ci: string) => { 
-       
-    const competidoresAnteriores = [...competidores];
-    
-    // 1. Encontrar el competidor y obtener su ID de clave primaria
-    const competidorAEliminar = competidores.find(comp => comp.ci === ci);
-
-    if (!competidorAEliminar || !competidorAEliminar.id_olimpista) {
-        alert('Error: No se encontró el ID interno del competidor para eliminar.');
-        console.error('Competidor no encontrado o le falta id_olimpista:', competidorAEliminar);
-        return;
-    }
-
-    try {
-        // Optimización: Actualizar la interfaz de usuario inmediatamente
-        const competidoresActualizados = competidores.filter(comp => 
-            comp.ci !== ci
-        );
-        
-        setCompetidores(competidoresActualizados);
-
-        // 2. Realizar la petición a la API usando el ID de clave primaria
-        // El backend espera: DELETE /olimpistas/{id_olimpista}
-        await api.delete(`/olimpistas/${competidorAEliminar.id_olimpista}`);
-
-
-        alert('Competidor eliminado exitosamente');
-        
-    } catch (err: unknown) {
-        console.error('Error deleting competitor:', err);
-        // Revertir el estado si la llamada a la API falla
-        setCompetidores(competidoresAnteriores);
-        
-        let errorMessage = 'Error al eliminar competidor. El cambio fue revertido.';
-        
-        if (axios.isAxiosError(err)) {
-            errorMessage = err.response?.data?.message || errorMessage;
-        } else if (err instanceof Error) {
-            errorMessage = err.message;
-        }
-        
-        alert(errorMessage);
-        throw err;
-    }
-};
-
-  // Funciones para los botones (sin funcionalidad completa)
-  const handleVerLista = () => {
-    // Ya estamos en la lista, no hace nada
-  };
-
+  // Funciones placeholder (mantenerlas o implementar)
+  const handleVerLista = () => {};
   const handleGenerarListas = () => {
     alert('Función GENERAR LISTAS POR ÁREA Y NIVEL - En desarrollo');
   };
-  
+
+  // Filtrado (basado en los datos disponibles después del mapeo)
   const competidoresFiltrados = competidores.filter(comp =>
     comp.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
+    (comp.apellidos && comp.apellidos.toLowerCase().includes(filtro.toLowerCase())) ||
     comp.ci.includes(filtro) ||
-    comp.institucion.toLowerCase().includes(filtro.toLowerCase()) ||
-    comp.area.toLowerCase().includes(filtro.toLowerCase())
+    (comp.institucion && comp.institucion.toLowerCase().includes(filtro.toLowerCase())) ||
+    (comp.area && comp.area.toLowerCase().includes(filtro.toLowerCase())) ||
+    (comp.departamentoNombre && comp.departamentoNombre.toLowerCase().includes(filtro.toLowerCase()))
   );
 
-  // Estados de carga y error
+  // --- Renderizado Condicional (Loading/Error) ---
   if (loading) {
     return (
       <div className="gestion-competidores-page">
         <div className="management-container">
-          <div className="flex justify-center items-center p-8">
-            <div className="text-lg">Cargando competidores...</div>
+          <div className="flex justify-center items-center p-8 text-lg">
+            Cargando competidores...
           </div>
         </div>
       </div>
@@ -254,12 +220,12 @@ const GestionCompetidores: React.FC = () => {
     return (
       <div className="gestion-competidores-page">
         <div className="management-container">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            <strong>Error:</strong> {error}
-            <br />
-            <button 
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <strong className="font-bold">Error: </strong>
+            <span className="block sm:inline">{error}</span>
+            <button
               onClick={fetchCompetidores}
-              className="mt-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+              className="mt-2 bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm"
             >
               Reintentar
             </button>
@@ -269,59 +235,70 @@ const GestionCompetidores: React.FC = () => {
     );
   }
 
+  // --- Renderizado Principal ---
   return (
     <div className="gestion-competidores-page">
-      {/* SECCIÓN DE CARGA DE OLIMPISTAS - IGUAL QUE EN CargarCSV */}
+      {/* Sección Carga CSV */}
       <div className="carga-section">
-        <CargarCSV 
-          onVerLista={handleVerLista}
+        <CargarCSV
+          onVerLista={handleVerLista} // Podría recargar la lista: onVerLista={fetchCompetidores}
           onGenerarListas={handleGenerarListas}
+          // Pasar callback para recargar lista después de importar exitosamente
+          onImportSuccess={fetchCompetidores}
         />
       </div>
-      
+
+      {/* Sección Gestión (Búsqueda y Tabla) */}
       <div className="management-container">
+        {/* Barra de Búsqueda */}
         <div className="search-section">
           <div className="search-container">
             <div className="search-input-wrapper">
               <input
                 type="text"
-                placeholder="Buscar competidor..."
+                placeholder="Buscar (Nombre, CI, Institución, Área, Depto)..."
                 className="search-input"
                 value={filtro}
                 onChange={(e) => setFiltro(e.target.value)}
               />
               <div className="search-icon">
-                <svg className="search-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                 {/* SVG Icon */}
+                 <svg className="search-svg h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                 </svg>
               </div>
             </div>
           </div>
+          {/* Podrías añadir un botón de "Nuevo Competidor" aquí si lo necesitas */}
         </div>
 
-        <CompetitorTable 
+        {/* Tabla de Competidores */}
+        <CompetitorTable
           competitors={competidoresFiltrados}
           onEdit={handleEditCompetitor}
-          onDelete={(id) => handleDeleteCompetitor(String(id))}
+          // onDelete ahora recibe el CI, como espera la tabla
+          onDelete={handleDeleteCompetitor}
         />
       </div>
 
-      {competidoresFiltrados.length > 0 && (
+      {/* Paginación (si hay competidores) */}
+      {competidores.length > 0 && ( // Mostrar incluso si filtrados es 0
         <div className="pagination-section">
           <span className="pagination-info">
-            Mostrando {competidoresFiltrados.length} de {competidores.length} competidores
+            {/* Información más clara */}
+            Mostrando {competidoresFiltrados.length} de {competidores.length} competidores totales.
           </span>
-          <div className="pagination-controls">
-            <button className="pagination-btn pagination-btn-prev">
-              Anterior
-            </button>
-            <button className="pagination-btn pagination-btn-active">1</button>
-            <button className="pagination-btn pagination-btn-next">
-              Siguiente
-            </button>
-          </div>
+          {/* Controles de paginación (si los implementas) */}
+          {/* <div className="pagination-controls"> ... </div> */}
         </div>
       )}
+
+      {/* Si no hay competidores (después de cargar) */}
+       {!loading && competidores.length === 0 && (
+         <div className="text-center p-8 text-gray-500">
+             No hay competidores registrados todavía. Puedes importarlos usando el formulario de arriba.
+         </div>
+       )}
     </div>
   );
 };

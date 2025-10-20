@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
-    
-use App\Models\Responsable_Area;
-use App\Models\Usuario;
+
+// CORRECCIÓN: Cambiado de Responsable_Area a ResponsableArea
+use App\Models\ResponsableArea; 
+use App\Models\User;
 use App\Models\Area;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -12,12 +13,12 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
-
-class Responsable_Area_Controller extends Controller
+class ResponsableAreaController extends Controller
 {
     public function index()
     {
-        $responsables = Responsable_Area::with(['usuario.rol', 'area'])->get();
+        // CORRECCIÓN: Cambiado de Responsable_Area a ResponsableArea
+        $responsables = ResponsableArea::with(['usuario.rol', 'area'])->get();
 
         $data = $responsables->map(function ($responsable) {
             return [
@@ -63,19 +64,16 @@ class Responsable_Area_Controller extends Controller
                 ], 422);
             }
 
-            // Buscar el área por nombre (ignora mayúsculas/minúsculas)
-            $area = \App\Models\Area::whereRaw('LOWER(nombre) = ?', [strtolower($data['area'])])->first();
+            $area = Area::whereRaw('LOWER(nombre) = ?', [strtolower($data['area'])])->first();
 
-            // Si no existe el área, crearla
             if (!$area) {
-                $area = \App\Models\Area::create([
+                $area = Area::create([
                     'nombre' => $data['area']
                 ]);
             }
 
-            // Crear usuario
             $plainPassword = $this->generatePassword();
-            $usuario = \App\Models\Usuario::create([
+            $usuario = User::create([
                 'nombre' => $data['nombre'],
                 'apellidos' => $data['apellidos'],
                 'ci' => $data['ci'],
@@ -85,13 +83,13 @@ class Responsable_Area_Controller extends Controller
                 'password' => Hash::make($plainPassword),
             ]);
 
-            // Crear relación responsable - área
-            $responsable = \App\Models\Responsable_Area::create([
+            // CORRECCIÓN: Cambiado de Responsable_Area a ResponsableArea
+            $responsable = ResponsableArea::create([
                 'id_usuario' => $usuario->id_usuario,
                 'id_area' => $area->id_area
             ]);
 
-            // Enviar correo
+            // ... (envío de correo está bien)
             try {
                 Mail::raw(
                     "Hola {$usuario->nombre},\n\n".
@@ -105,7 +103,7 @@ class Responsable_Area_Controller extends Controller
                     }
                 );
             } catch (\Throwable $mailError) {
-                DB::rollBack(); // revertir si falla el correo
+                DB::rollBack(); 
                 Log::error('Error enviando correo: '.$mailError->getMessage());
                 return response()->json([
                     'message' => 'No se pudo enviar el correo. Registro cancelado.',
@@ -113,7 +111,7 @@ class Responsable_Area_Controller extends Controller
                 ], 500);
             }
 
-            DB::commit(); // confirmar si todo va bien
+            DB::commit(); 
 
             return response()->json([
                 'message' => 'Responsable registrado y correo enviado correctamente',
@@ -123,7 +121,7 @@ class Responsable_Area_Controller extends Controller
                 'password_generada' => $plainPassword
             ]);
         } catch (\Throwable $e) {
-            DB::rollBack(); // aseguramos rollback ante cualquier error
+            DB::rollBack(); 
             Log::error('Error registrando responsable: '.$e->getMessage());
             return response()->json([
                 'message' => 'Error registrando responsable',
@@ -133,17 +131,15 @@ class Responsable_Area_Controller extends Controller
     }
 
     
-    public function update(Request $request)
+    public function update(Request $request, $id_usuario)
     {
         try {
-            // Obtener el id_usuario del request
-            $id_usuario = $request->id_usuario; // <--- aquí se define
-
             if (!$id_usuario) {
-                return response()->json(['message' => 'El id_usuario es obligatorio'], 422);
+                return response()->json(['message' => 'El id_usuario es obligatorio en la URL'], 422);
             }
 
-            $responsable = Responsable_Area::with('usuario')
+            // CORRECCIÓN: Cambiado de Responsable_Area a ResponsableArea
+            $responsable = ResponsableArea::with('usuario')
                 ->where('id_usuario', $id_usuario)
                 ->first();
 
@@ -166,7 +162,6 @@ class Responsable_Area_Controller extends Controller
                 return response()->json(['message'=>'Errores de validación','errors'=>$validator->errors()], 422);
             }
 
-            // Si viene el nombre del área, buscar su ID
             if (isset($data['area']) && !isset($data['id_area'])) {
                 $area = Area::where('nombre', $data['area'])->first();
                 if ($area) {
@@ -194,7 +189,8 @@ class Responsable_Area_Controller extends Controller
     {
         DB::beginTransaction();
         try {
-            $responsable = Responsable_Area::with('usuario')
+            // CORRECCIÓN: Cambiado de Responsable_Area a ResponsableArea
+            $responsable = ResponsableArea::with('usuario')
                 ->where('id_usuario', $id_usuario)
                 ->first();
 
@@ -203,10 +199,7 @@ class Responsable_Area_Controller extends Controller
                 return response()->json(['message' => 'Solo se pueden eliminar responsables'], 403);
             }
 
-            // Primero eliminar el registro en responsable_area (o responsable)
             $responsable->delete();
-
-            // Después eliminar el usuario
             $responsable->usuario->delete();
 
             DB::commit();

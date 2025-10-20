@@ -1,215 +1,137 @@
-// src/components/responsables/EditResponsableModal.tsx
-import React, { useState } from 'react';
+// src/components/evaluadores/EditEvaluadorModal.tsx
+import React, { useState, useEffect } from 'react';
 import { XIcon } from 'lucide-react';
-import type { Usuario } from '../../interfaces/Usuario';
+import type { Evaluador } from '../../types/User.types';
 
 interface EditEvaluadorModalProps {
-    usuario: Usuario | null;
-    onSave: (responsable: Usuario) => void;
-    onCancel: () => void;
-    isOpen: boolean;
+  evaluador: Evaluador | null; // Null indica modo creación
+  onSave: (data: Evaluador | Omit<Evaluador, 'id_usuario' | 'id_rol'>) => void;
+  onCancel: () => void;
+  isOpen: boolean;
 }
 
-const areas = [
-    'Matemáticas',
-    'Física', 
-    'Química',
-    'Biología',
-    'Astronomía',
-    'Geografía',
-    'Informática'
+const areasDisponibles = [
+  'Matemáticas', 'Física', 'Química', 'Biología',
+  'Astronomía', 'Geografía', 'Informática'
 ];
+// Lista de niveles ELIMINADA
 
-// Se eliminó la constante 'cargos'
+// Estado inicial para modo creación
+const initialState: Omit<Evaluador, 'id_usuario' | 'id_rol'> = {
+  nombre: '',
+  apellidos: '',
+  ci: '',
+  email: '',
+  telefono: null,
+  area: '',
+  // nivel: null,       <-- ELIMINADO
+  // id_nivel: null,    <-- ELIMINADO
+  // disponible: true,  <-- ELIMINADO
+};
 
-export function EditEvaluadorModal({ 
-    usuario, 
-    onSave, 
-    onCancel, 
-    isOpen
+
+export function EditEvaluadorModal({
+  evaluador,
+  onSave,
+  onCancel,
+  isOpen
 }: EditEvaluadorModalProps) {
+
+  const [editedData, setEditedData] = useState<Evaluador | Omit<Evaluador, 'id_usuario' | 'id_rol'>>(
+    evaluador || initialState
+  );
+
+  useEffect(() => {
+    setEditedData(evaluador ? { ...evaluador } : initialState);
+  }, [evaluador, isOpen]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
     
-    // Inicialización del estado
-    const [editedUsuario, setEditedUsuario] = useState<Usuario>(
-        usuario || {
-            id_usuario: 0, // Valor por defecto
-            nombre: '',
-            apellidos: '', // <-- Inicializado
-            ci: '',        // <-- Usamos CI
-            email: '',
-            telefono: null, // Debe ser null para nulo
-            area: '',
-            id_rol: 2,     // Rol por defecto
-            documento: '', // Alias para inicialización, usaremos 'ci' en la lógica
-        }
-    );
+    // Manejo de checkbox ELIMINADO
 
-    // Sincronizar estado cuando se abre el modal o cambia el responsable
-    React.useEffect(() => {
-        if (usuario) {
-            setEditedUsuario(usuario);
-        } else {
-            setEditedUsuario({
-                id_usuario: 0,
-                nombre: '',
-                apellidos: '', // <-- Inicializado
-                ci: '',        // <-- Usamos CI
-                email: '',
-                telefono: null,
-                area: '',
-                id_rol: 2,
-                documento: '', // Alias
-            });
-        }
-    }, [usuario]);
+    const finalValue = name === 'telefono' && value === '' ? null : value;
+    setEditedData(prev => ({ ...prev, [name]: finalValue }));
+  };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        // Manejamos null para telefono si el campo se deja vacío
-        const finalValue = name === 'telefono' && value === '' ? null : value;
-        setEditedUsuario(prev => ({ ...prev, [name]: finalValue }));
-    };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        onSave(editedUsuario);
-    };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editedData.nombre || !editedData.apellidos || !editedData.ci || !editedData.email || !editedData.area) {
+        alert("Por favor complete todos los campos requeridos (*)");
+        return;
+    }
+    onSave(editedData);
+  };
 
-    if (!isOpen) return null;
+  if (!isOpen) return null;
 
-    return (
-        <div className="modal-overlay">
-            <div className="modal-container">
-                <div className="modal-header">
-                    <h3 className="modal-title">
-                        {usuario ? 'Editar Evaluador' : 'Nuevo Evaluador'}
-                    </h3>
-                    <button
-                        onClick={onCancel}
-                        className="modal-close-btn"
-                        type="button"
-                    >
-                        <XIcon size={20} />
-                    </button>
-                </div>
-                
-                <form onSubmit={handleSubmit}>
-                    <div className="modal-form-grid">
-                        <div className="modal-form-group">
-                            <label className="modal-label">
-                                Nombre *
-                            </label>
-                            <input
-                                type="text"
-                                name="nombre"
-                                value={editedUsuario.nombre}
-                                onChange={handleChange}
-                                className="modal-input"
-                                placeholder="Ingrese nombre de pila"
-                                required
-                            />
-                        </div>
-
-                        {/* AGREGADO: Campo Apellidos */}
-                        <div className="modal-form-group">
-                            <label className="modal-label">
-                                Apellidos *
-                            </label>
-                            <input
-                                type="text"
-                                name="apellidos"
-                                value={editedUsuario.apellidos}
-                                onChange={handleChange}
-                                className="modal-input"
-                                placeholder="Ingrese apellidos"
-                                required
-                            />
-                        </div>
-                        
-                        <div className="modal-form-group">
-                            <label className="modal-label">
-                                Documento (CI) *
-                            </label>
-                            {/* CORREGIDO: Usamos name="ci" */}
-                            <input
-                                type="text"
-                                name="ci" 
-                                value={editedUsuario.ci}
-                                onChange={handleChange}
-                                className="modal-input"
-                                placeholder="Número de documento"
-                                required
-                            />
-                        </div>
-                        
-                        <div className="modal-form-group">
-                            <label className="modal-label">
-                                Email *
-                            </label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={editedUsuario.email}
-                                onChange={handleChange}
-                                className="modal-input"
-                                placeholder="correo@ejemplo.com"
-                                required
-                            />
-                        </div>
-                        
-                        <div className="modal-form-group">
-                            <label className="modal-label">
-                                Teléfono
-                            </label>
-                            {/* Manejamos `telefono` que puede ser null */}
-                            <input
-                                type="tel"
-                                name="telefono"
-                                value={editedUsuario.telefono || ''}
-                                onChange={handleChange}
-                                className="modal-input"
-                                placeholder="555-1234"
-                            />
-                        </div>
-                        
-                        <div className="modal-form-group">
-                            <label className="modal-label">
-                                Área *
-                            </label>
-                            <select
-                                name="area"
-                                value={editedUsuario.area}
-                                onChange={handleChange}
-                                className="modal-input"
-                                required
-                            >
-                                <option value="">Seleccione un área</option>
-                                {areas.map(area => (
-                                    <option key={area} value={area}>{area}</option>
-                                ))}
-                            </select>
-                        </div>
-                        
-                        {/* ELIMINADO: Se quita el campo Cargo */}
-                    </div>
-                    
-                    <div className="modal-footer">
-                        <button
-                            type="button"
-                            onClick={onCancel}
-                            className="modal-btn modal-btn-cancel"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            className="modal-btn modal-btn-primary"
-                        >
-                            {usuario ? 'Actualizar' : 'Crear'}
-                        </button>
-                    </div>
-                </form>
-            </div>
+  return (
+    <div className="modal-overlay">
+      <div className="modal-container">
+        <div className="modal-header">
+          <h3 className="modal-title">
+            {evaluador ? 'Editar Evaluador' : 'Nuevo Evaluador'}
+          </h3>
+          <button onClick={onCancel} className="modal-close-btn" type="button">
+            <XIcon size={20} />
+          </button>
         </div>
-    );
+
+        <form onSubmit={handleSubmit}>
+          {/* APLICADO md:grid-cols-2 para mejor layout */}
+          <div className="modal-body modal-form-grid md:grid-cols-2">
+            
+            {/* Nombre */}
+            <div className="modal-form-group">
+              <label className="modal-label">Nombre *</label>
+              <input type="text" name="nombre" value={editedData.nombre} onChange={handleChange} className="modal-input" required />
+            </div>
+            {/* Apellidos */}
+            <div className="modal-form-group">
+              <label className="modal-label">Apellidos *</label>
+              <input type="text" name="apellidos" value={editedData.apellidos || ''} onChange={handleChange} className="modal-input" required />
+            </div>
+            {/* CI */}
+            <div className="modal-form-group">
+              <label className="modal-label">Documento (CI) *</label>
+              <input type="text" name="ci" value={editedData.ci} onChange={handleChange} className="modal-input" required disabled={!!evaluador} />
+            </div>
+             {/* Teléfono */}
+            <div className="modal-form-group">
+              <label className="modal-label">Teléfono</label>
+              <input type="tel" name="telefono" value={editedData.telefono || ''} onChange={handleChange} className="modal-input" placeholder="Ej: 71234567" />
+            </div>
+             {/* Email */}
+             <div className="modal-form-group">
+              <label className="modal-label">Email *</label>
+              <input type="email" name="email" value={editedData.email} onChange={handleChange} className="modal-input" required />
+            </div>
+            {/* Área */}
+            <div className="modal-form-group">
+              <label className="modal-label">Área *</label>
+              <select name="area" value={editedData.area} onChange={handleChange} className="modal-input" required >
+                <option value="">Seleccione un área</option>
+                {areasDisponibles.map(area => (<option key={area} value={area}>{area}</option>))}
+              </select>
+            </div>
+            
+            {/* Campo Nivel ELIMINADO */}
+            
+            {/* Campo Disponible ELIMINADO */}
+
+          </div> {/* Fin modal-body */}
+
+          <div className="modal-footer">
+            <button type="button" onClick={onCancel} className="modal-btn modal-btn-cancel">
+              Cancelar
+            </button>
+            <button type="submit" className="modal-btn modal-btn-primary">
+              {evaluador ? 'Actualizar' : 'Crear'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }
