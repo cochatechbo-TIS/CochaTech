@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo; // <-- Añadido
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Evaluador extends Model
 {
@@ -16,19 +16,24 @@ class Evaluador extends Model
     protected $fillable = [
         'id_usuario',
         'id_area',
-        'id_nivel',
-        'disponible',
+        // 'id_nivel',     <-- ELIMINADO
+        // 'disponible',   <-- ELIMINADO
     ];
 
+
     public function usuario(): BelongsTo // <-- Tipo de retorno añadido
+
     {
         return $this->belongsTo(User::class, 'id_usuario', 'id_usuario');
     }
 
+
     public function area(): BelongsTo // <-- Tipo de retorno añadido
+
     {
         return $this->belongsTo(Area::class, 'id_area', 'id_area');
     }
+
 
     public function nivel(): BelongsTo // <-- Tipo de retorno añadido
     {

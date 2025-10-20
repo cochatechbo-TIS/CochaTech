@@ -34,6 +34,7 @@ export function EvaluadorTable({
       }
      setIsEditModalOpen(false);
      setCurrentEvaluador(null);
+
   };
 
   const handleEditCancel = () => {
