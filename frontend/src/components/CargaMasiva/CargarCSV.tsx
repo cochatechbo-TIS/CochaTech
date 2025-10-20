@@ -7,6 +7,7 @@ import './CargarCSV.css';
 interface CargarCSVProps {
   onVerLista?: () => void;
   onGenerarListas?: () => void;
+  onImportSuccess: () => Promise<void>;
 }
 
 function CargarCSV({ onVerLista }: CargarCSVProps) {

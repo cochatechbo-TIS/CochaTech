@@ -36,9 +36,7 @@ const Registro: React.FC = () => {
   };
 
   return (
-    <div className="gestion-competidores-page"> {/* Consider renaming this class */}
-      {/* LOG 5: Confirm main structure renders */}
-      {console.log('[Registro] Rendering main structure (header, nav)...')}
+    <div className="gestion-competidores-page">
       <div className="page-content-wrapper">
         <div className="page-header">
           <h1 className="page-title">Registro</h1>
@@ -50,8 +48,7 @@ const Registro: React.FC = () => {
         <RegistroNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
         <div className="registro-content">
-          {/* LOG 6: Confirm renderActiveTab is called */}
-          {console.log('[Registro] Calling renderActiveTab...')}
+
           {renderActiveTab()}
         </div>
       </div>

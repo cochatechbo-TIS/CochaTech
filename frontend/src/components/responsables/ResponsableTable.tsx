@@ -1,9 +1,9 @@
-// src/components/responsables/ResponsableTable.tsx
+
 import { useState } from "react";
 import { PencilIcon, TrashIcon } from "lucide-react";
 import type { Responsable } from "../../types/User.types";
 import { EditResponsableModal } from "./EditResponsableModal";
-
+type ResponsableCreationData = Omit<Responsable, 'id_usuario' | 'id_rol'>;
 interface ResponsableTableProps {
   usuarios: Responsable[];
   onEdit: (responsable: Responsable) => void;
@@ -24,8 +24,15 @@ export function ResponsableTable({
     setIsEditModalOpen(true);
   };
 
-  const handleEditSave = (editedResponsable: Responsable) => {
-    onEdit(editedResponsable);
+  const handleEditSave = (data: Responsable | ResponsableCreationData) => {
+    if ('id_usuario' in data) {
+      onEdit(data); // El onEdit de la tabla solo espera Responsable
+    } else {
+      // Aunque en teoría este modal solo se usa para editar, la prop onSave
+      // debe aceptar el tipo más amplio. Si se intenta crear aquí, no hacemos nada.
+      console.warn("Se intentó crear desde el modal de edición. Ignorando.");
+      return;
+    }
     setIsEditModalOpen(false);
     setCurrentResponsable(null);
   };

@@ -7,7 +7,7 @@ import axios from "axios";
 import { EvaluadorTable } from "../components/evaluadores/EvaluadorTable";
 import { EditEvaluadorModal } from "../components/evaluadores/EditEvaluadorModal";
 // CORRECCIÓN: Importa el tipo específico
-import type { Evaluador } from "../../types/User.types";
+import type { Evaluador } from "../types/User.types";
 
 const GestionEvaluadores: React.FC = () => {
   // CORRECCIÓN: Usa el tipo 'Evaluador'
@@ -324,7 +324,7 @@ const GestionEvaluadores: React.FC = () => {
       {/* Modal para Crear (se reutiliza el de editar en modo 'creación') */}
       {/* Asegúrate que EditEvaluadorModal maneje 'usuario={null}' */}
       <EditEvaluadorModal
-        usuario={null} // Indica modo creación
+        evaluador={null} // Indica modo creación
         onSave={handleCreateEvaluador}
         onCancel={() => setIsCreateModalOpen(false)}
         isOpen={isCreateModalOpen}

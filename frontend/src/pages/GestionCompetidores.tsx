@@ -111,20 +111,16 @@ const GestionCompetidores: React.FC = () => {
       // Llamada a la API usando el 'api' importado
       // El backend espera el ID en la URL y los datos en el cuerpo
       await api.put(`/olimpistas/${editedCompetitor.id_olimpista}`, {
-        // Enviar solo los campos que el backend espera para actualizar
-        ci: editedCompetitor.ci,
-        nombre: editedCompetitor.nombre,
-        apellidos: editedCompetitor.apellidos,
-        institucion: editedCompetitor.institucion,
-        // OJO: Si el backend espera NOMBRES de área/nivel, necesitas obtener los IDs
-        // Si espera IDs, asegúrate que 'editedCompetitor' los tenga. Asumiendo IDs:
-        id_area: editedCompetitor.id_area, // Necesitas asegurarte que este ID exista
-        id_nivel: editedCompetitor.id_nivel, // Necesitas asegurarte que este ID exista
-        grado: editedCompetitor.grado,
-        contacto_tutor: editedCompetitor.contacto_tutor,
-        nombre_tutor: editedCompetitor.nombre_tutor, // Añadido si es editable
-        id_departamento: editedCompetitor.id_departamento
-      });
+      ci: editedCompetitor.ci,
+      nombre: editedCompetitor.nombre,
+      apellidos: editedCompetitor.apellidos,
+      institucion: editedCompetitor.institucion,
+      area: editedCompetitor.area,   // ← se envía el nombre
+      nivel: editedCompetitor.nivel, // ← se envía el nombre
+      grado: editedCompetitor.grado,
+      contacto_tutor: editedCompetitor.contacto_tutor,
+      id_departamento: editedCompetitor.id_departamento,
+    });
 
       // No es necesario volver a mapear si la API no devuelve datos actualizados
       alert('Competidor actualizado exitosamente');

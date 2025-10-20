@@ -4,11 +4,12 @@ import { XIcon } from 'lucide-react';
 // CORRECCIÓN: Importa el tipo específico 'Responsable'
 import type { Responsable } from '../../types/User.types';
 
+type ResponsableCreationData = Omit<Responsable, 'id_usuario' | 'id_rol'>;
 interface EditResponsableModalProps {
   // CORRECCIÓN: Usa el tipo 'Responsable' y renombra la prop
   responsable: Responsable | null; // Null indica modo creación
   // CORRECCIÓN: Ajusta el tipo de onSave para aceptar datos de creación
-  onSave: (data: Responsable | Omit<Responsable, 'id_usuario' | 'id_rol'>) => void;
+  onSave: (data: Responsable | ResponsableCreationData) => void;
   onCancel: () => void;
   isOpen: boolean;
 }
@@ -20,7 +21,7 @@ const areasDisponibles = [
 ];
 
 // Estado inicial para el modo creación
-const initialState: Omit<Responsable, 'id_usuario' | 'id_rol'> = {
+const initialState: ResponsableCreationData = {
   nombre: '',
   apellidos: '',
   ci: '',
@@ -37,8 +38,8 @@ export function EditResponsableModal({
 }: EditResponsableModalProps) {
 
   // CORRECCIÓN: Usa el tipo 'Responsable' o el tipo parcial para el estado
-  const [editedData, setEditedData] = useState<Responsable | Omit<Responsable, 'id_usuario' | 'id_rol'>>(
-    responsable || initialState
+  const [editedData, setEditedData] = useState<Responsable | ResponsableCreationData>(    
+  responsable || initialState
   );
 
   // Sincronizar estado cuando 'responsable' (la prop) cambia

@@ -95,7 +95,6 @@ class AreaNivelController extends Controller
     {
         $user = auth()->user();
 
-        // Buscar si es responsable de un área
         $responsable = ResponsableArea::where('id_usuario', $user->id_usuario)->first();
 
         if (!$responsable) {
@@ -104,10 +103,10 @@ class AreaNivelController extends Controller
             ], 404);
         }
 
-        $id_area = $responsable->id_area;
+        // Generar combinaciones si no existen
+        $this->generarYListar();
 
-        // Llamamos al método existente para no repetir código
-        $area = Area::find($id_area);
+        $area = Area::find($responsable->id_area);
         if (!$area) {
             return response()->json([
                 'message' => 'Área no encontrada'
@@ -116,5 +115,4 @@ class AreaNivelController extends Controller
 
         return $this->listarPorArea($area->nombre);
     }
-
 }

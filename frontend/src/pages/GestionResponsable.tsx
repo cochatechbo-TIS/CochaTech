@@ -7,7 +7,7 @@ import axios from "axios";
 import { ResponsableTable } from "../components/responsables/ResponsableTable";
 import { EditResponsableModal } from "../components/responsables/EditResponsableModal";
 // CORRECCIÓN: Importa el tipo específico
-import type { Responsable } from "../../types/User.types";
+import type { Responsable } from "../types/User.types";
 
 const GestionResponsables: React.FC = () => {
   // CORRECCIÓN: Usa el tipo 'Responsable'
@@ -304,7 +304,7 @@ const GestionResponsables: React.FC = () => {
       {/* Modal para Crear (se reutiliza el de editar en modo 'creación') */}
       {/* Asegúrate que EditResponsableModal maneje 'usuario={null}' para modo creación */}
       <EditResponsableModal
-        usuario={null} // Indica modo creación
+        responsable={null} // Indica modo creación
         onSave={handleCreateResponsable}
         onCancel={() => setIsCreateModalOpen(false)}
         isOpen={isCreateModalOpen}
