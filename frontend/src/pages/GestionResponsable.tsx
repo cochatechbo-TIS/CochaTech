@@ -32,7 +32,7 @@ const GestionResponsables: React.FC = () => {
 
       // CORRECCIÓN: Mapea a la interfaz 'Responsable'
       const responsablesMapeados: Responsable[] = response.data.data.map(
-        (resp: any): Responsable => ({ // Usar 'any' temporalmente si la respuesta no coincide 100%
+        (resp: Responsable): Responsable => ({ // Usar 'any' temporalmente si la respuesta no coincide 100%
           id_usuario: resp.id_usuario,
           nombre: resp.nombre || "",
           apellidos: resp.apellidos || "",
@@ -217,17 +217,20 @@ const GestionResponsables: React.FC = () => {
   // --- Renderizado Condicional (Loading/Error) ---
   if (loading) {
     return (
-      <div className="gestion-page-container"> {/* Clase genérica */}
+      <div className="gestion-competidores-page">
+        <div className="management-container">
         <div className="flex justify-center items-center p-8 text-lg">
           Cargando responsables...
         </div>
+      </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="gestion-page-container">
+      <div className="gestion-competidores-page">
+        <div className="management-container">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
           <strong className="font-bold">Error: </strong>
           <span className="block sm:inline">{error}</span>
@@ -239,19 +242,21 @@ const GestionResponsables: React.FC = () => {
           </button>
         </div>
       </div>
+      </div>
     );
   }
 
   // --- Renderizado Principal ---
   return (
-    <div className="gestion-page-container"> {/* Clase genérica */}
+    <div className="gestion-competidores-page">
+      <div className="management-container">
       {/* Barra de Búsqueda y Botón Nuevo */}
       <div className="search-section">
         <div className="search-container">
           <div className="search-input-wrapper">
             <input
               type="text"
-              placeholder="Buscar (Nombre, CI, Email, Área)..."
+              placeholder="Buscar responsable..."
               className="search-input"
               value={filtro}
               onChange={(e) => setFiltro(e.target.value)}
@@ -309,6 +314,7 @@ const GestionResponsables: React.FC = () => {
         onCancel={() => setIsCreateModalOpen(false)}
         isOpen={isCreateModalOpen}
       />
+    </div>
     </div>
   );
 };

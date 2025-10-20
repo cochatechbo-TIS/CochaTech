@@ -256,7 +256,7 @@ const GestionCompetidores: React.FC = () => {
             <div className="search-input-wrapper">
               <input
                 type="text"
-                placeholder="Buscar (Nombre, CI, Institución, Área, Depto)..."
+                placeholder="Buscar olimpista..."
                 className="search-input"
                 value={filtro}
                 onChange={(e) => setFiltro(e.target.value)}

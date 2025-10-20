@@ -25,7 +25,7 @@ const GestionEvaluadores: React.FC = () => {
 
       // Mapeo actualizado (sin nivel/disponible)
       const evaluadoresMapeados: Evaluador[] = response.data.data.map(
-        (ev: any): Evaluador => ({ 
+        (ev: Evaluador): Evaluador => ({ 
           id_usuario: ev.id_usuario,
           nombre: ev.nombre || "",
           apellidos: ev.apellidos || "",
@@ -189,9 +189,11 @@ const GestionEvaluadores: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="gestion-page-container">
-        <div className="flex justify-center items-center p-8 text-lg">
-          Cargando evaluadores...
+      <div className="gestion-competidores-page">
+        <div className="management-container">
+          <div className="flex justify-center items-center p-8 text-lg">
+            Cargando evaluadores...
+          </div>
         </div>
       </div>
     );
@@ -199,29 +201,32 @@ const GestionEvaluadores: React.FC = () => {
 
   if (error) {
     return (
-      <div className="gestion-page-container">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-          <strong className="font-bold">Error: </strong>
-          <span className="block sm:inline">{error}</span>
-          <button
-            onClick={fetchEvaluadores}
-            className="mt-2 bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm"
-          >
-            Reintentar
-          </button>
+      <div className="gestion-competidores-page">
+        <div className="management-container">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <strong className="font-bold">Error: </strong>
+            <span className="block sm:inline">{error}</span>
+            <button
+              onClick={fetchEvaluadores}
+              className="mt-2 bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm"
+            >
+              Reintentar
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="gestion-page-container">
+    <div className="gestion-competidores-page">
+      <div className="management-container">
       <div className="search-section">
         <div className="search-container">
           <div className="search-input-wrapper">
             <input
               type="text"
-              placeholder="Buscar (Nombre, CI, Email, Área)..."
+              placeholder="Buscar evaluador..."
               className="search-input"
               value={filtro}
               onChange={(e) => setFiltro(e.target.value)}
@@ -272,6 +277,7 @@ const GestionEvaluadores: React.FC = () => {
         onCancel={() => setIsCreateModalOpen(false)}
         isOpen={isCreateModalOpen}
       />
+    </div>
     </div>
   );
 };
