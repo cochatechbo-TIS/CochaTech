@@ -26,6 +26,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/evaluador', [Evaluador_Controller::class, 'store']);     
     Route::put('/evaluador/{id}', [Evaluador_Controller::class, 'update']); 
     Route::delete('/evaluador/{id}', [Evaluador_Controller::class, 'destroy']);
-    Route::post('/area-nivel', [Area_Nivel_Controller::class, 'generarYListar']);
+    //Route::post('/area-nivel', [Area_Nivel_Controller::class, 'generarYListar']);
 
 });

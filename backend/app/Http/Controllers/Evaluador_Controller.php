@@ -53,7 +53,7 @@ class Evaluador_Controller extends Controller
                 'apellidos' => 'required|string|max:100',
                 'ci' => [
                     'required',
-                    'regex:/^[1-9][0-9]{6,14}$/',
+                    'regex:/^[1-9][0-9]{5,8}$/',
                     'unique:usuario,ci'
                 ],
                 'email' => 'required|email|max:50|unique:usuario,email',
