@@ -77,12 +77,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/evaluador/{id}', [Evaluador_Controller::class, 'destroy']);
     Route::post('/area-nivel', [Area_Nivel_Controller::class, 'generarYListar']);
     Route::middleware('is_admin')->group(function () {
-        // Ruta para crear un nuevo usuario
-        // POST -> http://localhost:8000/api/admin/users
-    
-
-        // Aquí podrías añadir más rutas de admin en el futuro, como:
-        // Route::get('/admin/users', [UserController::class, 'index']); // Para listar todos los usuarios
     });
 
 });
