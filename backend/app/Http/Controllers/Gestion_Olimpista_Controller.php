@@ -58,7 +58,10 @@ class Gestion_Olimpista_Controller extends Controller
             $validator = Validator::make($data, [
                 'nombre' => 'nullable|string|max:100',
                 'apellidos' => 'nullable|string|max:100',
-                'ci' => 'nullable|string|max:15|unique:olimpista,ci,'.$id.',id_olimpista',
+                'ci' => [
+                    'nullable',
+                    'regex:/^[1-9][0-9]{7,15}$/',
+                ],
                 'institucion' => 'nullable|string|max:150',
                 'id_area' => 'nullable|integer|exists:area,id_area',
                 'id_nivel' => 'nullable|integer|exists:nivel,id_nivel',
@@ -75,6 +78,23 @@ class Gestion_Olimpista_Controller extends Controller
                 ], 422);
             }
 
+            // Verificar si el CI ya existe en otro registro con distinto nombre
+            if (!empty($data['ci'])) {
+                $olimpistaExistente = Gestion_Olimpista::where('ci', $data['ci'])
+                    ->where('id_olimpista', '!=', $id)
+                    ->first();
+
+                if ($olimpistaExistente) {
+                    if (
+                        mb_strtolower(trim($olimpistaExistente->nombre), 'UTF-8') !== mb_strtolower(trim($data['nombre']), 'UTF-8') ||
+                        mb_strtolower(trim($olimpistaExistente->apellidos), 'UTF-8') !== mb_strtolower(trim($data['apellidos']), 'UTF-8')
+                    ) {
+                        return response()->json([
+                            'message' => "El CI '{$data['ci']}' ya pertenece a otra persona ({$olimpistaExistente->nombre} {$olimpistaExistente->apellidos})"
+                        ], 422);
+                    }
+                }
+            }
             $olimpista->fill($data);
             $olimpista->save();
 

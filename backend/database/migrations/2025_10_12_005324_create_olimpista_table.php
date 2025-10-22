@@ -10,7 +10,7 @@ return new class extends Migration {
             $table->id('id_olimpista');
             $table->text('nombre');
             $table->text('apellidos');
-            $table->string('ci', 15)->unique();
+            $table->string('ci', 15);
             $table->text('institucion');
             $table->foreignId('id_area')->constrained('area', 'id_area');
             $table->foreignId('id_nivel')->constrained('nivel', 'id_nivel');

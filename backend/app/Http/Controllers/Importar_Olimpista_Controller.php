@@ -8,7 +8,7 @@ use App\Models\Nivel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class ImportarOlimpistasController extends Controller
+class Importar_Olimpista_Controller extends Controller
 {
     public function importar(Request $request)
     {
@@ -55,8 +55,12 @@ class ImportarOlimpistasController extends Controller
 
             while (($row = fgetcsv($handle, 1000, $delimiter)) !== false) {
                 $linea++;
-
+                
                 try {
+                    // Omitir filas completamente vacías
+                    if (empty(array_filter($row))) {
+                        continue;
+                    }
                     // Validar número de columnas
                     if (count($header) !== count($row)) {
                         $errores[] = "Línea $linea: número de columnas incorrecto (esperadas " . count($header) . ", encontradas " . count($row) . ")";
@@ -82,6 +86,20 @@ class ImportarOlimpistasController extends Controller
                         $errores[] = "Línea $linea: el CI '{$data['ci']}' no es válido (debe tener solo números y al menos 7 dígitos)";
                         continue;
                     }
+                    // Verificar si el CI ya existe en otro registro
+                    $olimpistaExistente = Importar_Olimpista::where('ci', $data['ci'])->first();
+
+                    if ($olimpistaExistente) {
+                        // Si existe, verificar que nombre y apellidos coincidan
+                        if (
+                            mb_strtolower(trim($olimpistaExistente->nombre), 'UTF-8') !== mb_strtolower(trim($data['nombre']), 'UTF-8') ||
+                            mb_strtolower(trim($olimpistaExistente->apellidos), 'UTF-8') !== mb_strtolower(trim($data['apellidos']), 'UTF-8')
+                        ) {
+                            $errores[] = "Línea $linea: el CI '{$data['ci']}' ya pertenece a otra persona ({$olimpistaExistente->nombre} {$olimpistaExistente->apellidos})";
+                            continue;
+                        }
+                    }
+
                     // Buscar ID del área por nombre
                     $nombreArea = mb_strtolower(trim($data['area']), 'UTF-8');
                     $area = Area::whereRaw('LOWER(nombre) = ?', [$nombreArea])->first();
