@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\Usuario;///cambie esto porque se utilizara de ahora en adelante el modelo usuario user lo borre //OJO despues de esto puedes borrar este comentario
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules;
 
@@ -25,7 +25,7 @@ class UserController extends Controller
         ]);
 
         // 2. Crea el nuevo usuario
-        $user = User::create([
+        $user = Usuario::create([
             'nombre' => $request->nombre,
             'apellidos' => $request->apellidos,
             'email' => $request->email,
