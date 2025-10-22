@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Importar_Olimpista;
+use App\Models\Area;
+use App\Models\Nivel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class Importar_Olimpista_Controller extends Controller
+class ImportarOlimpistasController extends Controller
 {
     public function importar(Request $request)
     {
@@ -30,7 +32,6 @@ class Importar_Olimpista_Controller extends Controller
 
             // Leer encabezados
             $header = fgetcsv($handle, 1000, $delimiter);
-
             if (!empty($header)) {
                 $header[0] = preg_replace('/^\xEF\xBB\xBF/', '', $header[0]); // limpiar BOM
             }
@@ -38,8 +39,6 @@ class Importar_Olimpista_Controller extends Controller
             $insertados = [];
             $errores = [];
             $linea = 1;
-            $ciVistos = [];
-            $filasVistas = [];
 
             // Mapeo de departamentos
             $mapDepartamentos = [
@@ -56,35 +55,50 @@ class Importar_Olimpista_Controller extends Controller
 
             while (($row = fgetcsv($handle, 1000, $delimiter)) !== false) {
                 $linea++;
+
                 try {
+                    // Validar número de columnas
+                    if (count($header) !== count($row)) {
+                        $errores[] = "Línea $linea: número de columnas incorrecto (esperadas " . count($header) . ", encontradas " . count($row) . ")";
+                        continue;
+                    }
+
                     $data = array_combine($header, $row);
 
-                    // Campos obligatorios
-                    if (empty($data['ci']) || empty($data['nombre']) || empty($data['institucion'])) {
-                        $errores[] = "Línea $linea: Faltan campos obligatorios (ci, nombre o institucion)";
+                    // Validar campos obligatorios
+                    $camposObligatorios = ['ci', 'nombre', 'institucion', 'area', 'nivel'];
+                    $camposFaltantes = [];
+                    foreach ($camposObligatorios as $campo) {
+                        if (empty($data[$campo])) {
+                            $camposFaltantes[] = $campo;
+                        }
+                    }
+                    if (count($camposFaltantes) > 0) {
+                        $errores[] = "Línea $linea: faltan campos obligatorios -> " . implode(', ', $camposFaltantes);
                         continue;
                     }
+                    // Validar formato del CI (solo números y al menos 7 dígitos)
+                    if (!preg_match('/^[1-9][0-9]{7,15}$/', $data['ci'])) {
+                        $errores[] = "Línea $linea: el CI '{$data['ci']}' no es válido (debe tener solo números y al menos 7 dígitos)";
+                        continue;
+                    }
+                    // Buscar ID del área por nombre
+                    $nombreArea = mb_strtolower(trim($data['area']), 'UTF-8');
+                    $area = Area::whereRaw('LOWER(nombre) = ?', [$nombreArea])->first();
+                    if (!$area) {
+                        $errores[] = "Línea $linea: el área '{$data['area']}' no existe en la base de datos";
+                        continue;
+                    }
+                    $data['id_area'] = $area->id_area;
 
-                    // CI duplicado en el mismo archivo
-                    if (in_array($data['ci'], $ciVistos)) {
-                        $errores[] = "Línea $linea: CI duplicado en el archivo ({$data['ci']})";
+                    // Buscar ID del nivel por nombre
+                    $nombreNivel = mb_strtolower(trim($data['nivel']), 'UTF-8');
+                    $nivel = Nivel::whereRaw('LOWER(nombre) = ?', [$nombreNivel])->first();
+                    if (!$nivel) {
+                        $errores[] = "Línea $linea: el nivel '{$data['nivel']}' no existe en la base de datos";
                         continue;
                     }
-                    $ciVistos[] = $data['ci'];
-
-                    // Fila duplicada completa
-                    $filaHash = md5(json_encode($row));
-                    if (in_array($filaHash, $filasVistas)) {
-                        $errores[] = "Línea $linea: Fila duplicada en el archivo";
-                        continue;
-                    }
-                    $filasVistas[] = $filaHash;
-
-                    // CI duplicado en BD
-                    if (Importar_Olimpista::where('ci', $data['ci'])->exists()) {
-                        $errores[] = "Línea $linea: CI ya existe en la base de datos ({$data['ci']})";
-                        continue;
-                    }
+                    $data['id_nivel'] = $nivel->id_nivel;
 
                     // Convertir departamento a número
                     $id_departamento = $data['id_departamento'] ?? null;
@@ -93,29 +107,38 @@ class Importar_Olimpista_Controller extends Controller
                         if (isset($mapDepartamentos[$depLower])) {
                             $id_departamento = $mapDepartamentos[$depLower];
                         } else {
-                            $errores[] = "Línea $linea: Departamento no válido ({$id_departamento})";
+                            $errores[] = "Línea $linea: departamento no válido ('{$data['id_departamento']}')";
                             continue;
                         }
                     }
 
+                    // Verificar CI duplicado en la misma área
+                    $existe = Importar_Olimpista::where('ci', $data['ci'])
+                        ->where('id_area', $data['id_area'])
+                        ->exists();
+                    if ($existe) {
+                        $errores[] = "Línea $linea: el CI '{$data['ci']}' ya está registrado en el área '{$data['area']}'";
+                        continue;
+                    }
+
                     // Guardar en BD
                     $olimpista = Importar_Olimpista::create([
-                    'nombre' => $data['nombre'],
-                    'apellidos' => $data['apellidos'] ?? null,
-                    'ci' => $data['ci'],
-                    'institucion' => $data['institucion'],
-                    'id_area' => $data['area'],   // <- cambiar 'area' por 'id_area'
-                    'id_nivel' => $data['nivel'], // <- cambiar 'nivel' por 'id_nivel'
-                    'grado' => $data['grado'] ?? null,
-                    'contacto_tutor' => $data['contacto_tutor'] ?? null,
-                    'nombre_tutor' => $data['nombre_tutor'] ?? null,
-                    'id_departamento' => $id_departamento,
+                        'nombre' => $data['nombre'],
+                        'apellidos' => $data['apellidos'] ?? null,
+                        'ci' => $data['ci'],
+                        'institucion' => $data['institucion'],
+                        'id_area' => $data['id_area'],
+                        'id_nivel' => $data['id_nivel'],
+                        'grado' => $data['grado'] ?? null,
+                        'contacto_tutor' => $data['contacto_tutor'] ?? null,
+                        'nombre_tutor' => $data['nombre_tutor'] ?? null,
+                        'id_departamento' => $id_departamento,
                     ]);
 
                     $insertados[] = $olimpista;
 
                 } catch (\Throwable $e) {
-                    $errores[] = "Error en línea $linea: " . $e->getMessage();
+                    $errores[] = "Línea $linea: error inesperado -> " . $e->getMessage();
                     Log::error("Error en línea $linea: " . $e->getMessage());
                 }
             }

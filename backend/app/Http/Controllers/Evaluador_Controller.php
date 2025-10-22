@@ -51,7 +51,11 @@ class Evaluador_Controller extends Controller
             $validator = Validator::make($data, [
                 'nombre' => 'required|string|max:50',
                 'apellidos' => 'required|string|max:100',
-                'ci' => 'required|string|max:15|unique:usuario,ci',
+                'ci' => [
+                    'required',
+                    'regex:/^[1-9][0-9]{6,14}$/',
+                    'unique:usuario,ci'
+                ],
                 'email' => 'required|email|max:50|unique:usuario,email',
                 'telefono' => 'nullable|string|max:15',
                 'area' => 'required|string|exists:area,nombre',
@@ -79,6 +83,7 @@ class Evaluador_Controller extends Controller
 
             // Crear usuario
             $plainPassword = $this->generatePassword();
+            $data['ci'] = trim($data['ci']);//para limpiar espacios ojito
             $usuario = Usuario::create([
                 'nombre' => $data['nombre'],
                 'apellidos' => $data['apellidos'],
@@ -151,7 +156,11 @@ class Evaluador_Controller extends Controller
             $validator = Validator::make($data, [
                 'nombre' => 'nullable|string|max:50',
                 'apellidos' => 'nullable|string|max:100',
-                'ci' => 'nullable|string|max:15',
+                'ci' => [
+                    'nullable',
+                    'regex:/^[1-9][0-9]{6,14}$/',
+                    'unique:usuario,ci,' . $evaluador->usuario->id_usuario . ',id_usuario'
+                ],
                 'email' => 'nullable|email|max:50|unique:usuario,email,' . $evaluador->usuario->id_usuario . ',id_usuario',
                 'telefono' => 'nullable|string|max:15',
                 'area' => 'nullable|string|exists:area,nombre',
