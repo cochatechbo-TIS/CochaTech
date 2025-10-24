@@ -320,28 +320,24 @@ margin-right: 2rem;
 /* Sección de búsqueda */
 .search-section {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 16px;
-  margin-bottom: 24px;
-}
-
-@media (min-width: 1024px) {
-  .search-section {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between; /* Asegura que los elementos se separen */
-
-  }
+  margin-bottom: 4px;
+  align-items: center; /* Centra verticalmente ambos elementos */
+  flex-wrap: nowrap;
+  justify-content: space-between;
 }
 
 .search-container {
   flex: 1; /* ¡IMPORTANTE! Ocupa todo el espacio disponible */
-  min-width: 100px;
+  min-width: 0;
 }
 
 .search-input-wrapper {
   position: relative;
-  max-width: 500px; /* Opcional: limita el ancho máximo del buscador */
+  max-width: none; /* Opcional: limita el ancho máximo del buscador */
+  max-width: 500px;
+  width: 100%;
 }
 
 .search-input {
@@ -390,6 +386,8 @@ margin-right: 2rem;
   white-space: nowrap;
   flex-shrink: 0; /* Evita que el botón se reduzca */
   width: max-content; /* Ancho mínimo según contenido */
+  position: relative;
+  top: -12px; /* Mueve el botón 1 píxel hacia arriba */
 }
 
 .primary-button:hover {

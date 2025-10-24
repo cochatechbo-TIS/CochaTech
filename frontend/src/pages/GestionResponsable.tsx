@@ -295,7 +295,7 @@ const GestionResponsables: React.FC = () => {
       {responsablesFiltrados.length > 0 && (
         <div className="pagination-section">
           <span className="pagination-info">
-            Mostrando {responsablesFiltrados.length} de {responsables.length}{" "}
+            Mostrando {responsablesFiltrados.length} de {responsables.length}
             responsables
           </span>
         </div>
