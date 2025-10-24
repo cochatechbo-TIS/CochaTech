@@ -9,6 +9,11 @@ use App\Http\Controllers\Area_Nivel_Controller;
 
 Route::post('/login', [AuthController::class, 'login']);
 
+// ¡NUEVAS RUTAS PARA RESETEO DE CONTRASEÑA!
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
