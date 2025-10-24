@@ -155,7 +155,7 @@ const Navbar = () => {
     <div
       className="mobile-menu-content"
       onClick={(e) => e.stopPropagation()}
-  A >
+   >
       {/* Encabezado con Oh! SanSi y Rol */}
       <div className="mobile-menu-header">
         <div className="mobile-menu-title">Oh! SanSi</div>
