@@ -196,6 +196,7 @@ const GestionResponsables: React.FC = () => {
       resp.apellidos.toLowerCase().includes(filtro.toLowerCase()) ||
       resp.ci.includes(filtro) || // Usamos 'ci'
       resp.email.toLowerCase().includes(filtro.toLowerCase()) ||
+      (resp.telefono && resp.telefono.includes(filtro)) || // ✨ AÑADIDO: Incluir teléfono en el filtro
       resp.area.toLowerCase().includes(filtro.toLowerCase())
   );
 
@@ -294,7 +295,7 @@ const GestionResponsables: React.FC = () => {
       {responsablesFiltrados.length > 0 && (
         <div className="pagination-section">
           <span className="pagination-info">
-            Mostrando {responsablesFiltrados.length} de {responsables.length}{" "}
+            Mostrando {responsablesFiltrados.length} de {responsables.length}
             responsables
           </span>
         </div>

@@ -212,6 +212,7 @@ const GestionEvaluadores: React.FC = () => {
       evaluador.apellidos.toLowerCase().includes(filtro.toLowerCase()) ||
       evaluador.ci.includes(filtro) || 
       evaluador.email.toLowerCase().includes(filtro.toLowerCase()) ||
+      (evaluador.telefono && evaluador.telefono.includes(filtro)) || // ✨ AÑADIDO: Incluir teléfono en el filtro
       evaluador.area.toLowerCase().includes(filtro.toLowerCase())
   );
 
@@ -246,7 +247,6 @@ const GestionEvaluadores: React.FC = () => {
       </div>
     );
   }
-
 
   return (
     <div className="gestion-competidores-page">
