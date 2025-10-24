@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->foreignId('id_olimpista')->constrained('olimpista', 'id_olimpista');
             $table->foreignId('id_area_nivel_fase')->constrained('area_nivel_fase', 'id_area_nivel_fase');
             $table->decimal('nota', 5, 2)->nullable();
+            $table->foreignId('id_equipo')->nullable()->constrained('equipo', 'id_equipo');/////puede que lo borre
             //$table->decimal('nota_minima', 5, 2)->nullable();
             $table->text('comentario')->nullable();
             $table->boolean('falta_etica')->default(false);

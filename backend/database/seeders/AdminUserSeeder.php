@@ -14,7 +14,9 @@ class AdminUserSeeder extends Seeder
         $adminRole = Rol::where('nombre_rol', 'administrador')->first();
 
         if ($adminRole) {
+
             Usuario::firstOrCreate( // <-- CORREGIDO
+
                 ['email' => 'admin@sansi.com'],
                 [
                     'nombre' => 'Admin',
