@@ -1,0 +1,94 @@
+/* src/pages/evaluacion.css */
+
+.evaluacion-container {
+  padding: 1.5rem;
+}
+
+.titulo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.fases-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.fase-tab {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: none;
+  color: #6b7280;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.fase-tab.active {
+  border-bottom: 2px solid #2563eb;
+  color: #2563eb;
+}
+
+.evaluacion-table-container {
+  overflow-x: auto;
+}
+
+.evaluacion-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.evaluacion-table th,
+.evaluacion-table td {
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.evaluacion-table input[type="number"],
+.evaluacion-table input[type="text"] {
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0.3rem;
+  width: 100%;
+}
+
+.estado-aprobado {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.estado-reprobado {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.botones-evaluacion {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-purple {
+  background-color: #9333ea;
+}
+
+.btn-blue {
+  background-color: #2563eb;
+}
+
+.btn-green {
+  background-color: #16a34a;
+}
