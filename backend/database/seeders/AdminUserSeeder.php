@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\User;
+use App\Models\Usuario;
 use App\Models\Rol;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,7 +14,7 @@ class AdminUserSeeder extends Seeder
         $adminRole = Rol::where('nombre_rol', 'administrador')->first();
 
         if ($adminRole) {
-            User::firstOrCreate(
+            Usuario::firstOrCreate(
                 ['email' => 'admin@sansi.com'],
                 [
                     'nombre' => 'Admin',
