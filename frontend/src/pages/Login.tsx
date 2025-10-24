@@ -3,7 +3,8 @@ import './login.css';
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
-import authService from '../services/authService'; // <-- IMPORTANTE
+// import authService from '../services/authService'; // <-- YA NO SE USA DIRECTAMENTE
+import { useAuth } from '../context/AuthContext'; // <-- IMPORTAR useAuth
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth(); // <-- OBTENER login DEL CONTEXTO
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,29 +21,28 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      // Llama al servicio de autenticación
-      const data = await authService.login(email, password);
+      // Llama a la función login del contexto
+      const user = await login(email, password);
       
-      // Lee el rol desde la respuesta de la API
-      const userRole = data.user.rol.nombre_rol; // O como se llame el campo en tu DB
+      // Lee el rol desde la respuesta
+      const userRole = user.rol.nombre_rol;
 
-      // Redirige según el rol
+      // Redirige según el rol a las NUEVAS RUTAS
       switch (userRole) {
         case 'administrador':
-          navigate('/inicio'); // Dashboard del admin
+          navigate('/administrador/inicio'); // <-- MODIFICADO
           break;
         case 'evaluador':
-          navigate('/evaluadores'); // Dashboard del evaluador
+          navigate('/evaluador/inicio'); // <-- MODIFICADO
           break;
         case 'responsable':
-          navigate('/responsables'); // Dashboard del responsable
+          navigate('/responsable/inicio'); // <-- MODIFICADO
           break;
         default:
-          navigate('/inicio'); // Ruta por defecto si el rol no se reconoce
+          navigate('/login'); // Ruta por defecto si el rol no se reconoce
       }
 
     } catch (err: any) {
-      // Maneja errores (ej: 401 Credenciales incorrectas)
       if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message);
       } else {
@@ -52,18 +53,21 @@ const Login: React.FC = () => {
     }
   };
 
+  // ... (el resto del componente JSX es idéntico, no necesita cambios) ...
+  // ... (pego el JSX para que esté completo) ...
+
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
       
       <div className="flex flex-1 items-center justify-center px-4">
-        <div className="w-full max-w-md bg-white rounded-lg shadow-md"> {/* Mantengo rounded-lg y shadow-md aquí */}
-          <div className="bg-blue-600 text-white p-4 rounded-t-lg"> {/* Nuevo div para cuadro azul del título */}
+        <div className="w-full max-w-md bg-white rounded-lg shadow-md"> 
+          <div className="bg-blue-600 text-white p-4 rounded-t-lg"> 
             <h2 className="text-2xl font-bold text-center mb-2">Oh! SanSi</h2>
-            <p className="text-center mb-0">Iniciar sesión (RFS)</p> {/* Removí mb-8 para ajustar espacio */}
+            <p className="text-center mb-0">Iniciar sesión (RFS)</p> 
           </div>
-          <div className="p-8"> {/* Contenido del formulario en padding separado */}
+          <div className="p-8"> 
             {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
             <form onSubmit={handleSubmit}>
