@@ -196,6 +196,7 @@ const GestionResponsables: React.FC = () => {
       resp.apellidos.toLowerCase().includes(filtro.toLowerCase()) ||
       resp.ci.includes(filtro) || // Usamos 'ci'
       resp.email.toLowerCase().includes(filtro.toLowerCase()) ||
+      (resp.telefono && resp.telefono.includes(filtro)) || // ✨ AÑADIDO: Incluir teléfono en el filtro
       resp.area.toLowerCase().includes(filtro.toLowerCase())
   );
 
