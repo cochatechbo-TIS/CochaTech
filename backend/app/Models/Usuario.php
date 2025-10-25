@@ -6,10 +6,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Auth\Passwords\CanResetPassword; // <-- IMPORTAR ESTO
 
 class Usuario extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    // AÑADIR CanResetPassword AL use
+    use HasApiTokens, HasFactory, Notifiable, CanResetPassword; 
 
     protected $table = 'usuario';
     protected $primaryKey = 'id_usuario';
@@ -50,6 +52,27 @@ class Usuario extends Authenticatable
     public function responsable()
     {
         return $this->hasOne(Responsable_Area::class, 'id_usuario', 'id_usuario');
+    }
+
+        // --- ¡NUEVO! ---
+    /**
+     * Sobrescribimos el método para enviar la notificación de reseteo de contraseña.
+     * Esto nos permite personalizar el email que se envía.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        // Construimos la URL que irá en el email.
+        // Apunta a tu frontend, no al backend.
+        $url = env('FRONTEND_URL', 'http://localhost:3000') . 
+               '/reset-password/' . $token . 
+               '?email=' . urlencode($this->email);
+
+        // Aquí usamos una notificación simple de Laravel.
+        // Asegúrate de que tu .env esté configurado para enviar emails (ej. Mailtrap).
+        $this->notify(new \App\Notifications\CustomResetPasswordNotification($url));
     }
 
 }

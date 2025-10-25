@@ -1,12 +1,30 @@
-import api from './api'; // <-- CORREGIDO: Importa 'api' en lugar de 'axios'
+import api from './api'; 
 
-// La URL base ya no es necesaria aquí, porque 'api.ts' la define.
-
-interface LoginResponse {
+// --- INICIO DE CORRECCIÓN ---
+// Esta interfaz ahora coincide EXACTAMENTE
+// con la respuesta de tu AuthController.php
+interface AuthControllerLoginResponse {
   access_token: string;
   user: {
-    id_usuario: number; // Corregido para coincidir con tu backend
-    full_name: string;
+    id: number; // <-- Se llama 'id' en la respuesta JSON
+    nombre: string;
+    apellidos: string;
+    email: string;
+    rol: {
+      id_rol: number;
+      nombre_rol: string;
+    };
+  };
+}
+// --- FIN DE CORRECCIÓN ---
+
+// Interfaz para la respuesta de login del AuthController
+interface AuthControllerLoginResponse {
+  access_token: string;
+  user: {
+    id: number; 
+    nombre: string;
+    apellidos: string;
     email: string;
     rol: {
       id_rol: number;
@@ -15,16 +33,17 @@ interface LoginResponse {
   };
 }
 
-const login = async (email: string, password: string): Promise<LoginResponse> => {
-  // CORREGIDO: Usa 'api.post' en lugar de 'axios.post' y una ruta relativa.
-  const response = await api.post<LoginResponse>('/login', {
+
+const login = async (email: string, password: string): Promise<AuthControllerLoginResponse> => {
+  const response = await api.post<AuthControllerLoginResponse>('/login', {
     email,
     password,
   });
 
   if (response.data.access_token) {
     localStorage.setItem('authToken', response.data.access_token);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
+    // Guardamos el usuario basado en la respuesta real del AuthController
+    localStorage.setItem('user', JSON.stringify(response.data.user)); 
   }
 
   return response.data;
@@ -32,12 +51,10 @@ const login = async (email: string, password: string): Promise<LoginResponse> =>
 
 const logout = async () => {
   try {
-    // Es una buena práctica llamar al endpoint de logout del backend.
     await api.post('/logout');
   } catch (error) {
     console.error("Error al cerrar sesión en el backend:", error);
   } finally {
-    // Siempre limpia el localStorage, incluso si la llamada al backend falla.
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
   }
@@ -49,10 +66,42 @@ const getCurrentUser = () => {
   return null;
 };
 
+// --- ¡INICIO DE NUEVA FUNCIONALIDAD! ---
+
+/**
+ * Solicita un enlace de reseteo de contraseña al backend.
+ */
+const forgotPassword = async (email: string): Promise<{ message: string }> => {
+  const response = await api.post('/forgot-password', { email });
+  return response.data; // Devuelve el mensaje de éxito (ej: "Correo enviado")
+};
+
+/**
+ * Interfaz para los datos de reseteo de contraseña.
+ */
+interface ResetPasswordData {
+  token: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+}
+
+/**
+ * Envía la nueva contraseña y el token al backend.
+ */
+const resetPassword = async (data: ResetPasswordData): Promise<{ message: string }> => {
+  const response = await api.post('/reset-password', data);
+  return response.data; // Devuelve el mensaje de éxito (ej: "Contraseña actualizada")
+};
+// --- ¡FIN DE NUEVA FUNCIONALIDAD! ---
+
+
 const authService = {
   login,
   logout,
   getCurrentUser,
+  forgotPassword, // <-- Añadido
+  resetPassword,  // <-- Añadido
 };
 
 export default authService;
