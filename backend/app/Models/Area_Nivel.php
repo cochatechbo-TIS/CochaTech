@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class Area_Nivel extends Model
 {
     protected $table = 'area_nivel';
-    protected $primaryKey = 'id_area_nivel'; // clave primaria real
-    public $incrementing = true;
-    protected $keyType = 'int';
+    protected $primaryKey = 'id_area_nivel';
     public $timestamps = false;
 
-    protected $fillable = ['id_area', 'id_nivel'];
+    protected $fillable = [
+        'id_area',
+        'id_nivel',
+        'id_evaluador'
+    ];
 
     public function area()
     {
@@ -22,5 +24,10 @@ class Area_Nivel extends Model
     public function nivel()
     {
         return $this->belongsTo(Nivel::class, 'id_nivel', 'id_nivel');
+    }
+
+    public function evaluador()
+    {
+        return $this->belongsTo(Evaluador::class, 'id_evaluador', 'id_evaluador');
     }
 }
