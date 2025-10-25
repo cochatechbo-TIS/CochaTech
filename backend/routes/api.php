@@ -6,7 +6,7 @@ use App\Http\Controllers\Gestion_Olimpista_Controller;
 use App\Http\Controllers\Importar_Olimpista_Controller;
 use App\Http\Controllers\Responsable_Area_Controller;
 use App\Http\Controllers\Evaluador_Controller;
-use App\Http\Controllers\Area_Nivel_Controller;
+use App\Http\Controllers\Generar_Lista_Controller;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -35,18 +35,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/evaluador/{id}', [Evaluador_Controller::class, 'update']);
         Route::delete('/evaluador/{id}', [Evaluador_Controller::class, 'destroy']);
 
-    });
-
-    // Grupo para ADMIN 
-    Route::middleware('role:administrador')->group(function () {
-       Route::get('/area/{nombre_area}/niveles', [Area_Nivel_Controller::class, 'listarPorArea']);
-       
+        Route::get('/niveles/area/{nombre_area}', [Generar_Lista_Controller::class, 'listarPorArea']);
     });
     // Grupo Responsable 
     Route::middleware('role:responsable')->group(function () {
-       Route::get('/area-nivel/auth', [Area_Nivel_Controller::class, 'listarPorAreaAuth']);
-      
+        Route::get('/niveles/auth', [Generar_Lista_Controller::class, 'listarPorAuth']);
     });
-
 });
-

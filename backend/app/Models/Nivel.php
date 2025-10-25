@@ -2,23 +2,37 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Nivel extends Model
 {
+    use HasFactory;
+
     protected $table = 'nivel';
     protected $primaryKey = 'id_nivel';
-    public $incrementing = true;
-    protected $keyType = 'int';
     public $timestamps = false;
 
     protected $fillable = [
-        'nombre'
+        'nombre',
+        'id_area',
+        'id_evaluador',
+        'es_grupal'
     ];
 
-    // Relación inversa: un nivel puede tener muchos olimpistas
+    // Relaciones
+    public function area()
+    {
+        return $this->belongsTo(Area::class, 'id_area', 'id_area');
+    }
+
+    public function evaluador()
+    {
+        return $this->belongsTo(Evaluador::class, 'id_evaluador', 'id_evaluador');
+    }
+
     public function olimpistas()
     {
-        return $this->hasMany(Gestion_Olimpista::class, 'id_nivel');
+        return $this->hasMany(Olimpista::class, 'id_nivel', 'id_nivel');
     }
 }
