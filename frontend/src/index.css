@@ -1,5 +1,3 @@
-
-
 * {
   margin: 0;
   padding: 0;
@@ -40,10 +38,11 @@ html, body {
   display: flex;
   text-align: center;
   justify-content: space-between;
-  padding: 0.75rem 25px;
+  padding: 0.75rem 20px;
   width: 100%;
-  margin: 0;
+  margin: 0;  
 }
+
 .navbar-start {
 display: flex;
 align-items: center;
@@ -63,11 +62,12 @@ gap: 1rem;
   font-size: 1.5rem;
   font-weight: bold;
   color: white;
-  margin-right: 0;
+  margin-right: 2rem;
 }
-@media (min-width: 1025px) {
+@media (max-width: 375px) {
 .navbar-brand {
 margin-right: 2rem;
+font-size: 1rem; /* Reducir el tamaño del logo */
 }
 }
 .nav-item {
@@ -108,7 +108,7 @@ margin-right: 2rem;
 }
 /* Mobile Menu - Hidden by default */
 .mobile-menu-overlay {
-  position: fixed;
+  position:fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -311,37 +311,37 @@ margin-right: 2rem;
 .management-container {
   background-color: white;
   border-radius: 8px;
-  padding: 25px;
+  padding: 15px;
   margin: 8px 0; 
   box-shadow: 0 3px 4px rgba(0, 0, 0, 0.1);
   width: 100%; /* Ocupa todo el ancho disponible */
 }
-
+@media (min-width: 768px) {
+    .management-container {
+        padding: 25px; 
+    }
+}
 /* Sección de búsqueda */
 .search-section {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 16px;
-  margin-bottom: 24px;
-}
-
-@media (min-width: 1024px) {
-  .search-section {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between; /* Asegura que los elementos se separen */
-
-  }
+  margin-bottom: 4px;
+  align-items: center; /* Centra verticalmente ambos elementos */
+  flex-wrap: nowrap;
+  justify-content: space-between;
 }
 
 .search-container {
   flex: 1; /* ¡IMPORTANTE! Ocupa todo el espacio disponible */
-  min-width: 100px;
+  min-width: 0;
 }
 
 .search-input-wrapper {
   position: relative;
-  max-width: 500px; /* Opcional: limita el ancho máximo del buscador */
+  max-width: none; /* Opcional: limita el ancho máximo del buscador */
+  max-width: 500px;
+  width: 100%;
 }
 
 .search-input {
@@ -390,6 +390,8 @@ margin-right: 2rem;
   white-space: nowrap;
   flex-shrink: 0; /* Evita que el botón se reduzca */
   width: max-content; /* Ancho mínimo según contenido */
+  position: relative;
+  top: -12px; /* Mueve el botón 1 píxel hacia arriba */
 }
 
 .primary-button:hover {
@@ -732,6 +734,13 @@ margin-right: 2rem;
     letter-spacing: 0.05em; 
 }
 
+/* Ajustes para móvil */
+@media (max-width: 640px) {
+    .tab-button {
+        padding: 10px 6px; /* Reducir padding horizontal significativamente */
+    }
+}
+
 .tab-button:hover {
     color: #1f2937;
 }
@@ -769,12 +778,12 @@ margin-right: 2rem;
 }
 
 .user-role-mobile {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
   color: #dc004e;
   white-space: nowrap;
   background-color: #fef2f2;
-  padding: 0.2rem 0.5rem;
+  padding: 0.15rem 0.4rem;
   border-radius: 20px;
   border: 1px solid #dc2626;
 }

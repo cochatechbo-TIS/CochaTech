@@ -9,6 +9,11 @@ use App\Models\Usuario;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
+// --- ¡NUEVAS IMPORTACIONES! ---
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password as PasswordRules;
+
 class AuthController extends Controller
 {
     /**
@@ -73,4 +78,82 @@ class AuthController extends Controller
     {
         return $request->user()->load('rol');
     }
+
+        // --- ¡INICIO DE NUEVA FUNCIONALIDAD! ---
+
+    /**
+     * Maneja la solicitud de "Olvidé mi contraseña".
+     * Envía un enlace de reseteo al email del usuario.
+     */
+    public function forgotPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:usuario,email',
+        ], [
+            'email.exists' => 'No podemos encontrar un usuario con esa dirección de correo electrónico.'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        // Envía el enlace de reseteo usando el sistema de Laravel
+        $status = Password::broker()->sendResetLink(
+            $request->only('email')
+        );
+
+        if ($status == Password::RESET_LINK_SENT) {
+            return response()->json([
+                'message' => '¡Correo de reseteo enviado! Revisa tu bandeja de entrada.'
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'No se pudo enviar el correo. Inténtalo de nuevo más tarde.'
+        ], 500);
+    }
+
+    /**
+     * Maneja la solicitud de reseteo de contraseña.
+     * Valida el token y actualiza la contraseña.
+     */
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'token' => 'required',
+            'email' => 'required|email|exists:usuario,email',
+            'password' => [
+                'required',
+                'confirmed',
+                PasswordRules::min(8)->mixedCase()->numbers() // Reglas de contraseña fuertes
+            ],
+        ], [
+            'email.exists' => 'El email no coincide con el token.',
+            'password.confirmed' => 'La confirmación de contraseña no coincide.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => 'Error de validación', 'errors' => $validator->errors()], 422);
+        }
+
+        // Intenta resetear la contraseña
+        $status = Password::broker()->reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                // Esta función se ejecuta si el reseteo es exitoso
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                    'ultimo_acceso' => now() // Actualizamos su último acceso
+                ])->save();
+            }
+        );
+
+        if ($status == Password::PASSWORD_RESET) {
+            return response()->json(['message' => '¡Contraseña actualizada! Ya puedes iniciar sesión.'], 200);
+        }
+
+        // Si el token es inválido o expiró
+        return response()->json(['message' => 'El token de reseteo es inválido o ha expirado.'], 400);
+    }
+    // --- ¡FIN DE NUEVA FUNCIONALIDAD! ---
 }

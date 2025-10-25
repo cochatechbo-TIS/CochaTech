@@ -44,7 +44,7 @@ export function CompetitorTable({ competitors, onEdit, onDelete }: CompetitorTab
           <thead className="competitor-table-header">
             <tr>
               <th className="competitor-table-th">NOMBRE</th>
-              <th className="competitor-table-th">APELLIDOS</th> {/* <<< CAMBIO 3: NUEVA COLUMNA */}
+              <th className="competitor-table-th">APELLIDOS</th>{/* <<< CAMBIO 3: NUEVA COLUMNA */}
               <th className="competitor-table-th">DOCUMENTO</th>
               <th className="competitor-table-th">INSTITUCIÓN</th>
               <th className="competitor-table-th">ÁREA</th>

@@ -8,6 +8,11 @@ import ProtectedRoute from './components/ProtectedRoute'; // <-- Nuestro NUEVO P
 import Listas from './components/Lista Competidores/ListaCompetidores';
 import { useAuth } from './context/AuthContext'; // <-- Importar useAuth
 
+// --- ¡IMPORTAR NUEVAS PÁGINAS! ---
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+
+
 // --- Componentes Placeholder (Originales) ---
 const Inicio = () => (
   <div className="p-8 text-center">
@@ -108,6 +113,11 @@ function App() {
       {/* RUTAS PÚBLICAS */}
       {/* El login no usa el Layout principal para no mostrar la barra de navegación */}
       <Route path="/login" element={<Login />} />
+
+      {/* --- ¡NUEVAS RUTAS PÚBLICAS! --- */}
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
+      {/* --- FIN NUEVAS RUTAS --- */}
 
       {/* RUTA RAÍZ - Redirige automáticamente */}
       <Route path="/" element={<RootRedirect />} />
