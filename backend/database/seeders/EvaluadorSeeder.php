@@ -37,7 +37,7 @@ class EvaluadorSeeder extends Seeder
                 ['id_usuario' => $user->id_usuario],
                 [
                     'id_area' => $firstArea->id_area,
-                    'id_nivel' => $firstNivel->id_nivel,
+                    //'id_nivel' => $firstNivel->id_nivel,
                     'disponible' => true,
                 ]
             );
