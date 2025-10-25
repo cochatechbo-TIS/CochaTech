@@ -9,10 +9,14 @@ class EstadoOlimpistaSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('estado_olimpista')->insert([
-            ['nombre' => 'Clasificado'],
-            ['nombre' => 'No Clasificado'],
-            ['nombre' => 'Desclasificado'],
-        ]);
+        $estados = ['Clasificado', 'No Clasificado', 'Desclasificado'];
+
+        foreach ($estados as $nombre) {
+            DB::statement('
+                INSERT INTO estado_olimpista (nombre) 
+                VALUES (?) 
+                ON CONFLICT (nombre) DO NOTHING
+            ', [$nombre]);
+        }
     }
 }

@@ -9,10 +9,14 @@ class EstadoFaseSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('estado_fase')->insert([
-            ['nombre_estado' => 'En Proceso'],
-            ['nombre_estado' => 'Completado'],
-            ['nombre_estado' => 'Pendiente'],
-        ]);
+        $estados = ['En Proceso', 'Completado', 'Pendiente'];
+
+        foreach ($estados as $nombre) {
+            DB::statement('
+                INSERT INTO estado_fase (nombre_estado) 
+                VALUES (?) 
+                ON CONFLICT (nombre_estado) DO NOTHING
+            ', [$nombre]);
+        }
     }
 }

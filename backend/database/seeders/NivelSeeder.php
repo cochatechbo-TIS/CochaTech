@@ -10,14 +10,14 @@ class NivelSeeder extends Seeder
     public function run(): void
     {
         $areas = [
-            ['id_area' => 1, 'nombre' => 'Química'],
-            ['id_area' => 2, 'nombre' => 'Física'],
-            ['id_area' => 3, 'nombre' => 'Matemáticas'],
-            ['id_area' => 4, 'nombre' => 'Biología'],
-            ['id_area' => 5, 'nombre' => 'Informática'],
-            ['id_area' => 6, 'nombre' => 'Robótica'],
-            ['id_area' => 7, 'nombre' => 'Astronomía'],
-            ['id_area' => 8, 'nombre' => 'Geografía'],
+            ['id_area' => 1, 'nombre' => 'Q'],
+            ['id_area' => 2, 'nombre' => 'F'],
+            ['id_area' => 3, 'nombre' => 'M'],
+            ['id_area' => 4, 'nombre' => 'B'],
+            ['id_area' => 5, 'nombre' => 'I'],
+            ['id_area' => 6, 'nombre' => 'R'],
+            ['id_area' => 7, 'nombre' => 'A'],
+            ['id_area' => 8, 'nombre' => 'G'],
         ];
 
         $niveles = [];
@@ -26,7 +26,7 @@ class NivelSeeder extends Seeder
             // Niveles individuales
             for ($i = 1; $i <= 3; $i++) {
                 $niveles[] = [
-                    'nombre' => "{$area['nombre']} - Nivel {$i}",
+                    'nombre' => "{$area['nombre']}-Nivel {$i}",
                     'id_area' => $area['id_area'],
                     'id_evaluador' => null,
                     'es_grupal' => false,
@@ -36,7 +36,7 @@ class NivelSeeder extends Seeder
             // Niveles grupales
             for ($i = 1; $i <= 2; $i++) {
                 $niveles[] = [
-                    'nombre' => "{$area['nombre']} - Grupal Nivel {$i}",
+                    'nombre' => "{$area['nombre']}-Grupal {$i}",
                     'id_area' => $area['id_area'],
                     'id_evaluador' => null,
                     'es_grupal' => true,
