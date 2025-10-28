@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-=======
+
 // src/components/Lista Competidores/ListaCompetidores.tsx
 import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
