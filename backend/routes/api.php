@@ -7,6 +7,7 @@ use App\Http\Controllers\Importar_Olimpista_Controller;
 use App\Http\Controllers\Responsable_Area_Controller;
 use App\Http\Controllers\Evaluador_Controller;
 use App\Http\Controllers\Generar_Lista_Controller;
+use App\Http\Controllers\Area_Controller;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -18,6 +19,7 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/areas/nombres', [Area_Controller::class, 'listarNombres']);
     // Grupo solo para ADMIN
     Route::middleware('role:administrador')->group(function () {
         Route::get('/olimpistas', [Gestion_Olimpista_Controller::class, 'index']);

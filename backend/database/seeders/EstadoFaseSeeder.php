@@ -9,14 +9,19 @@ class EstadoFaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $estados = ['En Proceso', 'Completado', 'Pendiente'];
+        $estados = [
+            ['id' => 1, 'nombre' => 'En Proceso'],
+            ['id' => 2, 'nombre' => 'Aprobada'],
+            ['id' => 3, 'nombre' => 'Rechazada'],
+        ];
 
-        foreach ($estados as $nombre) {
+        foreach ($estados as $estado) {
             DB::statement('
-                INSERT INTO estado_fase (nombre_estado) 
-                VALUES (?) 
-                ON CONFLICT (nombre_estado) DO NOTHING
-            ', [$nombre]);
+                INSERT INTO estado_fase (id_estado_fase, nombre_estado)
+                VALUES (?, ?)
+                ON CONFLICT (id_estado_fase) DO NOTHING
+            ', [$estado['id'], $estado['nombre']]);
         }
+
     }
 }

@@ -25,6 +25,8 @@ class Generar_Lista_Controller extends Controller
                 'data' => []
             ], 404);
         }
+        // Contar total de fases
+        $totalFases = DB::table('fase')->count();
 
         $niveles = Nivel::where('id_area', $area->id_area)
             ->with(['evaluador'])
@@ -38,12 +40,15 @@ class Generar_Lista_Controller extends Controller
             ->keyBy('id_nivel');
 
         $resultado = $niveles->filter(fn($n) => isset($conteos[$n->id_nivel]))
-            ->map(function ($n) use ($conteos) {
+            ->map(function ($n) use ($conteos, $totalFases, $nombre_area) {
                 return [
-                    'id_nivel' => $n->id_nivel,
-                    'nombre_nivel' => $n->nombre,
-                    'cantidad_olimpistas' => $conteos[$n->id_nivel]->total ?? 0,
+                    'id' => $n->id_nivel,
+                    'nombre' => $n->nombre,
+                    'competidores' => $conteos[$n->id_nivel]->total ?? 0,
+                    'fasesAprobadas' => 0,         // temporal (por ahora en cero)
+                    'faseTotales' => $totalFases, 
                     'evaluador' => $n->evaluador?->nombre_completo ?? '',
+                    'area' => $nombre_area,
                 ];
             })
             ->values();
@@ -86,37 +91,5 @@ class Generar_Lista_Controller extends Controller
         }
 
         return $this->listarPorArea($area->nombre);
-    }
-
-    /**
-     * Para admin: todos los niveles de todas las áreas con olimpistas
-     */
-    public function listarTodosConOlimpistas()
-    {
-        $conteos = Importar_Olimpista::select('id_area', 'id_nivel', DB::raw('COUNT(*) as total'))
-            ->groupBy('id_area', 'id_nivel')
-            ->get();
-
-        $niveles = Nivel::with(['area', 'evaluador'])->get();
-
-        $resultado = $niveles->filter(function ($nivel) use ($conteos) {
-            return $conteos->contains(fn($c) => 
-                $c->id_area == $nivel->id_area && $c->id_nivel == $nivel->id_nivel
-            );
-        })->map(function ($nivel) use ($conteos) {
-            $conteo = $conteos->firstWhere('id_nivel', $nivel->id_nivel);
-            return [
-                'nombre_area' => $nivel->area->nombre,
-                'id_nivel' => $nivel->id_nivel,
-                'nombre_nivel' => $nivel->nombre,
-                'cantidad_olimpistas' => $conteo->total ?? 0,
-                'evaluador' => $nivel->evaluador?->nombre_completo ?? '',
-            ];
-        })->values();
-
-        return response()->json([
-            'message' => 'Listado de niveles con olimpistas por área (admin)',
-            'data' => $resultado
-        ]);
     }
 }
