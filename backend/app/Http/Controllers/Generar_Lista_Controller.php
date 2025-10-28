@@ -25,6 +25,7 @@ class Generar_Lista_Controller extends Controller
                 'data' => []
             ], 404);
         }
+        
         // Contar total de fases
         $totalFases = DB::table('fase')->count();
 
