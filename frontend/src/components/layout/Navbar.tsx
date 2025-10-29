@@ -1,9 +1,10 @@
+/* eslint-disable no-irregular-whitespace */
 // src/components/layout/Navbar.tsx
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import MenuDesplegable from './MenuDesplegable';
 import { 
-  Menu, X, LogOut, User,
+  Menu, X, LogOut,
   LayoutDashboard, Users, List, ChartColumn, 
   Trophy, FileText, History 
 } from 'lucide-react';
@@ -11,13 +12,13 @@ import { useAuth } from '../../context/AuthContext'; // <-- IMPORTAR useAuth
 
 // Definimos los items del menú por rol
 const adminNavItems = [
-  { name: 'Inicio', path: '/administrador/inicio', icon: LayoutDashboard },
-  { name: 'Registro', path: '/administrador/registro', icon: Users },
-  { name: 'Listas', path: '/administrador/listas', icon: List },
-  { name: 'Evaluación', path: '/administrador/evaluacion', icon: ChartColumn },
-  { name: 'Final', path: '/administrador/final', icon: Trophy },
-  { name: 'Reportes', path: '/administrador/reportes', icon: FileText },
-  { name: 'Historial', path: '/administrador/historial', icon: History }
+  {name: 'Inicio', path: '/administrador/inicio', icon: LayoutDashboard },
+  {name: 'Registro', path: '/administrador/registro', icon: Users },
+  {name: 'Listas', path: '/administrador/listas', icon: List },
+  {name: 'Evaluación', path: '/administrador/evaluacion', icon: ChartColumn },
+  {name: 'Final', path: '/administrador/final', icon: Trophy },
+  {name: 'Reportes', path: '/administrador/reportes', icon: FileText },
+  {name: 'Historial', path: '/administrador/historial', icon: History }
 ];
 
 const responsableNavItems = [
@@ -32,13 +33,12 @@ const evaluadorNavItems = [
   { name: 'Informes', path: '/evaluador/informes', icon: FileText },
 ];
 
-
 const Navbar = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { user, logout } = useAuth(); // <-- OBTENER USER Y LOGOUT
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobileView, setIsMobileView] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(false);
 
   // Determinar qué items mostrar basado en el rol
   const [navItems, setNavItems] = useState<typeof adminNavItems>([]);
@@ -65,107 +65,107 @@ const Navbar = () => {
     }
   }, [user]); // Se actualiza cada vez que el usuario cambia
 
-  const handleLogout = () => {
+  const handleLogout = () => {
     logout(); // <-- USA LA FUNCIÓN DEL CONTEXTO
-    navigate('/login'); // Redirige a login
-    closeMobileMenu();
-  };
+    navigate('/login'); // Redirige a login
+    closeMobileMenu();
+  };
 
-  const handleProfile = () => {
-    //navigate('/perfil'); // Puedes implementar esto en el futuro
-    closeMobileMenu();
-  };
+  const handleProfile = () => {
+    //navigate('/perfil'); // Puedes implementar esto en el futuro
+    closeMobileMenu();
+  };
 
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobileView(window.innerWidth < 1024);
-    };
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobileView(window.innerWidth < 1024);
+    };
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
-  const isActive = (path: string) => location.pathname === path;
-  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+  const isActive = (path: string) => location.pathname === path;
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
   
   // No mostramos navbar en /login
   if (location.pathname === '/login') {
     return null; 
   }
 
-  return (
-    <nav className="navbar">
-      <div className="navbar-content">
-        <div className="navbar-start">
-          {isMobileView && (
-            <button
-              className="navbar-toggle"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          )}
-          <span className="navbar-brand">Oh! SanSi</span>
-        </div>
+  return (
+    <nav className="navbar">
+      <div className="navbar-content">
+        <div className="navbar-start">
+          {isMobileView && (
+            <button
+              className="navbar-toggle"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          )}
+          <span className="navbar-brand">Oh! SanSi</span>
+        </div>
 
-        <>
-          {/* Menu Items - Desktop */}
-          {!isMobileView && (
-            <div className="navbar-items">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`nav-item flex items-center ${isActive(item.path) ? 'active' : ''}`}
-                >
-                  {item.icon && <item.icon size={20} className="navbar-icon" />}
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-          )}
+        <>
+          {/* Menu Items - Desktop */}
+          {!isMobileView && (
+            <div className="navbar-items">
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`nav-item flex items-center ${isActive(item.path) ? 'active' : ''}`}
+                >
+                  {item.icon && <item.icon size={20} className="navbar-icon" />}
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+          )}
 
-          {/* User Info - Desktop */}
-          {!isMobileView && (
-            <div className="user-info-desktop">
-              <span className="user-role">Rol: {userRole}</span> {/* <-- DINÁMICO */}
-              <MenuDesplegable 
-                onLogout={handleLogout}
-                onProfile={handleProfile}
-              />
-            </div>
-          )}
+          {/* User Info - Desktop */}
+          {!isMobileView && (
+            <div className="user-info-desktop">
+              <span className="user-role">Rol: {userRole}</span> {/* <-- DINÁMICO */}
+              <MenuDesplegable
+                onLogout={handleLogout}
+                onProfile={handleProfile}
+              />
+            </div>
+          )}
 
-          {/* User Info - Mobile (siempre visible en mobile) */}
-          {isMobileView && (
-            <div className="user-info-mobile">
-              <span className="user-role-mobile">Rol:{userRole}</span> {/* <-- DINÁMICO */}
-              <MenuDesplegable 
-                onLogout={handleLogout}
-                onProfile={handleProfile}
-              />
-            </div>
-          )}
-        </>
-      </div>
+          {/* User Info - Mobile (siempre visible en mobile) */}
+          {isMobileView && (
+            <div className="user-info-mobile">
+              <span className="user-role-mobile">Rol: {userRole}</span> {/* <-- DINÁMICO */}
+              <MenuDesplegable
+                onLogout={handleLogout}
+                onProfile={handleProfile}
+              />
+            </div>
+          )}
+        </>
+      </div>
 
-      {/* Menú Mobile */}
+      {/* Menú Mobile */}
 {isMobileView && isMobileMenuOpen && (
-  <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
-    <div
-      className="mobile-menu-content"
-      onClick={(e) => e.stopPropagation()}
-   >
-      {/* Encabezado con Oh! SanSi y Rol */}
-      <div className="mobile-menu-header">
-        <div className="mobile-menu-title">Oh! SanSi</div>
-        <div className="user-role">Rol: {userRole}</div> {/* <-- DINÁMICO */}
-      </div>
-      {/* Items de navegación */}
-      <div className="mobile-nav-items">
-        {navItems.map((item) => (
-          <Link
-            key={item.name}
+  <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
+    <div
+      className="mobile-menu-content"
+      onClick={(e) => e.stopPropagation()}
+  >
+      {/* Encabezado con Oh! SanSi y Rol */}
+        <div className="mobile-menu-header">
+        <div className="mobile-menu-title">Oh! SanSi</div>
+        <div className="user-role">Rol: {userRole}</div> {/* <-- DINÁMICO */}
+      </div>
+      {/* Items de navegación */}
+      <div className="mobile-nav-items">
+        {navItems.map((item) => (
+          <Link
+            key={item.name}
             to={item.path}
             className={`mobile-nav-item ${
               isActive(item.path) ? 'active' : ''
@@ -191,7 +191,7 @@ const Navbar = () => {
     </div>
   </div>
 )}
-    </nav>
+  </nav>
   );
 };
 

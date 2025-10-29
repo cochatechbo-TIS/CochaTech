@@ -1,3 +1,4 @@
+/* eslint-disable no-irregular-whitespace */
 // src/pages/GestionCompetidores.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
@@ -18,12 +19,14 @@ const departamentosMapReverse: { [key: number]: string } = {
   8: 'Beni',
   9: 'Pando'
 };
+const COMPETIDORES_POR_PAGINA = 20;
 
 const GestionCompetidores: React.FC = () => {
   const [competidores, setCompetidores] = useState<Competidor[]>([]);
   const [filtro, setFiltro] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [paginaActual, setPaginaActual] = useState(1); //nuevo estado de paginacion
 
   // URL base de la API
   const API_BASE = 'http://localhost:8000/api';
@@ -53,7 +56,8 @@ const GestionCompetidores: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      
+      setPaginaActual(1); // Resetear a la primera página al recargar
+
       console.log('Cargando competidores...');
       const response = await api.get('/olimpistas');
       
@@ -105,6 +109,11 @@ const GestionCompetidores: React.FC = () => {
   useEffect(() => {
     fetchCompetidores();
   }, [fetchCompetidores]);
+
+  useEffect(() => {
+    setPaginaActual(1);
+  }, [filtro]);
+
 
   // OPTIMIZADO: Actualizar competidor (ACTUALIZACIÓN LOCAL INMEDIATA)
 
@@ -237,6 +246,22 @@ const GestionCompetidores: React.FC = () => {
     comp.area.toLowerCase().includes(filtro.toLowerCase())
   );
 
+  const totalPaginas = Math.ceil(competidoresFiltrados.length / COMPETIDORES_POR_PAGINA);
+  const indiceInicio = (paginaActual - 1) * COMPETIDORES_POR_PAGINA;
+  const indiceFin = indiceInicio + COMPETIDORES_POR_PAGINA;
+
+  // **Competidores que se muestran en la tabla**
+  const competidoresPaginados = competidoresFiltrados.slice(indiceInicio, indiceFin);
+
+  // **Controladores de paginación**
+  const irAPagina = (pagina: number) => {
+    if (pagina >= 1 && pagina <= totalPaginas) {
+      setPaginaActual(pagina);
+    }
+  };
+  const irAnterior = () => irAPagina(paginaActual - 1);
+  const irSiguiente = () => irAPagina(paginaActual + 1);
+
   // Estados de carga y error
   if (loading) {
     return (
@@ -268,6 +293,9 @@ const GestionCompetidores: React.FC = () => {
       </div>
     );
   }
+  // **Cálculo para mostrar el rango actual**
+  const rangoInicio = competidoresPaginados.length > 0 ? indiceInicio + 1 : 0;
+  const rangoFin = indiceInicio + competidoresPaginados.length;
 
   return (
     <div className="gestion-competidores-page">
@@ -300,7 +328,7 @@ const GestionCompetidores: React.FC = () => {
         </div>
 
         <CompetitorTable 
-          competitors={competidoresFiltrados}
+          competitors={competidoresPaginados}
           onEdit={handleEditCompetitor}
           onDelete={(id) => handleDeleteCompetitor(String(id))}
         />
@@ -309,14 +337,32 @@ const GestionCompetidores: React.FC = () => {
       {competidoresFiltrados.length > 0 && (
         <div className="pagination-section">
           <span className="pagination-info">
-            Mostrando {competidoresFiltrados.length} de {competidores.length} competidores
+            Mostrando {rangoInicio} - {rangoFin} de {competidoresFiltrados.length} competidores
           </span>
           <div className="pagination-controls">
-            <button className="pagination-btn pagination-btn-prev">
+            <button 
+              onClick={irAnterior}
+              disabled={paginaActual === 1} // **Deshabilitar en la primera página**
+              className="pagination-btn pagination-btn-prev"
+            >
               Anterior
             </button>
-            <button className="pagination-btn pagination-btn-active">1</button>
-            <button className="pagination-btn pagination-btn-next">
+            {/* **Generación de botones de página simplificada** */}
+            {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => irAPagina(page)}
+                className={`pagination-btn ${page === paginaActual ? 'pagination-btn-active' : ''}`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              onClick={irSiguiente}
+              disabled={paginaActual === totalPaginas || totalPaginas === 0} // **Deshabilitar en la última página**
+              className="pagination-btn pagination-btn-next"
+            >
               Siguiente
             </button>
           </div>

@@ -8,7 +8,10 @@ use App\Http\Controllers\Responsable_Area_Controller;
 use App\Http\Controllers\Evaluador_Controller;
 use App\Http\Controllers\Generar_Lista_Controller;
 use App\Http\Controllers\Area_Controller;
+
 use App\Http\Controllers\Evaluacion_Controller; // <-- AÑADIR EL NUEVO CONTROLLER
+use App\Http\Controllers\Nivel_Fase_Controller;
+
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -44,7 +47,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Grupo Responsable 
     Route::middleware('role:responsable')->group(function () {
         Route::get('/niveles/auth', [Generar_Lista_Controller::class, 'listarPorAuth']);
+        Route::post('/nivel-fase/rechazar/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'rechazar']);
+        Route::post('/nivel-fase/aprobar/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'aprobar']);
     });
+
 
     // --- INICIO DE CÓDIGO AÑADIDO ---
     // Grupo Evaluador
@@ -67,4 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/evaluacion/fase/{id_fase}/enviar-lista', [Evaluacion_Controller::class, 'enviarLista']);
     });
     // --- FIN DE CÓDIGO AÑADIDO ---
+
+    Route::get('/nivel-fase/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'mostrar']);
+
 });
