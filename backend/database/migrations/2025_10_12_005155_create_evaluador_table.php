@@ -9,9 +9,10 @@ return new class extends Migration {
         Schema::create('evaluador', function (Blueprint $table) {
             $table->id('id_evaluador');
             $table->foreignId('id_usuario')->constrained('usuario', 'id_usuario');
-            $table->boolean('disponible')->default(true);
+           // $table->boolean('disponible')->default(true);
             $table->foreignId('id_area')->constrained('area', 'id_area');
-            $table->foreignId('id_nivel')->nullable()->constrained('nivel', 'id_nivel');
+           // $table->foreignId('id_nivel')->nullable()->constrained('nivel', 'id_nivel');
+            $table->unsignedInteger('max_olimpistas')->default(30);
             $table->timestampTz('created_at')->useCurrent();
         });
     }

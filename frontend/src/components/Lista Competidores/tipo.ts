@@ -5,10 +5,7 @@ export interface Nivel {
   competidores: number;
   fasesAprobadas: number;
   faseTotal: number;
-  evaluador: {
-    id?: number;
-    nombre: string;
-  } | null;
+  evaluador: string;
 }
 
 export interface ValidacionListasProps {

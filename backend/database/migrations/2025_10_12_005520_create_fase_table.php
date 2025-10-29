@@ -9,7 +9,7 @@ return new class extends Migration {
        Schema::create('fase', function (Blueprint $table) {
     $table->id('id_fase');
     $table->text('nombre');
-    $table->decimal('nota_minima', 5, 2)->nullable();
+    $table->unsignedTinyInteger('nota_minima')->nullable();
     $table->foreignId('iniciado_por')->nullable()->constrained('usuario', 'id_usuario');
     $table->timestampTz('iniciado_timestamp')->nullable();
     $table->foreignId('finalizado_por')->nullable()->constrained('usuario', 'id_usuario');

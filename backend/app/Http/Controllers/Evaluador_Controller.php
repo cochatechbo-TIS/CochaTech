@@ -47,7 +47,8 @@ class Evaluador_Controller extends Controller
             $data = $request->only([
                 'nombre', 'apellidos', 'ci', 'email', 'telefono', 'area', 'nivel', 'disponible'
             ]);
-
+            $data['ci'] = trim($data['ci'] ?? '');//para limpiar espacios ojito
+            //Log::info('CI recibido: [' . $data['ci'] . ']');
             $validator = Validator::make($data, [
                 'nombre' => 'required|string|max:50',
                 'apellidos' => 'required|string|max:100',
@@ -83,7 +84,6 @@ class Evaluador_Controller extends Controller
 
             // Crear usuario
             $plainPassword = $this->generatePassword();
-            $data['ci'] = trim($data['ci']);//para limpiar espacios ojito
             $usuario = Usuario::create([
                 'nombre' => $data['nombre'],
                 'apellidos' => $data['apellidos'],

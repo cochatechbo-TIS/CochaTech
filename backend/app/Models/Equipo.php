@@ -5,19 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Nivel extends Model
+class Equipo extends Model
 {
     use HasFactory;
 
-    protected $table = 'nivel';
-    protected $primaryKey = 'id_nivel';
-    public $timestamps = false;
+    protected $table = 'equipo';
+    protected $primaryKey = 'id_equipo';
 
     protected $fillable = [
-        'nombre',
+        'nombre_equipo',
+        'institucion',
         'id_area',
-        'id_evaluador',
-        'es_grupal'
+        'id_nivel',
     ];
 
     // Relaciones
@@ -26,13 +25,13 @@ class Nivel extends Model
         return $this->belongsTo(Area::class, 'id_area', 'id_area');
     }
 
-    public function evaluador()
+    public function nivel()
     {
-        return $this->belongsTo(Evaluador::class, 'id_evaluador', 'id_evaluador');
+        return $this->belongsTo(Nivel::class, 'id_nivel', 'id_nivel');
     }
 
     public function olimpistas()
     {
-        return $this->hasMany(Olimpista::class, 'id_nivel', 'id_nivel');
+        return $this->belongsToMany(Importar_Olimpista::class, 'equipo_olimpista', 'id_equipo', 'id_olimpista');
     }
 }

@@ -18,7 +18,9 @@ class DatabaseSeeder extends Seeder
             RolSeeder::class,
             AreaSeeder::class,
             NivelSeeder::class,
-            
+            EstadoFaseSeeder::class,
+            EstadoOlimpistaSeeder::class,
+            FaseSeeder::class,
             // Seeders de usuarios (dependen de los anteriores)
             AdminUserSeeder::class,
             EvaluadorSeeder::class, // <-- AÑADIDO

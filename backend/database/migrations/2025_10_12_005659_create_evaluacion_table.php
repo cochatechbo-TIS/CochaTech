@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::create('evaluacion', function (Blueprint $table) {
             $table->id('id_evaluacion');
             $table->foreignId('id_olimpista')->constrained('olimpista', 'id_olimpista');
-            $table->foreignId('id_area_nivel_fase')->constrained('area_nivel_fase', 'id_area_nivel_fase');
+            $table->foreignId('id_nivel_fase')->constrained('nivel_fase', 'id_nivel_fase');
             $table->decimal('nota', 5, 2)->nullable();
             $table->foreignId('id_equipo')->nullable()->constrained('equipo', 'id_equipo');/////puede que lo borre
             //$table->decimal('nota_minima', 5, 2)->nullable();
