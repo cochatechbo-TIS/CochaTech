@@ -5,6 +5,7 @@ import { EvaluadorTable } from "../components/evaluadores/EvaluadorTable"; // As
 import { EditEvaluadorModal } from "../components/evaluadores/EditEvaluadorModal"; // Asegúrate de que este componente exista
 import type { Usuario } from "../interfaces/Usuario";
 
+const EVALUADORES_POR_PAGINA = 20;
 const GestionEvaluadores: React.FC = () => {
   // 1. ESTADOS
   const [evaluadores, setEvaluadores] = useState<Usuario[]>([]);
@@ -12,6 +13,7 @@ const GestionEvaluadores: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [paginaActual, setPaginaActual] = useState(1); // Página inicial: 1
 
   const API_BASE = "http://localhost:8000/api"; // URL base de la API
 
@@ -39,6 +41,8 @@ const GestionEvaluadores: React.FC = () => {
     try {
       setLoading(true);
       setError("");
+
+      setPaginaActual(1); // Reiniciar a la primera página al recargar datos
 
       console.log("Cargando evaluadores...");
       // RUTA DE TU API PARA LISTAR EVALUADORES
@@ -85,6 +89,11 @@ const GestionEvaluadores: React.FC = () => {
   useEffect(() => {
     fetchEvaluadores();
   }, [fetchEvaluadores]);
+
+  // **NUEVO: Resetear página a 1 cuando el filtro cambie**
+  useEffect(() => {
+    setPaginaActual(1);
+  }, [filtro]);
 
   // 5. MANEJADORES DE ACCIONES
 
@@ -215,6 +224,27 @@ const GestionEvaluadores: React.FC = () => {
       (evaluador.telefono && evaluador.telefono.includes(filtro)) || // ✨ AÑADIDO: Incluir teléfono en el filtro
       evaluador.area.toLowerCase().includes(filtro.toLowerCase())
   );
+  // **NUEVO: LÓGICA DE PAGINACIÓN**
+  const totalPaginas = Math.ceil(evaluadoresFiltrados.length / EVALUADORES_POR_PAGINA);
+  const indiceInicio = (paginaActual - 1) * EVALUADORES_POR_PAGINA;
+  const indiceFin = indiceInicio + EVALUADORES_POR_PAGINA;
+
+  // **Evaluadores que se muestran en la tabla (paginados)**
+  const evaluadoresPaginados = evaluadoresFiltrados.slice(indiceInicio, indiceFin);
+
+  // **Controladores de paginación**
+  const irAPagina = (pagina: number) => {
+    if (pagina >= 1 && pagina <= totalPaginas) {
+      setPaginaActual(pagina);
+    }
+  };
+
+  const irAnterior = () => irAPagina(paginaActual - 1);
+  const irSiguiente = () => irAPagina(paginaActual + 1);
+
+  // Cálculo para mostrar el rango actual
+  const rangoInicio = evaluadoresPaginados.length > 0 ? indiceInicio + 1 : 0;
+  const rangoFin = indiceInicio + evaluadoresPaginados.length;
 
   // 7. RENDERIZADO (Usando el patrón de tu código)
   if (loading) {
@@ -303,7 +333,7 @@ const GestionEvaluadores: React.FC = () => {
 
         {/* 🧾 TABLA */}
         <EvaluadorTable
-          usuario={evaluadoresFiltrados}
+          usuario={evaluadoresPaginados}
           onEdit={handleEditEvaluador}
           onDelete={handleDeleteEvaluador}
         />
@@ -313,8 +343,34 @@ const GestionEvaluadores: React.FC = () => {
       {evaluadoresFiltrados.length > 0 && (
         <div className="pagination-section">
           <span className="pagination-info">
-            Mostrando {evaluadoresFiltrados.length} de {evaluadores.length} evaluadores
+            Mostrando {rangoInicio} - {rangoFin} de {evaluadoresFiltrados.length} evaluadores
           </span>
+          <div className="pagination-controls">
+            <button
+              onClick={irAnterior}
+              disabled={paginaActual === 1} // **Deshabilitar en la primera página**
+              className="pagination-btn pagination-btn-prev"
+            >
+              Anterior
+            </button>
+            {/* **Generación de botones de página simplificada** */}
+            {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => irAPagina(page)}
+                className={`pagination-btn ${page === paginaActual ? 'pagination-btn-active' : ''}`}
+              >
+                {page}
+              </button>
+            ))}
+            <button
+              onClick={irSiguiente}
+              disabled={paginaActual === totalPaginas || totalPaginas === 0} // **Deshabilitar en la última página**
+              className="pagination-btn pagination-btn-next"
+            >
+              Siguiente
+            </button>
+          </div>
         </div>
       )}
 

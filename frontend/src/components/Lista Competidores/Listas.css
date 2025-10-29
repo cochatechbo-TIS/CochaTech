@@ -344,4 +344,22 @@
   }
 
 }
+@media (max-width: 480px) {
+  .validacion-title, .validacion-subtitle {
+    font-size: 16px;
+  }
+  .info-title, .info-text, .progreso-text, .evaluador-nombre {
+    font-size: 12px;
+  }
+}
+@media (max-width: 480px) {
+  .search-container > div {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .filter-select {
+    min-width: 120px;
+    width: 100%;
+  }
+}
 

@@ -169,8 +169,9 @@ function Listas({ area = AREA_DEFAULT }: ValidacionListasProps) {
   }, []);
 
   const handleAsignarEvaluador = useCallback((nivelId: number) => {
-    alert(`Funcionalidad de asignar evaluador en desarrollo para el nivel: ${nivelId}`);
-  }, []);
+    alert(`Funcionalidad de cambiar evaluador en desarrollo para el nivel: ${nivelId}`);
+}, []);
+
 
   const handleCambiarEvaluador = useCallback((nivelId: number) => {
     alert(`Funcionalidad de cambiar evaluador en desarrollo para el nivel: ${nivelId}`);
@@ -183,6 +184,7 @@ function Listas({ area = AREA_DEFAULT }: ValidacionListasProps) {
     [navigate]
   );
 
+
   // ========== RENDER ==========
   return (
     <div className="validacion-container">
@@ -193,7 +195,7 @@ function Listas({ area = AREA_DEFAULT }: ValidacionListasProps) {
       {/* Filtros y buscador */}
       <div className="search-container">
         <div style={{ display: "flex", gap: "10px", width: "100%" }}>
-          <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
+          <div style={{ flex: 1, display: "flex", alignItems: "center", position: "relative" }}>
             <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.35-4.35" />
@@ -204,7 +206,6 @@ function Listas({ area = AREA_DEFAULT }: ValidacionListasProps) {
               value={busqueda}
               onChange={handleBusquedaChange}
               className="search-input"
-              style={{ width: "500px" }}
             />
           </div>
           <select value={filtroNivel} onChange={handleNivelChange} className="filter-select">

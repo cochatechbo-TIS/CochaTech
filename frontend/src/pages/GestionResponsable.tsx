@@ -5,6 +5,7 @@ import { ResponsableTable } from "../components/responsables/ResponsableTable";
 import { EditResponsableModal } from "../components/responsables/EditResponsableModal";
 import type { Usuario } from "../interfaces/Usuario";
 
+const RESPONSABLES_POR_PAGINA = 20;
 const GestionResponsables: React.FC = () => {
   // 1. ESTADOS
   const [responsables, setResponsables] = useState<Usuario[]>([]);
@@ -12,6 +13,7 @@ const GestionResponsables: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [paginaActual, setPaginaActual] = useState(1);
 
   const API_BASE = "http://localhost:8000/api"; // URL base de la API
 
@@ -39,6 +41,7 @@ const GestionResponsables: React.FC = () => {
     try {
       setLoading(true);
       setError("");
+      setPaginaActual(1);
 
       console.log("Cargando responsables...");
       // RUTA DE TU API PARA LISTAR RESPONSABLES
@@ -85,6 +88,10 @@ const GestionResponsables: React.FC = () => {
   useEffect(() => {
     fetchResponsables();
   }, [fetchResponsables]);
+
+  useEffect(() => {
+    setPaginaActual(1);
+  }, [filtro]);
 
   // 5. MANEJADORES DE ACCIONES (Actualizados para usar el estado)
 
@@ -199,6 +206,27 @@ const GestionResponsables: React.FC = () => {
       (resp.telefono && resp.telefono.includes(filtro)) || // ✨ AÑADIDO: Incluir teléfono en el filtro
       resp.area.toLowerCase().includes(filtro.toLowerCase())
   );
+  
+  // **NUEVO: LÓGICA DE PAGINACIÓN**
+  const totalPaginas = Math.ceil(responsablesFiltrados.length / RESPONSABLES_POR_PAGINA);
+  const indiceInicio = (paginaActual - 1) * RESPONSABLES_POR_PAGINA;
+  const indiceFin = indiceInicio + RESPONSABLES_POR_PAGINA;
+
+  // **Responsables que se muestran en la tabla (paginados)**
+  const responsablesPaginados = responsablesFiltrados.slice(indiceInicio, indiceFin);
+
+  // **Controladores de paginación**
+  const irAPagina = (pagina: number) => {
+    if (pagina >= 1 && pagina <= totalPaginas) {
+      setPaginaActual(pagina);
+    }
+  };
+
+  const irAnterior = () => irAPagina(paginaActual - 1);
+  const irSiguiente = () => irAPagina(paginaActual + 1);  
+  // Cálculo para mostrar el rango actual
+  const rangoInicio = responsablesPaginados.length > 0 ? indiceInicio + 1 : 0;
+  const rangoFin = indiceInicio + responsablesPaginados.length;
 
   // 6. RENDERIZADO CONDICIONAL DE CARGA/ERROR
   if (loading) {
@@ -286,7 +314,7 @@ const GestionResponsables: React.FC = () => {
         </div>
 
         <ResponsableTable
-          usuario={responsablesFiltrados}
+          usuario={responsablesPaginados}
           onEdit={handleEditResponsable}
           onDelete={handleDeleteResponsable}
         />
@@ -295,9 +323,35 @@ const GestionResponsables: React.FC = () => {
       {responsablesFiltrados.length > 0 && (
         <div className="pagination-section">
           <span className="pagination-info">
-            Mostrando {responsablesFiltrados.length} de {responsables.length}
-            responsables
+            Mostrando {rangoInicio} - {rangoFin} de {responsablesFiltrados.length} responsables
           </span>
+          <div className="pagination-controls">
+            <button
+              onClick={irAnterior}
+              disabled={paginaActual === 1} 
+              className="pagination-btn pagination-btn-prev"
+            >
+              Anterior
+            </button>
+
+            {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => irAPagina(page)}
+                className={`pagination-btn ${page === paginaActual ? 'pagination-btn-active' : ''}`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              onClick={irSiguiente}
+              disabled={paginaActual === totalPaginas || totalPaginas === 0} 
+              className="pagination-btn pagination-btn-next"
+            >
+              Siguiente
+            </button>
+          </div>
         </div>
       )}
 
