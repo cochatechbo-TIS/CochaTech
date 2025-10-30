@@ -29,12 +29,27 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
         // 2. Buscar al usuario por su email
         $user = Usuario::where('email', $request->email)->first();
-        // 3. Verificar si el usuario existe y la contraseña es correcta
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+
+        // *** AGREGAR ESTAS LÍNEAS ***
+        if (!$user) {
             throw ValidationException::withMessages([
-                'email' => ['Las credenciales proporcionadas son incorrectas.'],
+                'email' => ['No existe una cuenta con este correo electrónico.'],
             ]);
         }
+
+        if (!Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'password' => ['La contraseña es incorrecta.'],
+            ]);
+        }
+        // *** FIN DE LAS LÍNEAS AGREGADAS ***
+
+        // 3. Verificar si el usuario existe y la contraseña es correcta YA LO HACE ARRIBA
+        //if (! $user || ! Hash::check($request->password, $user->password)) {
+        //    throw ValidationException::withMessages([
+        //        'email' => ['Las credenciales proporcionadas son incorrectas.'],
+        //    ]);
+        //}
          ///esde aqui estoy trayendo el codigo que hiciste a en las rutas
         if (Auth::attempt($credentials)) {
             /** @var \App\Models\User $user */

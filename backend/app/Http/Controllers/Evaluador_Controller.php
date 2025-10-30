@@ -17,7 +17,7 @@ class Evaluador_Controller extends Controller
 {
     public function index()
     {
-        $evaluadores = Evaluador::with(['usuario', 'area', 'nivel'])->get();
+        $evaluadores = Evaluador::with(['usuario', 'area'])->get();
 
         $data = $evaluadores->map(function ($evaluador) {
             return [
@@ -28,8 +28,8 @@ class Evaluador_Controller extends Controller
                 'email' => $evaluador->usuario->email,
                 'telefono' => $evaluador->usuario->telefono,
                 'area' => $evaluador->area->nombre,
-                'nivel' => $evaluador->nivel?->nombre,
-                'disponible' => $evaluador->disponible ?? true,
+                //'nivel' => $evaluador->nivel?->nombre,
+                //'disponible' => $evaluador->disponible ?? true,
             ];
         });
 
@@ -45,7 +45,7 @@ class Evaluador_Controller extends Controller
 
         try {
             $data = $request->only([
-                'nombre', 'apellidos', 'ci', 'email', 'telefono', 'area', 'nivel', 'disponible'
+                'nombre', 'apellidos', 'ci', 'email', 'telefono', 'area'
             ]);
             $data['ci'] = trim($data['ci'] ?? '');//para limpiar espacios ojito
             //Log::info('CI recibido: [' . $data['ci'] . ']');
@@ -60,8 +60,8 @@ class Evaluador_Controller extends Controller
                 'email' => 'required|email|max:50|unique:usuario,email',
                 'telefono' => 'nullable|string|max:15',
                 'area' => 'required|string|exists:area,nombre',
-                'nivel' => 'nullable|string|exists:nivel,nombre',
-                'disponible' => 'nullable|boolean'
+                //'nivel' => 'nullable|string|exists:nivel,nombre',
+                //'disponible' => 'nullable|boolean'
             ]);
 
             if ($validator->fails()) {
@@ -78,9 +78,9 @@ class Evaluador_Controller extends Controller
             }
 
             // Buscar el nivel si se proporcionó
-            $nivel = isset($data['nivel'])
+            /*$nivel = isset($data['nivel'])
                 ? Nivel::whereRaw('LOWER(nombre) = ?', [strtolower($data['nivel'])])->first()
-                : null;
+                : null;*/
 
             // Crear usuario
             $plainPassword = $this->generatePassword();
@@ -98,8 +98,8 @@ class Evaluador_Controller extends Controller
             $evaluador = Evaluador::create([
                 'id_usuario' => $usuario->id_usuario,
                 'id_area' => $area->id_area,
-                'id_nivel' => $nivel?->id_nivel,
-                'disponible' => $data['disponible'] ?? true,
+                //'id_nivel' => $nivel?->id_nivel,
+                //'disponible' => $data['disponible'] ?? true,
             ]);
 
             // Enviar correo
@@ -151,7 +151,7 @@ class Evaluador_Controller extends Controller
                 return response()->json(['message' => 'Evaluador no encontrado'], 404);
             }
 
-            $data = $request->only(['nombre', 'apellidos', 'ci', 'email', 'telefono', 'area', 'nivel', 'disponible']);
+            $data = $request->only(['nombre', 'apellidos', 'ci', 'email', 'telefono', 'area']);
 
             $validator = Validator::make($data, [
                 'nombre' => 'nullable|string|max:50',
@@ -164,8 +164,8 @@ class Evaluador_Controller extends Controller
                 'email' => 'nullable|email|max:50|unique:usuario,email,' . $evaluador->usuario->id_usuario . ',id_usuario',
                 'telefono' => 'nullable|string|max:15',
                 'area' => 'nullable|string|exists:area,nombre',
-                'nivel' => 'nullable|string|exists:nivel,nombre',
-                'disponible' => 'nullable|boolean',
+                //'nivel' => 'nullable|string|exists:nivel,nombre',
+                //'disponible' => 'nullable|boolean',
             ]);
 
             if ($validator->fails()) {
@@ -182,22 +182,22 @@ class Evaluador_Controller extends Controller
                 }
             }
 
-            // Actualizar nivel si viene nombre
+            /*// Actualizar nivel si viene nombre
             if (isset($data['nivel'])) {
                 $nivel = Nivel::whereRaw('LOWER(nombre)=?', [strtolower($data['nivel'])])->first();
                 $evaluador->id_nivel = $nivel?->id_nivel;
-            }
+            }*/
 
             // Actualizar disponibilidad si viene
-            if (isset($data['disponible'])) {
+            /*if (isset($data['disponible'])) {
                 $evaluador->disponible = $data['disponible'];
-            }
+            }*/
 
             $evaluador->save();
 
             return response()->json([
                 'message' => 'Evaluador actualizado correctamente',
-                'data' => $evaluador->load('usuario', 'area', 'nivel')
+                'data' => $evaluador->load('usuario', 'area')
             ]);
         } catch (\Throwable $e) {
             Log::error('Error actualizando evaluador: ' . $e->getMessage());

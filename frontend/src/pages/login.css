@@ -1,344 +1,250 @@
 /* src/pages/login.css */
 
-.min-h-screen {
+/* Contenedor principal */
+.login-container {
   min-height: 100vh;
-}
-
-.bg-white {
   background-color: #ffffff;
-}
-
-.flex {
   display: flex;
-}
-
-.flex-col {
   flex-direction: column;
 }
 
-.items-center {
+.login-content {
+  flex: 1;
+  display: flex;
   align-items: center;
-}
-
-.justify-center {
   justify-content: center;
+  padding: 1rem;
 }
 
-.px-4 {
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-.w-full {
+/* Tarjeta de login */
+.login-card {
   width: 100%;
-}
-
-.max-w-md {
   max-width: 28rem;
-}
-
-.p-8 {
-  padding: 2rem;
-}
-
-.rounded-lg {
+  background-color: #ffffff;
   border-radius: 0.5rem;
-}
-
-.shadow-md {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.text-2xl {
+/* Header de la tarjeta */
+.login-header {
+  background-color: #2563eb;
+  color: #ffffff;
+  padding: 1rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.login-title {
   font-size: 1.5rem;
-}
-
-.font-bold {
   font-weight: 700;
-}
-
-.text-blue-700 {
-  color: #1d4ed8 !important;
-}
-
-.text-center {
   text-align: center;
-}
-
-.mb-2 {
   margin-bottom: 0.5rem;
 }
 
-.mb-8 {
-  margin-bottom: 2rem;
+.login-subtitle {
+  text-align: center;
+  margin: 0;
 }
 
-.text-gray-600 {
-  color: #4b5563;
+/* Contenedor del formulario */
+.login-form-container {
+  padding: 1.5rem;
 }
 
-.text-red-500 {
+/* Mensaje de error */
+.error-message {
   color: #ef4444;
-}
-
-.mb-4 {
+  text-align: center;
   margin-bottom: 1rem;
 }
 
-.mb-6 {
+/* Grupos de formulario */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group:last-of-type {
   margin-bottom: 1.5rem;
 }
 
-.block {
+.form-label {
   display: block;
-}
-
-.text-gray-700 {
   color: #374151;
-}
-
-.text-sm {
+  margin-bottom: 0.5rem;
   font-size: 0.875rem;
-}
-
-.font-medium {
   font-weight: 500;
 }
 
-.relative {
+/* Wrapper de inputs */
+.input-wrapper {
   position: relative;
 }
 
-.absolute {
+/* Iconos dentro de inputs */
+.input-icon {
   position: absolute;
-}
-
-.left-3 {
   left: 0.75rem;
-}
-
-.top-1\/2 {
   top: 50%;
-}
-
-.transform {
   transform: translateY(-50%);
-}
-
-.w-5 {
   width: 1.25rem;
-}
-
-.h-5 {
   height: 1.25rem;
-}
-
-.text-gray-400 {
   color: #9ca3af;
 }
 
-.p-3 {
+/* Inputs */
+.form-input {
+  width: 100%;
   padding: 0.75rem;
-}
-
-.pl-10 {
   padding-left: 2.5rem;
-}
-
-.pr-10 {
-  padding-right: 2.5rem;
-}
-
-.border {
-  border-width: 1px;
-}
-
-.border-gray-300 {
-  border-color: #d1d5db;
-}
-
-.rounded-md {
+  border: 1px solid #d1d5db;
   border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
 }
 
-.focus\:outline-none:focus {
+.form-input:focus {
   outline: none;
-}
-
-.focus\:border-blue-600:focus {
   border-color: #2563eb;
 }
 
-.bg-blue-600 {
-  background-color: #2563eb;
+/* Input de contraseña con espacio para el botón */
+.password-input {
+  padding-right: 3rem;
 }
 
-.text-white {
-  color: #ffffff;
-}
-
-.py-3 {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-}
-
-.flex {
+/* Botón para mostrar/ocultar contraseña */
+.toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0.25rem;
   display: flex;
-}
-
-.justify-center {
+  align-items: center;
   justify-content: center;
+  transition: color 0.2s;
 }
 
-.items-center {
-  align-items: center;
-}
-
-.hover\:bg-blue-700:hover {
-  background-color: #1d4ed8;
-}
-
-.disabled\:opacity-50:disabled {
-  opacity: 0.5;
-}
-
-.text-purple-600 {
-  color: #7c3aed;
-}
-
-.mt-4 {
-  margin-top: 1rem;
-}
-
-.hover\:underline:hover {
-  text-decoration: underline;
-}
-
-.text-gray-500 {
+.toggle-password:hover {
   color: #6b7280;
 }
 
-.mt-8 {
-  margin-top: 2rem;
+.toggle-password:focus {
+  outline: none;
 }
 
-.mt-2 {
-  margin-top: 0.5rem;
-}
-
-/* Estilos para LoginHeader */
-.bg-blue-600 {
+/* Botón de submit */
+.submit-btn {
+  width: 100%;
   background-color: #2563eb;
-}
-
-.text-white {
   color: #ffffff;
-}
-
-.py-4 {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-}
-
-.px-6 {
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-}
-
-.flex {
+  padding: 0.75rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
   display: flex;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-.items-center {
+  justify-content: center;
   align-items: center;
+  transition: background-color 0.2s;
 }
 
-.text-2xl {
-  font-size: 1.5rem;
-}
-
-.font-bold {
-  font-weight: 700;
-}
-
-.bg-blue-700 {
+.submit-btn:hover {
   background-color: #1d4ed8;
 }
 
-.hover\:bg-blue-800:hover {
-  background-color: #1e40af;
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.px-4 {
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-.py-2 {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
-.rounded-md {
-  border-radius: 0.375rem;
-}
-
-.gap-2 {
-  gap: 0.5rem;
-}
-
-/* Ajustes para el contenedor principal */
-.flex-col {
-  flex-direction: column;
-}
-
-.flex-1 {
-  flex: 1;
-}
-
-
-
-
-/* Ajustes para título (más oscuro y forzado) */
-.text-blue-700 {
-  color: #1d4ed8 !important;
-}
-
-/* Estilos para el botón de LoginHeader (más redondeado) */
-.rounded-md {
-  border-radius: 0.375rem;
-}
-
-.rounded-full {
-  border-radius: 9999px; /* Para botón más curvo, como en mockup */
-}
-
-/* Estilos para el footer */
-.bg-gray-100 {
-  background-color: #f3f4f6; /* Gris claro como en mockup */
-}
-
-.py-4 {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-}
-
-.text-center {
+/* Enlace de contraseña olvidada */
+.forgot-password {
   text-align: center;
-}
-
-.text-gray-500 {
-  color: #6b7280;
-}
-
-.text-sm {
+  margin-top: 1rem;
   font-size: 0.875rem;
 }
 
-.mt-1 {
-  margin-top: 0.25rem;
+.forgot-link {
+  color: #7c3aed;
+  text-decoration: none;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* Footer */
+.login-footer {
+  background-color: #f3f4f6;
+  padding: 1rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.login-footer p {
+  margin: 0.25rem 0;
+}
+
+/* Estilos específicos para ResetPassword */
+.success-message {
+  color: #059669;
+  background-color: #f0fdf4;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.success-link {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.error-message-box {
+  color: #dc2626;
+  background-color: #fef2f2;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.reset-info {
+  color: #4b5563;
+  font-size: 0.875rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.reset-email {
+  color: #1f2937;
+}
+
+/* Estilos específicos para ForgotPassword */
+.forgot-info {
+  color: #4b5563;
+  font-size: 0.875rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.back-to-login {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+}
+
+.back-link {
+  color: #7c3aed;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
 }

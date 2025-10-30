@@ -10,13 +10,11 @@ class Evaluador extends Model
     protected $primaryKey = 'id_evaluador';
     public $incrementing = true;
     protected $keyType = 'int';
-    public $timestamps = false; // ya que tienes created_at manual
+    public $timestamps = false; 
 
     protected $fillable = [
         'id_usuario',
         'id_area',
-        'id_nivel',
-        'disponible',
     ];
 
     // Relación con usuario
@@ -31,9 +29,4 @@ class Evaluador extends Model
         return $this->belongsTo(Area::class, 'id_area', 'id_area');
     }
 
-    // Relación con nivel
-    public function nivel()
-    {
-        return $this->belongsTo(Nivel::class, 'id_nivel', 'id_nivel');
-    }
 }
