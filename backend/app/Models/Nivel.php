@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Nivel extends Model
 {
@@ -21,7 +22,8 @@ class Nivel extends Model
     ];
 
     // Relaciones
-    public function area()
+    
+    public function area(): BelongsTo
     {
         return $this->belongsTo(Area::class, 'id_area', 'id_area');
     }

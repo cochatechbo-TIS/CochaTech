@@ -3,55 +3,74 @@ import React, { useEffect, useState } from "react";
 import type { Fase, Olimpista } from "../interfaces/Evaluacion";
 import EvaluacionTable from "../components/evaluadores/EvaluacionTable";
 import {
-  obtenerFasesPorNivel,
+  obtenerDatosDeEvaluacion, // <-- Función actualizada
+  type EvaluacionData,      // <-- Interfaz actualizada
+  type InfoEvaluador,         // <-- Interfaz nueva
   obtenerOlimpistasPorFase,
   guardarNotas,
-  // --- INICIO DE CÓDIGO AÑADIDO ---
   generarClasificados,
   enviarLista,
-  // --- FIN DE CÓDIGO AÑADIDO ---
 } from "../services/evaluacionService";
+import { FaUser, FaCalendarAlt, FaUsers } from 'react-icons/fa'; // Iconos
 import "./evaluacion.css";
 
 const EvaluacionPorFases: React.FC = () => {
+  // --- Estados para los datos ---
   const [fases, setFases] = useState<Fase[]>([]);
+  const [infoEvaluador, setInfoEvaluador] = useState<InfoEvaluador | null>(null);
   const [faseSeleccionada, setFaseSeleccionada] = useState<Fase | null>(null);
   const [olimpistas, setOlimpistas] = useState<Olimpista[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [fechaActual, setFechaActual] = useState<string>('');
+  
+  // --- Estados de UI ---
+  const [loading, setLoading] = useState(true); // Carga inicial de la página
+  const [loadingOlimpistas, setLoadingOlimpistas] = useState(false); // Carga de la tabla
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // --- INICIO DE MODIFICACIÓN ---
-  // Ya no necesitamos un nivelId fijo, el backend lo sabe.
-  // const nivelId = 2; 
-  // --- FIN DE MODIFICACIÓN ---
-
+  // Efecto para cargar datos iniciales (fases, info evaluador, fecha)
   useEffect(() => {
+    // Setea la fecha actual
+    const hoy = new Date();
+    setFechaActual(hoy.toLocaleString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }));
+
     (async () => {
       try {
-        // --- INICIO DE MODIFICACIÓN ---
-        // Ya no se pasa el nivelId
-        const fasesData = await obtenerFasesPorNivel();
-        // --- FIN DE MODIFICACIÓN ---
-        setFases(fasesData);
-        if (fasesData.length > 0) setFaseSeleccionada(fasesData[0]);
+        setLoading(true);
+        const data: EvaluacionData = await obtenerDatosDeEvaluacion();
+        
+        setInfoEvaluador(data.infoEvaluador);
+        setFases(data.fases);
+        
+        if (data.fases.length > 0) {
+          setFaseSeleccionada(data.fases[0]); // Activa la primera fase
+        } else {
+          setError("No hay fases asignadas para este nivel.");
+        }
       } catch (err) {
         console.error(err);
         setError("No se pudieron cargar las fases. ¿Eres un evaluador con un nivel asignado?");
       }
+      setLoading(false);
     })();
   }, []);
 
+  // Efecto para cargar olimpistas cuando cambia la fase seleccionada
   useEffect(() => {
     if (faseSeleccionada) {
       cargarOlimpistas(faseSeleccionada.id);
     }
   }, [faseSeleccionada]);
 
+  // --- Funciones de Lógica ---
+
   const cargarOlimpistas = async (faseId: number) => {
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
+    setLoadingOlimpistas(true);
+    clearMessages();
     try {
       const data = await obtenerOlimpistasPorFase(faseId);
       setOlimpistas(data);
@@ -59,19 +78,20 @@ const EvaluacionPorFases: React.FC = () => {
       console.error(err);
       setError("No se pudieron cargar los olimpistas.");
     }
-    setLoading(false);
+    setLoadingOlimpistas(false);
   };
 
-  // Limpia los mensajes de éxito/error
   const clearMessages = () => {
     setError(null);
     setSuccess(null);
   };
 
+  // --- Manejadores de Botones ---
+
   const handleGuardar = async () => {
     if (!faseSeleccionada) return;
     clearMessages();
-    setLoading(true);
+    setLoadingOlimpistas(true); // Bloquea la tabla mientras guarda
     try {
       await guardarNotas(faseSeleccionada.id, olimpistas);
       setSuccess("Notas guardadas correctamente ✅");
@@ -79,110 +99,136 @@ const EvaluacionPorFases: React.FC = () => {
       console.error(err);
       setError("Error al guardar las notas.");
     }
-    setLoading(false);
+    setLoadingOlimpistas(false);
   };
 
-  // --- INICIO DE CÓDIGO AÑADIDO ---
   const handleGenerarClasificados = async () => {
     if (!faseSeleccionada) return;
-    if (!window.confirm("¿Estás seguro de que deseas generar los clasificados? Esto calculará el estado (Aprobado/Reprobado) basado en las notas guardadas.")) {
-      return;
-    }
+    if (!window.confirm("¿Estás seguro de generar los clasificados? Esto calculará el estado (Aprobado/Reprobado).")) return;
     
     clearMessages();
-    setLoading(true);
+    setLoadingOlimpistas(true);
     try {
-      // La API devuelve la lista actualizada de olimpistas
       const olimpistasActualizados = await generarClasificados(faseSeleccionada.id);
-      setOlimpistas(olimpistasActualizados); // Actualizamos la tabla
-      setSuccess("Clasificados generados correctamente. Revisa la columna 'ESTADO'.");
+      setOlimpistas(olimpistasActualizados);
+      setSuccess("Clasificados generados. Revisa la columna 'ESTADO'.");
     } catch (err) {
       console.error(err);
-      setError("Error al generar clasificados. Asegúrate de haber guardado las notas primero.");
+      setError("Error al generar clasificados.");
     }
-    setLoading(false);
+    setLoadingOlimpistas(false);
   };
 
   const handleEnviarLista = async () => {
     if (!faseSeleccionada) return;
-     if (!window.confirm("¿Estás seguro de enviar la lista? Esta acción marca la fase como finalizada y no podrás editarla después.")) {
-      return;
-    }
+    if (!window.confirm("¿Estás seguro de enviar la lista? Esta acción es final.")) return;
+
     clearMessages();
-    setLoading(true);
+    setLoadingOlimpistas(true);
     try {
       const res = await enviarLista(faseSeleccionada.id);
       setSuccess(res.message);
-      // Opcional: deshabilitar la edición
+      // Recargar fases para mostrar el nuevo estado (ej. "Aprobada")
+      const data = await obtenerDatosDeEvaluacion();
+      setFases(data.fases);
     } catch (err) {
       console.error(err);
       setError("Error al enviar la lista.");
     }
-    setLoading(false);
+    setLoadingOlimpistas(false);
   };
-  // --- FIN DE CÓDIGO AÑADIDO ---
 
+
+  // --- Renderizado ---
+
+  if (loading) {
+    return <div className="evaluacion-container"><p>Cargando panel de evaluador...</p></div>;
+  }
 
   return (
     <div className="evaluacion-container">
       <h1 className="titulo">Evaluación de olimpistas</h1>
+      
+      {/* --- INICIO: NUEVO HEADER DE INFORMACIÓN --- */}
+      {infoEvaluador && (
+        <div className="evaluador-info-header">
+          <div className="info-item">
+            <FaUser className="info-icon" />
+            <span>{infoEvaluador.nombre}</span>
+          </div>
+          <div className="info-item">
+            <strong>Área:</strong>
+            <span>{infoEvaluador.area}</span>
+          </div>
+          <div className="info-item">
+            <strong>Nivel:</strong>
+            <span>{infoEvaluador.nivel}</span>
+          </div>
+          <div className="info-item info-fecha">
+            <FaCalendarAlt className="info-icon" />
+            <span>{fechaActual}</span>
+          </div>
+        </div>
+      )}
+      {/* --- FIN: NUEVO HEADER DE INFORMACIÓN --- */}
 
-      {/* --- INICIO DE CÓDIGO AÑADIDO (Mensajes de Alerta) --- */}
+      {/* Alertas */}
       {error && <div className="alerta alerta-error">{error}</div>}
       {success && <div className="alerta alerta-exito">{success}</div>}
-      {/* --- FIN DE CÓDIGO AÑADIDO --- */}
-
 
       {/* Tabs dinámicos */}
       <div className="fases-tabs">
         {fases.map((f) => (
           <button
             key={f.id}
-            onClick={() => { setFaseSeleccionada(f); clearMessages(); }}
+            onClick={() => setFaseSeleccionada(f)}
             className={`fase-tab ${
               faseSeleccionada?.id === f.id ? "active" : ""
             }`}
+            disabled={loadingOlimpistas} // Deshabilita tabs mientras carga/guarda
           >
-            {f.nombre} ({f.estado}) {/* Mostramos el estado de la fase */}
+            {f.nombre} ({f.estado})
           </button>
         ))}
       </div>
 
-      {loading ? (
-        <p>Cargando...</p>
+      {loadingOlimpistas ? (
+        <p>Cargando olimpistas...</p>
       ) : (
         <>
-          <p className="info-olimpistas">
-            👥 {olimpistas.length} olimpistas en esta fase
-          </p>
-
-          <EvaluacionTable olimpistas={olimpistas} onChange={setOlimpistas} />
-
-          <div className="botones-evaluacion">
-            {/* --- INICIO DE MODIFICACIÓN (Conectamos los botones) --- */}
-            <button 
-              onClick={handleGenerarClasificados}
-              className="btn btn-purple"
-              disabled={loading}
-            >
-              Generar clasificados
-            </button>
-            <button 
-              onClick={handleEnviarLista}
-              className="btn btn-blue"
-              disabled={loading}
-            >
-              Enviar lista
-            </button>
-            <button 
-              onClick={handleGuardar} 
-              className="btn btn-green"
-              disabled={loading}
-            >
-              {loading ? 'Guardando...' : 'Guardar notas'}
-            </button>
-            {/* --- FIN DE MODIFICACIÓN --- */}
+          {/* --- INICIO: NUEVO HEADER DE TABLA (Botones y Conteo) --- */}
+          <div className="tabla-header-controles">
+            <div className="info-olimpistas-conteo">
+              <FaUsers className="info-icon" />
+              <span>{olimpistas.length} olimpistas en esta fase</span>
+            </div>
+            <div className="botones-evaluacion">
+              <button 
+                onClick={handleGenerarClasificados}
+                className="btn btn-purple"
+                disabled={loadingOlimpistas}
+              >
+                Generar clasificados
+              </button>
+              <button 
+                onClick={handleEnviarLista}
+                className="btn btn-blue"
+                disabled={loadingOlimpistas}
+              >
+                Enviar lista
+              </button>
+              <button 
+                onClick={handleGuardar} 
+                className="btn btn-green"
+                disabled={loadingOlimpistas}
+              >
+                {loadingOlimpistas ? 'Guardando...' : 'Guardar notas'}
+              </button>
+            </div>
           </div>
+          {/* --- FIN: NUEVO HEADER DE TABLA --- */}
+          
+          <EvaluacionTable olimpistas={olimpistas} onChange={setOlimpistas} />
         </>
       )}
     </div>

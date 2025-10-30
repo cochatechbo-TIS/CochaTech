@@ -35,25 +35,26 @@ class Evaluacion_Controller extends Controller
             return null;
         }
 
-        // 2. Buscar el nivel asignado a ESE evaluador
-        $nivelAsignado = Nivel::where('id_evaluador', $evaluador->id_evaluador)->first();
+        // 2. CORRECCIÓN: Cargar la relación 'area' del nivel
+        $nivelAsignado = Nivel::with('area') // <-- Cargar el nombre del área
+                          ->where('id_evaluador', $evaluador->id_evaluador)
+                          ->first();
 
         if (!$nivelAsignado) {
-            Log::warning("getEvaluadorData - Se encontró evaluador (ID: {$evaluador->id_evaluador}), pero no tiene nivel asignado en la tabla 'nivel'.");
+            Log::warning("getEvaluadorData - Evaluador (ID: {$evaluador->id_evaluador}) no tiene nivel asignado.");
             return null;
         }
 
+
         // 3. Devolver todos los datos que necesitamos
-        // --- INICIO DE CORRECCIÓN LÓGICA ---
-        // El 'id_area' AHORA viene del nivel asignado, no del evaluador.
-        // Esto asegura que el nivel y el área siempre coincidan.
         return [
-            'evaluador'    => $evaluador,              // El modelo Evaluador
-            'nivel'        => $nivelAsignado,          // El modelo Nivel
-            'id_usuario'   => $user->id_usuario,
+            'usuario' => $user,                   // <-- DEVOLVER EL USUARIO COMPLETO
+            'evaluador' => $evaluador,
+            'nivel' => $nivelAsignado,          // <-- Nivel (con área cargada)
+            'id_usuario' => $user->id_usuario,
             'id_evaluador' => $evaluador->id_evaluador,
-            'id_nivel'     => $nivelAsignado->id_nivel,
-            'id_area'      => $nivelAsignado->id_area, // <-- CORREGIDO
+            'id_nivel' => $nivelAsignado->id_nivel,
+            'id_area' => $nivelAsignado->id_area,
         ];
         // --- FIN DE CORRECCIÓN LÓGICA ---
     }
@@ -63,7 +64,7 @@ class Evaluacion_Controller extends Controller
      */
     public function obtenerFases(Request $request)
     {
-        // --- INICIO DE CORRECCIÓN ---
+  
         $evaluadorData = $this->getEvaluadorData();
 
         if (!$evaluadorData) {
@@ -75,7 +76,12 @@ class Evaluacion_Controller extends Controller
 
         $idNivelDelEvaluador = $evaluadorData['id_nivel'];
         $idUsuarioAutenticado = $evaluadorData['id_usuario'];
-        // --- FIN DE CORRECCIÓN ---
+        // Construir el objeto de información del evaluador
+        $infoEvaluador = [
+            'nombre' => $evaluadorData['usuario']->nombre . ' ' . $evaluadorData['usuario']->apellidos,
+            'nivel' => $evaluadorData['nivel']->nombre,
+            'area' => $evaluadorData['nivel']->area->nombre // <-- Obtenido de la relación
+        ];
 
         try {
             // Buscamos las fases relacionadas a ESE nivel
@@ -91,6 +97,7 @@ class Evaluacion_Controller extends Controller
              // Formatear respuesta
              $resultadoFases = $fases->map(function ($fase) use ($idNivelDelEvaluador) {
                  $nivelFaseInfo = $fase->nivel_fases->firstWhere('id_nivel', $idNivelDelEvaluador);
+                 $estadoNombre = $nivelFaseInfo?->estado_fase?->nombre_estado ?? 'Desconocido';
                  return [
                      'id' => $fase->id_fase, 
                      'nombre' => $fase->nombre,
@@ -98,7 +105,10 @@ class Evaluacion_Controller extends Controller
                  ];
              });
 
-            return response()->json($resultadoFases);
+            return response()->json([
+                'infoEvaluador' => $infoEvaluador,
+                'fases' => $resultadoFases
+            ]);
 
         } catch (\Throwable $e) {
             Log::error("Error en Evaluacion_Controller::obtenerFases para usuario ID {$idUsuarioAutenticado}, Nivel ID {$idNivelDelEvaluador}: ".$e->getMessage());

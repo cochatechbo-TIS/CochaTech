@@ -2,6 +2,8 @@
 
 .evaluacion-container {
   padding: 1.5rem;
+  width: 95%; /* Añadido para que no ocupe toda la pantalla */
+  margin: 0 auto; /* Añadido para centrar */
 }
 
 .titulo {
@@ -13,22 +15,30 @@
 .fases-tabs {
   display: flex;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0; /* Ajustado */
   border-bottom: 2px solid #e5e7eb;
 }
 
 .fase-tab {
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.25rem; /* Más padding */
   border: none;
   background: none;
   color: #6b7280;
   font-weight: 500;
   cursor: pointer;
+  margin-bottom: -2px; /* Alinea con el borde */
+  border-bottom: 2px solid transparent;
+}
+
+.fase-tab:disabled { /* Añadido */
+  color: #9ca3af;
+  cursor: not-allowed;
 }
 
 .fase-tab.active {
   border-bottom: 2px solid #2563eb;
   color: #2563eb;
+  font-weight: 600; /* Añadido */
 }
 
 .evaluacion-table-container {
@@ -42,17 +52,29 @@
 
 .evaluacion-table th,
 .evaluacion-table td {
-  padding: 0.5rem;
+  padding: 0.75rem; /* Más padding */
   border: 1px solid #e5e7eb;
   text-align: left;
+  vertical-align: middle; /* Añadido */
+}
+
+.evaluacion-table th { /* Añadido */
+  background-color: #f9fafb;
+  font-weight: 600;
 }
 
 .evaluacion-table input[type="number"],
 .evaluacion-table input[type="text"] {
   border: 1px solid #d1d5db;
   border-radius: 4px;
-  padding: 0.3rem;
+  padding: 0.5rem; /* Más padding */
   width: 100%;
+  box-sizing: border-box; /* Añadido */
+}
+
+.evaluacion-table input[type="checkbox"] { /* Añadido */
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .estado-aprobado {
@@ -65,11 +87,12 @@
   font-weight: 600;
 }
 
+/* --- ESTILOS MOVIDOS Y MODIFICADOS --- */
 .botones-evaluacion {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  margin-top: 1rem;
+  /* margin-top: 1rem; <-- Eliminado */
 }
 
 .btn {
@@ -79,16 +102,115 @@
   font-weight: 500;
   border: none;
   cursor: pointer;
+  transition: background-color 0.2s; /* Añadido */
+}
+
+.btn:disabled { /* Añadido */
+  background-color: #9ca3af;
+  cursor: not-allowed;
 }
 
 .btn-purple {
   background-color: #9333ea;
 }
+.btn-purple:hover:not(:disabled) { /* Añadido */
+  background-color: #7e22ce;
+}
 
 .btn-blue {
   background-color: #2563eb;
+}
+.btn-blue:hover:not(:disabled) { /* Añadido */
+  background-color: #1d4ed8;
 }
 
 .btn-green {
   background-color: #16a34a;
 }
+.btn-green:hover:not(:disabled) { /* Añadido */
+  background-color: #15803d;
+}
+
+/* --- INICIO: CÓDIGO CSS NUEVO --- */
+.evaluador-info-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  gap: 15px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  color: #333;
+}
+
+.info-item .info-icon {
+  color: #2563eb; /* Azul */
+  font-size: 1.1rem;
+}
+
+.info-item strong {
+  color: #555;
+  margin-right: 4px;
+}
+
+.info-item.info-fecha {
+  margin-left: auto; /* Empuja la fecha a la derecha */
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.info-item.info-fecha .info-icon {
+  color: #6b7280;
+}
+
+.alerta {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+}
+.alerta-error {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+.alerta-exito {
+  background-color: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.tabla-header-controles {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; /* Para pantallas pequeñas */
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.info-olimpistas-conteo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.info-olimpistas-conteo .info-icon {
+  font-size: 1.2rem;
+  color: #333;
+}
+/* --- FIN: CÓDIGO CSS NUEVO --- */
