@@ -3,6 +3,7 @@ import api from './api';
 // --- INICIO DE CORRECCIÓN ---
 // Esta interfaz ahora coincide EXACTAMENTE
 // con la respuesta de tu AuthController.php
+// (SE ELIMINÓ LA SEGUNDA COPIA DUPLICADA)
 interface AuthControllerLoginResponse {
   access_token: string;
   user: {
@@ -17,21 +18,6 @@ interface AuthControllerLoginResponse {
   };
 }
 // --- FIN DE CORRECCIÓN ---
-
-// Interfaz para la respuesta de login del AuthController
-interface AuthControllerLoginResponse {
-  access_token: string;
-  user: {
-    id: number; 
-    nombre: string;
-    apellidos: string;
-    email: string;
-    rol: {
-      id_rol: number;
-      nombre_rol: string;
-    };
-  };
-}
 
 
 const login = async (email: string, password: string): Promise<AuthControllerLoginResponse> => {
@@ -51,10 +37,13 @@ const login = async (email: string, password: string): Promise<AuthControllerLog
 
 const logout = async () => {
   try {
-    await api.post('/logout');
+    // Esta llamada ahora debería funcionar al tener el 'api.ts' el token
+    await api.post('/logout'); 
   } catch (error) {
+    // Este log es el que veías, pero ahora no debería ocurrir
     console.error("Error al cerrar sesión en el backend:", error);
   } finally {
+    // Esto se ejecuta siempre, para limpiar el frontend
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
   }
