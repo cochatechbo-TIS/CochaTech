@@ -53,9 +53,20 @@ gap: 1rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  position: absolute; /* Posiciona absolutamente para centrar */
-  left: 50%; /* Centra horizontalmente */
-  transform: translateX(-50%); /* Ajusta el centrado */
+  /* ELIMINA estas 3 líneas que causan el problema: */
+  /* position: absolute; */
+  /* left: 50%; */
+  /* transform: translateX(-50%); */
+  /* AGREGA esto en su lugar: */
+  flex: 1;
+  justify-content: center;
+  margin: 0 1rem;
+}
+
+/* Solo para administrador (muchos items) */
+.navbar-items:has(.nav-item:nth-child(7)) .nav-item {
+  padding: 0.5rem 0.6rem;
+  font-size: 0.8rem;
 }
 
 .navbar-brand {
