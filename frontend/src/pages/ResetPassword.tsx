@@ -1,6 +1,6 @@
 // src/pages/ResetPassword.tsx
 import './login.css'; // Reutilizamos los estilos
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import authService from '../services/authService';
@@ -57,58 +57,56 @@ const ResetPassword: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <div className="flex flex-1 items-center justify-center px-4">
-        <div className="w-full max-w-md bg-white rounded-lg shadow-md">
-          <div className="bg-blue-600 text-white p-4 rounded-t-lg">
-            <h2 className="text-2xl font-bold text-center mb-2">Oh! SanSi</h2>
-            <p className="text-center mb-0">Restablecer Contraseña</p>
+    <div className="login-container">
+      <div className="login-content">
+        <div className="login-card">
+          <div className="login-header">
+            <h2 className="login-title">Oh! SanSi</h2>
+            <p className="login-subtitle">Restablecer Contraseña</p>
           </div>
-          <div className="p-8">
-            
+          <div className="login-form-container">
             {message && (
-              <div className="text-green-600 bg-green-50 p-4 rounded-md text-center mb-4">
-                {message} <Link to="/login" className="font-bold underline">Iniciar Sesión</Link>
+              <div className="success-message">
+                {message} <Link to="/login" className="success-link">Iniciar Sesión</Link>
               </div>
             )}
             {error && (
-              <div className="text-red-600 bg-red-50 p-4 rounded-md text-center mb-4">
+              <div className="error-message-box">
                 {error}
               </div>
             )}
 
             {!message && ( // Oculta el formulario si ya se reseteó
               <form onSubmit={handleSubmit}>
-                <p className="text-gray-600 text-sm text-center mb-4">
-                  Ingresa tu nueva contraseña para la cuenta: <strong className="text-gray-800">{email}</strong>
+                <p className="reset-info">
+                  Ingresa tu nueva contraseña para la cuenta: <strong className="reset-email">{email}</strong>
                 </p>
-                
-                <div className="mb-4">
-                  <label className="block text-gray-700 mb-2 text-sm font-medium">Nueva Contraseña</label>
-                  <div className="relative">
+                <div className="form-group">
+                  <label className="form-label">Nueva Contraseña</label>
+                  <div className="input-wrapper">
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full p-3 pl-4 pr-10 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 text-sm"
+                      className="form-input password-input"
                       required
                     />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                      {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="toggle-password">
+                      {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
                     </button>
                   </div>
                 </div>
 
-                <div className="mb-6">
-                  <label className="block text-gray-700 mb-2 text-sm font-medium">Confirmar Nueva Contraseña</label>
-                  <div className="relative">
+                <div className="form-group">
+                  <label className="form-label">Confirmar Nueva Contraseña</label>
+                  <div className="input-wrapper">
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={passwordConfirmation}
                       onChange={(e) => setPasswordConfirmation(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full p-3 pl-4 pr-10 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 text-sm"
+                      className="form-input password-input"
                       required
                     />
                   </div>
@@ -117,7 +115,7 @@ const ResetPassword: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-blue-600 text-white py-3 rounded-md flex justify-center items-center hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
+                  className="submit-btn"
                 >
                   {loading ? 'Actualizando...' : 'Restablecer Contraseña'}
                 </button>
@@ -127,7 +125,7 @@ const ResetPassword: React.FC = () => {
           </div>
         </div>
       </div>
-      <footer className="bg-gray-100 py-4 text-center text-gray-500 text-sm">
+      <footer className="login-footer">
         <p>Sistema de Gestión de Olimpiadas Académicas v1.0</p>
       </footer>
     </div>
