@@ -7,6 +7,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Auth\Passwords\CanResetPassword; // <-- IMPORTAR ESTO
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 
 class Usuario extends Authenticatable
 {
@@ -52,6 +53,14 @@ class Usuario extends Authenticatable
     public function responsable()
     {
         return $this->hasOne(Responsable_Area::class, 'id_usuario', 'id_usuario');
+    }
+
+        public function evaluador()
+    {
+        // El primer parámetro es el Modelo relacionado (Evaluador::class)
+        // El segundo es la clave foránea en la tabla 'evaluador' (id_usuario)
+        // El tercero es la clave primaria en la tabla 'usuario' (id_usuario)
+        return $this->hasOne(Evaluador::class, 'id_usuario', 'id_usuario');
     }
 
         // --- ¡NUEVO! ---

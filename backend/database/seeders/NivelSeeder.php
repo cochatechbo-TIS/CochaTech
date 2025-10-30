@@ -3,47 +3,54 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Nivel; // <-- Importar el modelo
 
 class NivelSeeder extends Seeder
 {
     public function run(): void
     {
+        // Usamos los códigos cortos que tu CSV espera
         $areas = [
-            ['id_area' => 1, 'nombre' => 'Q'],
-            ['id_area' => 2, 'nombre' => 'F'],
-            ['id_area' => 3, 'nombre' => 'M'],
-            ['id_area' => 4, 'nombre' => 'B'],
-            ['id_area' => 5, 'nombre' => 'I'],
-            ['id_area' => 6, 'nombre' => 'R'],
-            ['id_area' => 7, 'nombre' => 'A'],
-            ['id_area' => 8, 'nombre' => 'G'],
+            ['id_area' => 1, 'codigo' => 'Q'],
+            ['id_area' => 2, 'codigo' => 'F'],
+            ['id_area' => 3, 'codigo' => 'M'],
+            ['id_area' => 4, 'codigo' => 'B'],
+            ['id_area' => 5, 'codigo' => 'I'],
+            ['id_area' => 6, 'codigo' => 'R'],
+            ['id_area' => 7, 'codigo' => 'A'],
+            ['id_area' => 8, 'codigo' => 'G'],
         ];
 
-        $niveles = [];
-
         foreach ($areas as $area) {
-            // Niveles individuales
+            
+            // --- NIVELES INDIVIDUALES (Nivel 1, 2, 3) ---
             for ($i = 1; $i <= 3; $i++) {
-                $niveles[] = [
-                    'nombre' => "{$area['nombre']}-Nivel {$i}",
-                    'id_area' => $area['id_area'],
-                    'id_evaluador' => null,
-                    'es_grupal' => false,
-                ];
+                Nivel::firstOrCreate(
+                    [
+                        'nombre' => "{$area['codigo']}-Nivel {$i}", // Ej: "Q-Nivel 1"
+                        'id_area' => $area['id_area'],
+                        'es_grupal' => false
+                    ],
+                    [
+                        'id_evaluador' => null 
+                    ]
+                );
             }
 
-            // Niveles grupales
+            // --- NIVELES GRUPALES (Grupal 1, 2) ---
+            // Tu CSV también busca "R-Grupal 1", "F-Grupal 2", etc.
             for ($i = 1; $i <= 2; $i++) {
-                $niveles[] = [
-                    'nombre' => "{$area['nombre']}-Grupal {$i}",
-                    'id_area' => $area['id_area'],
-                    'id_evaluador' => null,
-                    'es_grupal' => true,
-                ];
+                Nivel::firstOrCreate(
+                    [
+                        'nombre' => "{$area['codigo']}-Grupal {$i}", // Ej: "R-Grupal 1"
+                        'id_area' => $area['id_area'],
+                        'es_grupal' => true
+                    ],
+                    [
+                        'id_evaluador' => null
+                    ]
+                );
             }
         }
-
-        DB::table('nivel')->insert($niveles);
     }
 }

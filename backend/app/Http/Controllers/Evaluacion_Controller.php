@@ -6,274 +6,345 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-
-// --- AÑADIMOS LOS MODELOS QUE USAREMOS ---
+use App\Models\Usuario;
 use App\Models\Evaluador;
+use App\Models\Nivel;
+use App\Models\Fase;
 use App\Models\Nivel_Fase;
 use App\Models\Olimpista;
 use App\Models\Evaluacion;
 use App\Models\Estado_Olimpista;
+use App\Models\Estado_Fase;
 
 class Evaluacion_Controller extends Controller
 {
+/**
+     * Función helper para obtener los datos clave del evaluador autenticado.
+     * Esto centraliza la lógica y evita errores.
+     */
+    private function getEvaluadorData()
+    {
+        /** @var \App\Models\Usuario $user */
+        $user = Auth::user();
+
+        // 1. Verificar si el usuario tiene la relación 'evaluador'
+        $evaluador = $user->evaluador; // Esto usa la relación hasOne()
+
+        if (!$evaluador) {
+            Log::warning("getEvaluadorData - No se encontró registro 'evaluador' para Usuario ID: {$user->id_usuario}");
+            return null;
+        }
+
+        // 2. Buscar el nivel asignado a ESE evaluador
+        $nivelAsignado = Nivel::where('id_evaluador', $evaluador->id_evaluador)->first();
+
+        if (!$nivelAsignado) {
+            Log::warning("getEvaluadorData - Se encontró evaluador (ID: {$evaluador->id_evaluador}), pero no tiene nivel asignado en la tabla 'nivel'.");
+            return null;
+        }
+
+        // 3. Devolver todos los datos que necesitamos
+        // --- INICIO DE CORRECCIÓN LÓGICA ---
+        // El 'id_area' AHORA viene del nivel asignado, no del evaluador.
+        // Esto asegura que el nivel y el área siempre coincidan.
+        return [
+            'evaluador'    => $evaluador,              // El modelo Evaluador
+            'nivel'        => $nivelAsignado,          // El modelo Nivel
+            'id_usuario'   => $user->id_usuario,
+            'id_evaluador' => $evaluador->id_evaluador,
+            'id_nivel'     => $nivelAsignado->id_nivel,
+            'id_area'      => $nivelAsignado->id_area, // <-- CORREGIDO
+        ];
+        // --- FIN DE CORRECCIÓN LÓGICA ---
+    }
 
     /**
-     * Endpoint 1: Obtener las fases para las pestañas
-     * GET /api/evaluador/fases
-     *
-     * Obtiene las fases (Clasificatoria, Semifinal, etc.) asignadas
-     * al nivel del evaluador autenticado.
+     * Obtener las fases asignadas al nivel del evaluador autenticado.
      */
-    public function obtenerFases()
+    public function obtenerFases(Request $request)
     {
+        // --- INICIO DE CORRECCIÓN ---
+        $evaluadorData = $this->getEvaluadorData();
+
+        if (!$evaluadorData) {
+            // El error viene de la función helper
+            return response()->json([
+                'message' => 'No se pudieron cargar las fases. ¿Eres un evaluador con un nivel asignado?'
+            ], 403); // 403 Forbidden
+        }
+
+        $idNivelDelEvaluador = $evaluadorData['id_nivel'];
+        $idUsuarioAutenticado = $evaluadorData['id_usuario'];
+        // --- FIN DE CORRECCIÓN ---
+
         try {
-            $user = Auth::user();
-            $evaluador = $user->evaluador; // Asumimos que la relación 'evaluador' existe en el modelo Usuario
+            // Buscamos las fases relacionadas a ESE nivel
+            $fases = Fase::whereHas('nivel_fases', function ($query) use ($idNivelDelEvaluador) {
+                $query->where('id_nivel', $idNivelDelEvaluador);
+            })
+            ->with(['nivel_fases' => function ($query) use ($idNivelDelEvaluador) {
+                $query->where('id_nivel', $idNivelDelEvaluador)->with('estado_fase');
+            }])
+            ->orderBy('id_fase')
+            ->get();
 
-            if (!$evaluador || !$evaluador->id_nivel) {
-                return response()->json(['message' => 'El usuario no es un evaluador válido o no tiene un nivel asignado.'], 403);
-            }
+             // Formatear respuesta
+             $resultadoFases = $fases->map(function ($fase) use ($idNivelDelEvaluador) {
+                 $nivelFaseInfo = $fase->nivel_fases->firstWhere('id_nivel', $idNivelDelEvaluador);
+                 return [
+                     'id' => $fase->id_fase, 
+                     'nombre' => $fase->nombre,
+                     'estado' => $nivelFaseInfo?->estado_fase?->nombre ?? 'Desconocido',
+                 ];
+             });
 
-            // Buscamos las fases que corresponden al nivel del evaluador
-            $fases = Nivel_Fase::where('id_nivel', $evaluador->id_nivel)
-                ->with(['fase', 'estadoFase']) // Cargamos las relaciones
+            return response()->json($resultadoFases);
+
+        } catch (\Throwable $e) {
+            Log::error("Error en Evaluacion_Controller::obtenerFases para usuario ID {$idUsuarioAutenticado}, Nivel ID {$idNivelDelEvaluador}: ".$e->getMessage());
+            return response()->json(['message' => 'Error interno al cargar las fases.'], 500);
+        }
+    }
+
+
+    /**
+     * Obtener la lista de olimpistas para una fase específica.
+     */
+    public function obtenerOlimpistasPorFase(Request $request, $id_fase)
+    {
+        // --- INICIO DE CORRECCIÓN ---
+        $evaluadorData = $this->getEvaluadorData();
+        if (!$evaluadorData) {
+            return response()->json([
+                'message' => 'No se pudo determinar el área o nivel del evaluador.'
+            ], 403);
+        }
+
+        $idAreaEvaluador = $evaluadorData['id_area'];
+        $idNivelEvaluador = $evaluadorData['id_nivel'];
+        $idUsuarioAutenticado = $evaluadorData['id_usuario'];
+        // --- FIN DE CORRECCIÓN ---
+
+        // Buscar el id_nivel_fase correspondiente
+        $nivelFase = Nivel_Fase::where('id_nivel', $idNivelEvaluador)
+                               ->where('id_fase', $id_fase)
+                               ->first();
+
+        if (!$nivelFase) {
+            Log::warning("Evaluacion_Controller::obtenerOlimpistas - No se encontró Nivel_Fase para Nivel ID: {$idNivelEvaluador} y Fase ID: {$id_fase}");
+            return response()->json(['message' => 'Combinación de nivel y fase no válida.'], 404);
+        }
+        $idNivelFase = $nivelFase->id_nivel_fase;
+
+        try {
+            // 1. Obtener los olimpistas
+            $olimpistas = Olimpista::where('id_area', $idAreaEvaluador)
+                                   ->where('id_nivel', $idNivelEvaluador)
+                                   ->get();
+
+            // 2. Obtener las evaluaciones existentes
+            $evaluacionesExistentes = Evaluacion::where('id_nivel_fase', $idNivelFase)
+                ->whereIn('id_olimpista', $olimpistas->pluck('id_olimpista'))
+                ->with('estado_olimpista')
                 ->get()
-                ->map(function ($nivelFase) {
-                    // Formateamos la respuesta para que coincida con la interfaz de Evaluacion.ts
-                    return [
-                        'id' => $nivelFase->fase->id_fase, // ID de la fase
-                        'nombre' => $nivelFase->fase->nombre_fase, // Nombre de la fase
-                        'estado' => $nivelFase->estadoFase->nombre_estado, // Ej: "En proceso"
-                        'id_nivel_fase' => $nivelFase->id_nivel_fase, // ID pivote que usaremos
-                    ];
-                });
+                ->keyBy('id_olimpista');
 
-            return response()->json($fases);
+            // 3. Mapear los resultados
+            $resultadoOlimpistas = $olimpistas->map(function ($olimpista) use ($evaluacionesExistentes) {
+                $evaluacion = $evaluacionesExistentes->get($olimpista->id_olimpista);
+                return [
+                    'id' => $olimpista->id_olimpista,
+                    'nombre' => $olimpista->nombre . ' ' . $olimpista->apellidos,
+                    'ci' => $olimpista->ci,
+                    'institucion' => $olimpista->institucion,
+                    'nota' => $evaluacion ? (float) $evaluacion->nota : null,
+                    'falta_etica' => $evaluacion ? (bool) $evaluacion->falta_etica : false,
+                    'observaciones' => $evaluacion ? $evaluacion->comentario : '',
+                    'estado' => $evaluacion?->estado_olimpista?->nombre ?? '-',
+                ];
+            });
 
-        } catch (\Exception $e) {
-            Log::error('Error al obtener fases: ' . $e->getMessage());
-            return response()->json(['message' => 'Error interno del servidor'], 500);
+            return response()->json($resultadoOlimpistas);
+
+        } catch (\Throwable $e) {
+             Log::error("Error en Evaluacion_Controller::obtenerOlimpistas para Usuario ID {$idUsuarioAutenticado}, NivelFase ID {$idNivelFase}: ".$e->getMessage());
+             Log::error("Stack trace: ".$e->getTraceAsString());
+            return response()->json(['message' => 'Error interno al cargar los olimpistas.'], 500);
         }
     }
 
-    /**
-     * Endpoint 2: Obtener la lista de olimpistas para la tabla
-     * GET /api/evaluacion/fase/{id_fase}
-     *
-     * Obtiene los olimpistas del área y nivel del evaluador
-     * para una fase específica.
-     */
-    public function obtenerOlimpistasPorFase($id_fase)
-    {
-        try {
-            $user = Auth::user();
-            $evaluador = $user->evaluador;
 
-            if (!$evaluador) {
-                return response()->json(['message' => 'Usuario evaluador no encontrado.'], 403);
-            }
-
-            // 1. Encontrar el id_nivel_fase (la clave de todo)
-            $nivelFase = $this->obtenerNivelFase($evaluador, $id_fase);
-            if (!$nivelFase) {
-                return response()->json(['message' => 'La fase no está configurada para tu nivel.'], 404);
-            }
-
-            // 2. Obtener los olimpistas del área y nivel del evaluador
-            $olimpistas = Olimpista::where('id_area', $evaluador->id_area)
-                ->where('id_nivel', $evaluador->id_nivel)
-                // 3. Cruzar con la tabla 'evaluacion' para obtener notas existentes
-                ->leftJoin('evaluacion', function ($join) use ($nivelFase) {
-                    $join->on('olimpista.id_olimpista', '=', 'evaluacion.id_olimpista')
-                         ->where('evaluacion.id_nivel_fase', '=', $nivelFase->id_nivel_fase);
-                })
-                // 4. Cruzar con 'estado_olimpista' para obtener el nombre del estado
-                ->leftJoin('estado_olimpista', 'evaluacion.id_estado_olimpista', '=', 'estado_olimpista.id_estado_olimpista')
-                // 5. Seleccionar los campos que el frontend necesita (según Evaluacion.ts)
-                ->select(
-                    'olimpista.id_olimpista as id',
-                    DB::raw("CONCAT(olimpista.nombre, ' ', olimpista.apellidos) as nombre"),
-                    'olimpista.ci',
-                    'olimpista.institucion',
-                    'evaluacion.nota',
-                    'evaluacion.falta_etica',
-                    'evaluacion.comentario as observaciones',
-                    // Si no hay estado, devolvemos "-", como en la UI
-                    DB::raw("COALESCE(estado_olimpista.nombre_estado, '-') as estado") 
-                )
-                ->get();
-
-            return response()->json($olimpistas);
-
-        } catch (\Exception $e) {
-            Log::error('Error al obtener olimpistas por fase: ' . $e->getMessage());
-            return response()->json(['message' => 'Error interno del servidor: '.$e->getMessage()], 500);
-        }
-    }
-
-    /**
-     * Endpoint 3: Guardar las notas
-     * POST /api/evaluacion/fase/{id_fase}/guardar
-     *
-     * Guarda la nota, falta_etica y observaciones para una lista de olimpistas.
+     /**
+     * Guardar/Actualizar las notas.
      */
     public function guardarNotas(Request $request, $id_fase)
     {
-        $user = Auth::user();
-        $evaluador = $user->evaluador;
+        // --- INICIO DE CORRECCIÓN ---
+        $evaluadorData = $this->getEvaluadorData();
+        if (!$evaluadorData) {
+            return response()->json([
+                'message' => 'No se pudo determinar el área o nivel del evaluador.'
+            ], 403);
+        }
+        $idNivelEvaluador = $evaluadorData['id_nivel'];
+        $idUsuarioAutenticado = $evaluadorData['id_usuario'];
+        $idEvaluador = $evaluadorData['id_evaluador'];
+        // --- FIN DE CORRECCIÓN ---
 
-        // Validar que la data venga en el formato esperado
+        // Buscar el id_nivel_fase
+        $nivelFase = Nivel_Fase::where('id_nivel', $idNivelEvaluador)
+                               ->where('id_fase', $id_fase)
+                               ->first();
+
+        if (!$nivelFase) {
+             Log::warning("Evaluacion_Controller::guardarNotas - No se encontró Nivel_Fase para Nivel ID: {$idNivelEvaluador} y Fase ID: {$id_fase}");
+            return response()->json(['message' => 'Combinación de nivel y fase no válida.'], 404);
+        }
+        $idNivelFase = $nivelFase->id_nivel_fase;
+
+        // Validar los datos recibidos
         $validated = $request->validate([
             'olimpistas' => 'required|array',
             'olimpistas.*.id' => 'required|integer|exists:olimpista,id_olimpista',
             'olimpistas.*.nota' => 'nullable|numeric|min:0|max:100',
             'olimpistas.*.falta_etica' => 'required|boolean',
-            'olimpistas.*.observaciones' => 'nullable|string',
+            'olimpistas.*.observaciones' => 'nullable|string|max:1000',
         ]);
-
-        // Encontrar el id_nivel_fase
-        $nivelFase = $this->obtenerNivelFase($evaluador, $id_fase);
-        if (!$nivelFase) {
-            return response()->json(['message' => 'La fase no está configurada para tu nivel.'], 404);
-        }
 
         DB::beginTransaction();
         try {
             foreach ($validated['olimpistas'] as $olimpistaData) {
-                // Usamos updateOrCreate para insertar o actualizar la evaluación
                 Evaluacion::updateOrCreate(
                     [
-                        // Criterios de búsqueda
                         'id_olimpista' => $olimpistaData['id'],
-                        'id_nivel_fase' => $nivelFase->id_nivel_fase,
+                        'id_nivel_fase' => $idNivelFase,
                     ],
                     [
-                        // Valores a insertar/actualizar
                         'nota' => $olimpistaData['nota'] ?? null,
                         'falta_etica' => $olimpistaData['falta_etica'],
-                        'comentario' => $olimpistaData['observaciones'] ?? null,
-                        // Limpiamos el estado si la nota cambia (se recalculará)
-                        'id_estado_olimpista' => null 
+                        'comentario' => $olimpistaData['observaciones'] ?? '',
+                        // --- INICIO DE CORRECCIÓN ---
+                        // Añadimos id_evaluador si tu tabla 'evaluacion' lo tiene (descomenta si es así)
+                        // 'id_evaluador' => $idEvaluador, 
+                        // --- FIN DE CORRECCIÓN ---
                     ]
                 );
             }
-
             DB::commit();
-            return response()->json(['message' => 'Notas guardadas correctamente.']);
+            return response()->json(['message' => 'Notas guardadas correctamente']);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error('Error al guardar notas: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al guardar notas: '.$e->getMessage()], 500);
+            Log::error("Error en Evaluacion_Controller::guardarNotas para Usuario ID {$idUsuarioAutenticado}, NivelFase ID {$idNivelFase}: ".$e->getMessage());
+            Log::error("Stack trace: ".$e->getTraceAsString());
+            Log::error("Request data: ", $request->input('olimpistas'));
+            return response()->json(['message' => 'Error interno al guardar las notas.'], 500);
         }
     }
 
     /**
-     * Endpoint 4: Generar Clasificados
-     * POST /api/evaluacion/fase/{id_fase}/generar-clasificados
-     *
-     * Procesa las notas guardadas y asigna "Aprobado" o "Reprobado".
+     * Generar clasificados para una fase.
      */
-    public function generarClasificados($id_fase)
+    public function generarClasificados(Request $request, $id_fase)
     {
-        $user = Auth::user();
-        $evaluador = $user->evaluador;
-        $nivelFase = $this->obtenerNivelFase($evaluador, $id_fase);
+         // --- INICIO DE CORRECCIÓN ---
+        $evaluadorData = $this->getEvaluadorData();
+        if (!$evaluadorData) {
+            return response()->json(['message' => 'No se pudo determinar el nivel del evaluador.'], 403);
+        }
+        $idNivelEvaluador = $evaluadorData['id_nivel'];
+        $idUsuarioAutenticado = $evaluadorData['id_usuario'];
+        // --- FIN DE CORRECCIÓN ---
+
+        $nivelFase = Nivel_Fase::where('id_nivel', $idNivelEvaluador)
+                               ->where('id_fase', $id_fase)
+                               ->first();
         if (!$nivelFase) {
-            return response()->json(['message' => 'Fase no encontrada para tu nivel.'], 404);
+             Log::warning("Evaluacion_Controller::generarClasificados - No se encontró Nivel_Fase para Nivel ID: {$idNivelEvaluador} y Fase ID: {$id_fase}");
+            return response()->json(['message' => 'Combinación de nivel y fase no válida.'], 404);
+        }
+        $idNivelFase = $nivelFase->id_nivel_fase;
+
+        // EJEMPLO FIJO (¡CAMBIAR POR LÓGICA REAL!):
+        $notaMinima = 51; // ¡¡¡ IMPORTANTE: DEFINE ESTO CORRECTAMENTE !!!
+
+        $idEstadoAprobado = Estado_Olimpista::where('nombre', 'Aprobado')->value('id_estado_olimpista');
+        $idEstadoReprobado = Estado_Olimpista::where('nombre', 'Reprobado')->value('id_estado_olimpista');
+
+        if (!$idEstadoAprobado || !$idEstadoReprobado) {
+             Log::error("Evaluacion_Controller::generarClasificados - No se encontraron los estados 'Aprobado' o 'Reprobado'.");
+            return response()->json(['message' => 'Error de configuración: Faltan estados Aprobado/Reprobado.'], 500);
         }
 
-        // --- LÓGICA DE CLASIFICACIÓN (Ejemplo: aprobar con >= 51) ---
-        // DEBES OBTENER ESTOS VALORES DE LA DB (ej. de la tabla 'fase')
-        // Por ahora, los definimos aquí:
-        $notaMinimaAprobacion = 51;
-        $idEstadoAprobado = $this->obtenerIdEstado('Aprobado');
-        $idEstadoReprobado = $this->obtenerIdEstado('Reprobado');
-        
-        if (!$idEstadoAprobado || !$idEstadoReprobado) {
-             return response()->json(['message' => 'Estados "Aprobado" o "Reprobado" no encontrados. Ejecuta los seeders.'], 500);
-        }
-        
         DB::beginTransaction();
         try {
-            // Actualizar APROBADOS
-            Evaluacion::where('id_nivel_fase', $nivelFase->id_nivel_fase)
-                ->where('nota', '>=', $notaMinimaAprobacion)
-                ->where('falta_etica', false)
-                ->update(['id_estado_olimpista' => $idEstadoAprobado]);
-
-            // Actualizar REPROBADOS (por nota baja)
-            Evaluacion::where('id_nivel_fase', $nivelFase->id_nivel_fase)
-                ->where('nota', '<', $notaMinimaAprobacion)
-                ->update(['id_estado_olimpista' => $idEstadoReprobado]);
-                
-            // Actualizar REPROBADOS (por falta ética, sin importar la nota)
-            Evaluacion::where('id_nivel_fase', $nivelFase->id_nivel_fase)
-                ->where('falta_etica', true)
-                ->update(['id_estado_olimpista' => $idEstadoReprobado]);
-
+            Evaluacion::where('id_nivel_fase', $idNivelFase)
+                ->chunkById(100, function ($evaluaciones) use ($notaMinima, $idEstadoAprobado, $idEstadoReprobado) {
+                    foreach ($evaluaciones as $evaluacion) {
+                        if ($evaluacion->nota !== null && $evaluacion->nota >= $notaMinima && !$evaluacion->falta_etica) {
+                            $evaluacion->id_estado_olimpista = $idEstadoAprobado;
+                        } else {
+                            $evaluacion->id_estado_olimpista = $idEstadoReprobado;
+                        }
+                        $evaluacion->save();
+                    }
+                });
             DB::commit();
+             Log::info("Clasificados generados para NivelFase ID {$idNivelFase} por Usuario ID {$idUsuarioAutenticado}. Nota mínima: {$notaMinima}");
+            return response()->json(['message' => 'Clasificados generados correctamente']);
 
-            // Devolvemos la lista actualizada de olimpistas
-            return $this->obtenerOlimpistasPorFase($id_fase);
-
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error('Error al generar clasificados: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al generar clasificados.'], 500);
+            Log::error("Error en Evaluacion_Controller::generarClasificados para NivelFase ID {$idNivelFase}: ".$e->getMessage());
+             Log::error("Stack trace: ".$e->getTraceAsString());
+            return response()->json(['message' => 'Error interno al generar clasificados.'], 500);
         }
     }
 
-    /**
-     * Endpoint 5: Enviar Lista (Finalizar Fase)
-     * POST /api/evaluacion/fase/{id_fase}/enviar-lista
-     *
-     * Marca una fase como "Finalizada" (o "Pendiente de Aprobación").
-     */
-    public function enviarLista($id_fase)
-    {
-         $user = Auth::user();
-         $evaluador = $user->evaluador;
-         $nivelFase = $this->obtenerNivelFase($evaluador, $id_fase);
-         if (!$nivelFase) {
-             return response()->json(['message' => 'Fase no encontrada para tu nivel.'], 404);
-         }
-         
-         // Lógica para cambiar el estado de la fase
-         // DEBES OBTENER ESTE ID DE LA DB
-         $idEstadoFinalizado = 3; // Asumiendo 1="En Proceso", 2="Pendiente", 3="Finalizado"
-         
-         try {
-             $nivelFase->id_estado_fase = $idEstadoFinalizado;
-             $nivelFase->save();
-             
-             return response()->json(['message' => 'Lista enviada y fase marcada como finalizada.']);
-             
-         } catch (\Exception $e) {
-            Log::error('Error al enviar lista: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al enviar la lista.'], 500);
-         }
-    }
-
-
-    // --- Métodos de Ayuda ---
 
     /**
-     * Función privada para obtener el ID de nivel_fase
+     * Marcar la lista de una fase como "enviada".
      */
-    private function obtenerNivelFase(Evaluador $evaluador, $id_fase)
+    public function enviarLista(Request $request, $id_fase)
     {
-        return Nivel_Fase::where('id_nivel', $evaluador->id_nivel)
-            ->where('id_fase', $id_fase)
-            ->first();
+         // --- INICIO DE CORRECCIÓN ---
+        $evaluadorData = $this->getEvaluadorData();
+        if (!$evaluadorData) {
+            return response()->json(['message' => 'No se pudo determinar el nivel del evaluador.'], 403);
+        }
+        $idNivelEvaluador = $evaluadorData['id_nivel'];
+        $idUsuarioAutenticado = $evaluadorData['id_usuario'];
+        // --- FIN DE CORRECCIÓN ---
+
+        $nivelFase = Nivel_Fase::where('id_nivel', $idNivelEvaluador)
+                               ->where('id_fase', $id_fase)
+                               ->first();
+
+        if (!$nivelFase) {
+            return response()->json(['message' => 'Combinación de nivel y fase no válida.'], 404);
+        }
+        $idNivelFase = $nivelFase->id_nivel_fase;
+
+        $idEstadoFinalizada = Estado_Fase::where('nombre', 'Finalizada')->value('id_estado_fase'); 
+        
+        if (!$idEstadoFinalizada) {
+             Log::error("Evaluacion_Controller::enviarLista - No se encontró el estado 'Finalizada'.");
+            return response()->json(['message' => 'Error de configuración: Falta estado Finalizada.'], 500);
+        }
+
+        DB::beginTransaction();
+        try {
+            $nivelFase->id_estado_fase = $idEstadoFinalizada;
+            $nivelFase->save();
+            DB::commit();
+             Log::info("Lista enviada para NivelFase ID {$idNivelFase} por Usuario ID {$idUsuarioAutenticado}.");
+            return response()->json(['message' => 'Lista marcada como enviada correctamente']);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error("Error en Evaluacion_Controller::enviarLista para NivelFase ID {$idNivelFase}: ".$e->getMessage());
+             Log::error("Stack trace: ".$e->getTraceAsString());
+            return response()->json(['message' => 'Error interno al marcar la lista como enviada.'], 500);
+        }
     }
-    
-    /**
-     * Función privada para obtener el ID de un estado
-     */
-    private function obtenerIdEstado($nombreEstado)
-    {
-         $estado = Estado_Olimpista::where('nombre_estado', $nombreEstado)->first();
-         return $estado ? $estado->id_estado_olimpista : null;
-    }
-}
+
+} // Fin de la clase

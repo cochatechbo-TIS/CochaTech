@@ -3,25 +3,25 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Estado_Fase; // <-- Importar el modelo
 
 class EstadoFaseSeeder extends Seeder
 {
     public function run(): void
     {
         $estados = [
-            ['id' => 1, 'nombre' => 'En Proceso'],
-            ['id' => 2, 'nombre' => 'Aprobada'],
-            ['id' => 3, 'nombre' => 'Rechazada'],
+            // id_estado_fase se vuelve la llave primaria
+            ['id_estado_fase' => 1, 'nombre_estado' => 'En Proceso'],
+            ['id_estado_fase' => 2, 'nombre_estado' => 'Aprobada'],
+            ['id_estado_fase' => 3, 'nombre_estado' => 'Rechazada'],
         ];
 
         foreach ($estados as $estado) {
-            DB::statement('
-                INSERT INTO estado_fase (id_estado_fase, nombre_estado)
-                VALUES (?, ?)
-                ON CONFLICT (id_estado_fase) DO NOTHING
-            ', [$estado['id'], $estado['nombre']]);
+            // Usamos updateOrCreate para insertar o actualizar basado en el ID
+             Estado_Fase::updateOrCreate(
+                ['id_estado_fase' => $estado['id_estado_fase']],
+                ['nombre_estado' => $estado['nombre_estado']]
+            );
         }
-
     }
 }
