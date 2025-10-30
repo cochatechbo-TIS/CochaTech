@@ -12,7 +12,7 @@ import { useAuth } from './context/AuthContext'; // <-- Importar useAuth
 // --- ¡IMPORTAR NUEVAS PÁGINAS! ---
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
-
+import EvaluacionPorFases from './pages/EvaluacionPorFases';
 
 // --- Componentes Placeholder (Originales) ---
 const Inicio = () => (
@@ -151,7 +151,7 @@ D   </Route>
       {/* Grupo de rutas protegidas para 'evaluador' */}
       <Route element={<ProtectedRoute allowedRoles={['evaluador']} />}>
         <Route path="/evaluador/inicio" element={<Layout showNavbar={true}><Inicio /></Layout>} />
-config         <Route path="/evaluador/evaluacion" element={<Layout showNavbar={true}><Evaluacion /></Layout>} />
+        <Route path="/evaluador/evaluacion" element={<Layout showNavbar={true}><EvaluacionPorFases /></Layout>} />
         <Route path="/evaluador/informes" element={<Layout showNavbar={true}><Reportes /></Layout>} />
       </Route>
 
