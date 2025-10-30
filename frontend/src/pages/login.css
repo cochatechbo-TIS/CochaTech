@@ -47,7 +47,7 @@
 
 /* Contenedor del formulario */
 .login-form-container {
-  padding: 2rem;
+  padding: 1.5rem;
 }
 
 /* Mensaje de error */
@@ -59,7 +59,7 @@
 
 /* Grupos de formulario */
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .form-group:last-of-type {

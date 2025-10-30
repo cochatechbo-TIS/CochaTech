@@ -67,7 +67,7 @@ const Login: React.FC = () => {
             <p className="login-subtitle">Iniciar sesión</p> 
           </div>
           <div className="login-form-container"> 
-            {error && <p className="error-mensaje">{error}</p>}
+            {error && <p className="error-message-box">{error}</p>}
 
             <form onSubmit={handleSubmit}>
               <div className="form-group">
