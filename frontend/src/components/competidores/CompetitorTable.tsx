@@ -50,6 +50,7 @@ export function CompetitorTable({ competitors, onEdit, onDelete }: CompetitorTab
               <th className="competitor-table-th">ÁREA</th>
               <th className="competitor-table-th">NIVEL</th>
               <th className="competitor-table-th">GRADO</th>
+              <th className="competitor-table-th">NOMBRE TUTOR</th>
               <th className="competitor-table-th">CONTACTO TUTOR</th>
               <th className="competitor-table-th">DEPARTAMENTO</th>
               <th className="competitor-table-th">ACCIONES</th>
@@ -65,6 +66,7 @@ export function CompetitorTable({ competitors, onEdit, onDelete }: CompetitorTab
                 <td className="competitor-table-td">{competitor.area}</td>
                 <td className="competitor-table-td">{competitor.nivel}</td>
                 <td className="competitor-table-td">{competitor.grado}</td>
+                <td className="competitor-table-td">{competitor.nombre_tutor || '-'}</td>
                 <td className="competitor-table-td">{competitor.contacto_tutor}</td>
                 <td className="competitor-table-td">{competitor.departamentoNombre}</td>
                 <td className="competitor-table-td">

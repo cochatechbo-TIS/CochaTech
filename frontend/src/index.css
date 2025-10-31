@@ -83,6 +83,7 @@ font-size: 1rem; /* Reducir el tamaño del logo */
 }
 .nav-item {
   padding: 0.5rem 1rem;
+  display: flex; /* 👈 AGREGADO */
   align-items: center;
   gap: 0.5rem; /* 👈 AUMENTA este valor para más espacio */
   font-size: 0.9rem;
