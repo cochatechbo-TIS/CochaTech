@@ -35,4 +35,9 @@ class Olimpista extends Model
     {
         return $this->belongsTo(Nivel::class, 'id_nivel', 'id_nivel');
     }
+        public function nivelFase()
+    {
+        return $this->belongsTo(NivelFase::class, 'id_nivel_fase');
+    }
+
 }

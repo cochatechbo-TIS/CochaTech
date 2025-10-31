@@ -11,7 +11,7 @@ import {
   generarClasificados,
   enviarLista,
 } from "../services/evaluacionService";
-import { FaUser, FaCalendarAlt, FaUsers } from 'react-icons/fa'; // Iconos
+import { User, CalendarDays, Users } from 'lucide-react';
 import "./evaluacion.css";
 
 const EvaluacionPorFases: React.FC = () => {

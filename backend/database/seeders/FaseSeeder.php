@@ -3,26 +3,37 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Fase; // <-- Importar el modelo
+use App\Models\Fase;
 
 class FaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Usamos firstOrCreate para evitar duplicados si lo corres varias veces
+        // Fase 1
         Fase::firstOrCreate(
             ['nombre' => 'Fase 1 - Clasificatoria'],
-            ['nota_minima' => 51]
+            [
+                'orden' => 1,
+                'nota_minima' => 51
+            ]
         );
-        
+
+        // Fase 2
         Fase::firstOrCreate(
             ['nombre' => 'Fase 2 - Semifinal'],
-            ['nota_minima' => 55]
+            [
+                'orden' => 2,
+                'nota_minima' => 55
+            ]
         );
-        
+
+        // Fase 3
         Fase::firstOrCreate(
             ['nombre' => 'Fase 3 - Final'],
-            ['nota_minima' => 60]
+            [
+                'orden' => 3,
+                'nota_minima' => 60
+            ]
         );
     }
 }

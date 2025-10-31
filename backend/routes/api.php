@@ -8,6 +8,7 @@ use App\Http\Controllers\Responsable_Area_Controller;
 use App\Http\Controllers\Evaluador_Controller;
 use App\Http\Controllers\Generar_Lista_Controller;
 use App\Http\Controllers\Area_Controller;
+use App\Http\Controllers\EvaluacionController;
 
 use App\Http\Controllers\Evaluacion_Controller; // <-- AÑADIR EL NUEVO CONTROLLER
 use App\Http\Controllers\Nivel_Fase_Controller;
@@ -51,6 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/nivel-fase/aprobar/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'aprobar']);
     });
 
+    
 
     // --- INICIO DE CÓDIGO AÑADIDO ---
     // Grupo Evaluador
@@ -77,3 +79,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/nivel-fase/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'mostrar']);
 
 });
+
+
+ // Crear evaluaciones para la primera fase
+    Route::post('/fase-inicial/{idFase}', [EvaluacionController::class, 'crearEvaluacionesFaseInicial']);
+
+    // Avanzar automáticamente a la siguiente fase
+    Route::post('/avanzar-fase/{idFaseActual}', [EvaluacionController::class, 'avanzarFase']);
+
+    // Ver resultados de una fase
+    Route::get('/resultados/{idFase}', [EvaluacionController::class, 'verResultadosFase']);
