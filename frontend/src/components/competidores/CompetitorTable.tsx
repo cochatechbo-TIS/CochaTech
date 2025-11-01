@@ -31,9 +31,7 @@ export function CompetitorTable({ competitors, onEdit, onDelete }: CompetitorTab
   };
 
   const handleDelete = (ci: string) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar este competidor?')) {
       onDelete(ci);
-    }
   };
 
   return (

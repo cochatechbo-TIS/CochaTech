@@ -1,0 +1,171 @@
+/* Fondo que cubre toda la pantalla (Backdrop) */
+.custom-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  background-color: rgba(75, 85, 99, 0.5); /* Fondo blanco semitransparente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Asegura que esté por encima de todo */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Visibilidad */
+.custom-modal-backdrop.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Contenido del Modal (Caja Blanca/Roja) */
+.custom-modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-width: 450px;
+    width: 90%;
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+    text-align: center;
+}
+
+/* Animación cuando el modal es visible */
+.custom-modal-backdrop.visible .custom-modal-content {
+    transform: translateY(0);
+}
+
+.custom-modal-content .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.custom-modal-content .modal-icon {
+    font-size: 2rem;
+    margin-right: 15px;
+}
+
+.custom-modal-content .modal-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    color: #1f2937;
+    margin: 0;
+}
+
+.custom-modal-content .modal-message {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 25px;
+}
+
+.custom-modal-content .modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10%;
+}
+
+/* Botones */
+.custom-modal-content .modal-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.custom-modal-content .modal-btn-primary {
+    background-color: #dc3545; /* Rojo para confirmar eliminación */
+    color: white;
+}
+
+.custom-modal-content .modal-btn-primary:hover {
+    background-color: #c82333;
+}
+
+.custom-modal-content .modal-btn-secondary {
+    background-color: white;
+    color: #1d4ed8;
+    border: 1px solid #1d4ed8;
+}
+
+.custom-modal-content .modal-btn-secondary:hover {
+    background-color: #f8fafc;
+}
+
+.custom-modal-content .modal-accept-btn {
+    background-color: #007bff; /* Azul para aceptar en info/error */
+    color: white;
+    width: 100%;
+}
+.custom-modal-content .modal-accept-btn:hover {
+    background-color: #0056b3;
+}
+
+
+/* ================================ */
+/* 2. ESTILOS PARA TOAST (Notificaciones Superiores) */
+/* ================================ */
+
+/* Contenedor del Toast (posición fija superior) */
+.toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 2000; /* Más alto que el modal si es necesario */
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Añadido para espaciar el contenido */
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    color: #333;
+    background-color: #ffffff;
+    max-width: 350px;
+    gap: 10px; /* Espacio entre mensaje e ícono */
+    opacity: 0;
+    transform: translateY(100%); /* Inicialmente fuera de pantalla */
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+
+/* Estado visible (show) */
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-icon {
+    font-size: 1.5rem;
+    margin-right: 15px;
+    order: 2;
+    display: flex; /* Asegura que el ícono se centre bien */
+}
+
+.toast-message {
+    font-size: 0.95rem;
+    order: 1;
+    flex-grow: 1;
+}
+
+/* Colores Específicos para Toast */
+.toast-success .toast-icon {
+    color: #28a745; /* Ícono verde */
+}
+
+.toast-error .toast-icon {
+    color: #dc3545; /* Rojo */
+}
+
+.toast-info .toast-icon {
+    color: #17a2b8; /* Azul claro */
+}

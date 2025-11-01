@@ -5,8 +5,10 @@ import axios from 'axios';
 
 import { CompetitorTable } from '../components/competidores/CompetitorTable';
 import CargarCSV from '../components/carga masiva/CargarCSV';
+import { NotificationModal } from '../components/common/NotificationModal'; // MODAL IMPORTADO
 import type { Competidor } from '../interfaces/Competidor';
 
+type NotificationType = 'success' | 'error' | 'info' | 'confirm';
 // Mapa de departamentos
 const departamentosMapReverse: { [key: number]: string } = {
   1: 'La Paz',
@@ -28,6 +30,14 @@ const GestionCompetidores: React.FC = () => {
   const [error, setError] = useState('');
   const [paginaActual, setPaginaActual] = useState(1); //nuevo estado de paginacion
 
+  const [notification, setNotification] = useState({
+        isVisible: false,
+        message: '',
+        type: 'info' as NotificationType,
+        title: undefined as string | undefined, // Agregar title al estado
+        onConfirm: undefined as (() => void) | undefined, // Cambiar a undefined
+    });
+  
   // URL base de la API
   const API_BASE = 'http://localhost:8000/api';
 
@@ -51,14 +61,31 @@ const GestionCompetidores: React.FC = () => {
       });
   }, [API_BASE]); 
 
+  const showNotification = useCallback((
+    message: string, 
+    type: NotificationType, 
+    onConfirm?: () => void,
+    title?: string
+) => {
+    setNotification({
+        isVisible: true,
+        message,
+        type,
+        title,
+        onConfirm,
+    });
+}, []);
+
+    const closeNotification = useCallback(() => {
+        setNotification(prev => ({ ...prev, isVisible: false }));
+    }, []);
+
   const fetchCompetidores = useCallback(async () => {
 
     try {
       setLoading(true);
       setError('');
       setPaginaActual(1); // Resetear a la primera página al recargar
-
-      console.log('Cargando competidores...');
       const response = await api.get('/olimpistas');
       
       // Mapear los datos del backend a nuestra interfaz
@@ -81,12 +108,10 @@ const GestionCompetidores: React.FC = () => {
                            ''
       }));
       
-      console.log('Competidores cargados:', competidoresMapeados.length);
       setCompetidores(competidoresMapeados);
       
     } catch (err: unknown) {
       console.error('Error fetching competidores:', err);
-      
       let errorMessage = 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.';
       
       if (axios.isAxiosError(err)) {
@@ -165,7 +190,7 @@ const GestionCompetidores: React.FC = () => {
       }
 
 
-      alert('Competidor actualizado exitosamente');
+      showNotification('Competidor actualizado exitosamente', 'success');
       
     } catch (err: unknown) {
       console.error('Error updating competitor:', err);
@@ -179,21 +204,21 @@ const GestionCompetidores: React.FC = () => {
         errorMessage = err.message;
       }
       
-      alert(errorMessage);
-      throw err;
+      showNotification(errorMessage, 'error');
+      throw err;
     }
   };
 
   // OPTIMIZADO: Eliminar competidor (ELIMINACIÓN LOCAL INMEDIATA)
-  const handleDeleteCompetitor = async (ci: string) => { 
-       
+  const executeDeleteCompetitor = useCallback(async (ci: string) => { 
+    closeNotification(); // Cierra el modal de confirmación
     const competidoresAnteriores = [...competidores];
     
     // 1. Encontrar el competidor y obtener su ID de clave primaria
     const competidorAEliminar = competidores.find(comp => comp.ci === ci);
 
     if (!competidorAEliminar || !competidorAEliminar.id_olimpista) {
-        alert('Error: No se encontró el ID interno del competidor para eliminar.');
+        showNotification('Error: No se encontró el ID interno del competidor para eliminar.', 'error');
         console.error('Competidor no encontrado o le falta id_olimpista:', competidorAEliminar);
         return;
     }
@@ -211,10 +236,9 @@ const GestionCompetidores: React.FC = () => {
         await api.delete(`/olimpistas/${competidorAEliminar.id_olimpista}`);
 
 
-        alert('Competidor eliminado exitosamente');
+        showNotification('Competidor eliminado exitosamente', 'success');
         
     } catch (err: unknown) {
-        console.error('Error deleting competitor:', err);
         // Revertir el estado si la llamada a la API falla
         setCompetidores(competidoresAnteriores);
         
@@ -226,10 +250,25 @@ const GestionCompetidores: React.FC = () => {
             errorMessage = err.message;
         }
         
-        alert(errorMessage);
+        showNotification(errorMessage, 'error');
         throw err;
     }
-};
+}, [api, competidores, showNotification, closeNotification]);
+
+// OPTIMIZADO: Eliminar competidor (DISPARA LA CONFIRMACIÓN)
+  const handleDeleteCompetitor = useCallback((ci: string) => {
+  const competidor = competidores.find(c => c.ci === ci);
+    const nombreCompleto = competidor 
+        ? `${competidor.nombre} ${competidor.apellidos}` 
+        : `con CI: ${ci}`;         
+        // 🛑 NUEVA LÓGICA: Dispara el modal de CONFIRMACIÓN
+        showNotification(
+        `¿Estás seguro de que quieres eliminar a ${nombreCompleto}? Esta acción es irreversible.`,
+        'confirm',
+        () => executeDeleteCompetitor(ci),
+        'Confirmar Eliminación'
+        );
+  }, [competidores,showNotification, executeDeleteCompetitor]); // Dependencias
 
   // Funciones para los botones (sin funcionalidad completa)
   const handleVerLista = () => {
@@ -237,9 +276,9 @@ const GestionCompetidores: React.FC = () => {
   };
 
   const handleGenerarListas = () => {
-    alert('Función GENERAR LISTAS POR ÁREA Y NIVEL - En desarrollo');
+    showNotification('Función GENERAR LISTAS POR ÁREA Y NIVEL - En desarrollo', 'info');
   };
-  
+
   const competidoresFiltrados = competidores.filter(comp =>
     comp.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
     comp.ci.includes(filtro) ||
@@ -369,6 +408,14 @@ const GestionCompetidores: React.FC = () => {
           </div>
         </div>
       )}
+      <NotificationModal
+                isVisible={notification.isVisible}
+                message={notification.message}
+                type={notification.type}
+                title={notification.title}
+                onClose={closeNotification} // Cierra el toast o el modal de info/error/confirmación
+                onConfirm={notification.onConfirm} // Función a ejecutar si es de tipo 'confirm'
+            />
     </div>
   );
 };
