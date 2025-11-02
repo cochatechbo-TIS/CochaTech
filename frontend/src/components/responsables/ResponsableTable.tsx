@@ -49,12 +49,11 @@ export function ResponsableTable({
               <th className="competitor-table-th">APELLIDOS</th>
               <th className="competitor-table-th">CI</th>
               <th className="competitor-table-th">EMAIL</th>
-              <th className="competitor-table-th">TELÉFONO</th> {/* ✨ AÑADIDO */}
+              <th className="competitor-table-th">TELÉFONO</th>
               <th className="competitor-table-th">ÁREA</th>
               <th className="competitor-table-th">ACCIONES</th>
             </tr>
           </thead>
-
           <tbody className="competitor-table-body">
             {usuario.map((usuario) => (
               <tr key={usuario.id_usuario} className="competitor-table-row">
@@ -66,7 +65,7 @@ export function ResponsableTable({
                 </td>
                 <td className="competitor-table-td">{usuario.ci}</td>
                 <td className="competitor-table-td">{usuario.email}</td>
-                <td className="competitor-table-td">{usuario.telefono || 'N/A'}</td> {/* ✨ AÑADIDO */}
+                <td className="competitor-table-td">{usuario.telefono || 'N/A'}</td>
                 <td className="competitor-table-td">{usuario.area}</td>
                 <td className="competitor-table-td">
                   <div className="competitor-table-actions">
@@ -91,7 +90,6 @@ export function ResponsableTable({
           </tbody>
         </table>
       </div>
-
       {currentUsuario && (
         <EditResponsableModal
           usuario={currentUsuario}

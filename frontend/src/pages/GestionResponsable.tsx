@@ -3,7 +3,10 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios"; // Necesitas importar axios
 import { ResponsableTable } from "../components/responsables/ResponsableTable";
 import { EditResponsableModal } from "../components/responsables/EditResponsableModal";
+import { NotificationModal } from '../components/common/NotificationModal';
 import type { Usuario } from "../interfaces/Usuario";
+
+type NotificationType = 'success' | 'error' | 'info' | 'confirm';
 
 const RESPONSABLES_POR_PAGINA = 20;
 const GestionResponsables: React.FC = () => {
@@ -14,6 +17,15 @@ const GestionResponsables: React.FC = () => {
   const [error, setError] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [paginaActual, setPaginaActual] = useState(1);
+
+  // ESTADO DE NOTIFICACIONES
+  const [notification, setNotification] = useState({
+    isVisible: false,
+    message: '',
+    type: 'info' as NotificationType,
+    title: undefined as string | undefined,
+    onConfirm: undefined as (() => void) | undefined,
+  });
 
   const API_BASE = "http://localhost:8000/api"; // URL base de la API
 
@@ -34,6 +46,30 @@ const GestionResponsables: React.FC = () => {
       baseURL: API_BASE,
       headers: headers,
     });
+  }, []);
+
+  
+  // FUNCIONES DE NOTIFICACIÓN
+  const showNotification = useCallback((
+    message: string, 
+    type: NotificationType, 
+    onConfirm?: () => void,
+    title?: string
+  ) => {
+    setNotification({
+      isVisible: true,
+      message,
+      type,
+      title,
+      onConfirm,
+    });
+  }, []);
+
+  const closeNotification = useCallback(() => {
+    setNotification(prev => ({ 
+      ...prev, 
+      isVisible: false 
+    }));
   }, []);
 
   // 3. FUNCIÓN DE CARGA DE DATOS
@@ -112,7 +148,7 @@ const GestionResponsables: React.FC = () => {
 
         await api.put(`/responsable/${editedResponsable.id_usuario}`, editedResponsable);
 
-        alert('Responsable actualizado correctamente.');
+        showNotification('Responsable actualizado exitosamente', 'success');
     } catch (err: unknown) {
         console.error("Error al actualizar responsable:", err);
 
@@ -126,21 +162,27 @@ const GestionResponsables: React.FC = () => {
         errorMessage = err.message;
         }
 
-        alert(errorMessage);
+        showNotification(errorMessage, 'error');
+        throw err;
     }
     };
 
   // Función de eliminación (usaremos el ID del responsable)
-    const handleDeleteResponsable = async (id: number) => {
-    const responsablesAnteriores = [...responsables];
-    if (!window.confirm(`¿Estás seguro de que deseas eliminar al responsable?`)) {
-        return;
-    }
+  const executeDeleteResponsable = useCallback(async (id: number) => {
+    closeNotification(); 
 
+    const responsablesAnteriores = [...responsables];
+
+    const responsableAEliminar = responsables.find(r => r.id_usuario === id);
+
+    if (!responsableAEliminar) {
+      showNotification('Error: No se encontró el responsable para eliminar.', 'error');
+      return;
+    }
     try {
         setResponsables(prev => prev.filter(r => r.id_usuario !== id));
         await api.delete(`/responsable/${id}`);
-        alert("Responsable eliminado exitosamente.");
+        showNotification("Responsable eliminado exitosamente", 'success');
 
     } catch (err: unknown) {
         console.error("Error al eliminar responsable:", err);
@@ -151,10 +193,25 @@ const GestionResponsables: React.FC = () => {
         } else if (err instanceof Error) {
         errorMessage = err.message;
         }
-        alert(errorMessage);
-    }
-    };
+        showNotification(errorMessage, 'error');
+        throw err;
+      }
+    }, [api, responsables, showNotification, closeNotification]);
 
+    // Función que dispara la confirmación de eliminación
+  const handleDeleteResponsable = useCallback((id: number) => {
+    const responsable = responsables.find(r => r.id_usuario === id);
+    const nombreCompleto = responsable 
+      ? `${responsable.nombre} ${responsable.apellidos}` 
+      : `con ID: ${id}`;
+    
+    showNotification(
+      `¿Estás seguro de que quieres eliminar a ${nombreCompleto}? Esta acción es irreversible.`,
+      'confirm',
+      () => executeDeleteResponsable(id),
+      'Confirmar Eliminación'
+    );
+  }, [responsables, showNotification, executeDeleteResponsable]);
 
   // Función de creación
     const handleCreateResponsable = async (newResponsable: Usuario) => {
@@ -170,12 +227,15 @@ const GestionResponsables: React.FC = () => {
         area: newResponsable.area,
       });
       if (response.data) {
-          setResponsables((prev) => [...prev, newResponsable]);
-          alert("Responsable creado exitosamente");
-        } else {
-          alert("No se recibió confirmación del servidor.");
-        }
-
+          // Agregar el nuevo responsable con el ID que devuelve el servidor
+        const responsableCreado = response.data.data || newResponsable;
+        setResponsables((prev) => [...prev, responsableCreado]);
+        
+        showNotification("Responsable creado exitosamente", 'success');
+        setIsCreateModalOpen(false);
+      } else {
+        showNotification("No se recibió confirmación del servidor.", 'error');
+      }
     } catch (error: unknown) {
       console.error("Error al crear responsable:", error);
 
@@ -188,11 +248,9 @@ const GestionResponsables: React.FC = () => {
         errorMessage = error.message;
       }
 
-      alert(errorMessage);
+      showNotification(errorMessage, 'error');
       setError(errorMessage);
     } finally {
-
-      setIsCreateModalOpen(false);
       setLoading(false);
     }
   };
@@ -361,6 +419,16 @@ const GestionResponsables: React.FC = () => {
         onSave={handleCreateResponsable}
         onCancel={() => setIsCreateModalOpen(false)}
         isOpen={isCreateModalOpen}
+      />
+
+      {/* Modal de Notificaciones */}
+      <NotificationModal
+        isVisible={notification.isVisible}
+        message={notification.message}
+        type={notification.type}
+        title={notification.title}
+        onClose={closeNotification}
+        onConfirm={notification.onConfirm}
       />
     </div>
   );
