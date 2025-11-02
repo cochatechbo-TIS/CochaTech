@@ -89,9 +89,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cantidad/fases/{id}', [Fase_Lista_Controller::class, 'listarFasesPorNivel']);
     Route::get('/fase/{id}', [Fase_Consulta_Controller::class, 'mostrarFase']);
 });
-Route::post('/primera/fase/{id}', [Primera_Fase_Controller::class, 'crearPrimeraFase']);
-    Route::post('/clasificacion/{id}', [Clasificacion_Controller::class, 'registrarEvaluaciones']);
-    Route::post('/fase-nivel/siguiente/{id}', [Fase_Dinamico_Controller::class, 'crearSiguienteFase']);
-    Route::get('/cantidad/fases/{id}', [Fase_Lista_Controller::class, 'listarFasesPorNivel']);
-    Route::get('/fase/{id}', [Fase_Consulta_Controller::class, 'mostrarFase']);
-   
