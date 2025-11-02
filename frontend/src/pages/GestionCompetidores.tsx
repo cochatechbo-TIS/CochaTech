@@ -72,8 +72,8 @@ const GestionCompetidores: React.FC = () => {
         nivel: olimpista.nivel || '',
         gradoEscolaridad: olimpista.grado || '',
         grado: olimpista.grado || '',
-        contactoTutor: olimpista.contacto_tutor || '',
         contacto_tutor: olimpista.contacto_tutor || '',
+        nombre_tutor: olimpista.nombre_tutor || '',
         id_departamento: olimpista.id_departamento,
         departamento: olimpista.departamento,
         departamentoNombre: olimpista.departamento?.nombre_departamento || 
@@ -143,6 +143,7 @@ const GestionCompetidores: React.FC = () => {
         area: editedCompetitor.area,
         nivel: editedCompetitor.nivel,
         grado: editedCompetitor.grado,
+        nombre_tutor: editedCompetitor.nombre_tutor,
         contacto_tutor: editedCompetitor.contacto_tutor,
         id_departamento: editedCompetitor.id_departamento
       });

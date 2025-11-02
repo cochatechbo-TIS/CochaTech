@@ -47,6 +47,7 @@ export function EditCompetitorModal({
       ci: editedCompetitor.ci, 
       grado: editedCompetitor.grado || editedCompetitor.grado,
       contacto_tutor: editedCompetitor.contacto_tutor || editedCompetitor.contacto_tutor,
+      nombre_tutor: editedCompetitor.nombre_tutor || '', // AGREGADO
       id_departamento: idDepartamento
     };
     
@@ -60,6 +61,7 @@ export function EditCompetitorModal({
       // documento: competitor.ci, 
       grado: competitor.grado,
       contacto_tutor: competitor.contacto_tutor,
+      nombre_tutor: competitor.nombre_tutor || '', // AGREGADO
       departamentoNombre: competitor.departamento?.nombre_departamento || ''
   });
   }, [competitor]); // Solo 'competitor' en las dependencias
@@ -103,7 +105,7 @@ export function EditCompetitorModal({
               </label>
               <input
                 type="text"
-                name="apellidos" // <-- Nombre del campo correcto
+                name="apellidos"
                 value={editedCompetitor.apellidos} // <-- Valor desde el estado
                 onChange={handleChange}
                 className="modal-input"
@@ -118,7 +120,7 @@ export function EditCompetitorModal({
               </label>
               <input
                 type="text"
-                name="ci" // <-- CORREGIDO: Usamos 'ci' consistentemente
+                name="ci"
                 value={editedCompetitor.ci}
                 onChange={handleChange}
                 className="modal-input"
@@ -181,26 +183,36 @@ export function EditCompetitorModal({
               <label className="modal-label">
                 Grado Escolaridad
               </label>
-              <select
-                name="gradoEscolaridad"
-                value={editedCompetitor.grado || editedCompetitor.grado}
+              <input
+                type="text"
+                name="grado"
+                value={editedCompetitor.grado || ''}
                 onChange={handleChange}
                 className="modal-input"
-              >
-                <option value="Primaria">Primaria</option>
-                <option value="Secundaria">Secundaria</option>
-                <option value="Bachillerato">Bachillerato</option>
-              </select>
+              />
             </div>
             
+            <div className="modal-form-group">
+              <label className="modal-label">
+                Nombre Tutor
+              </label>
+              <input
+                type="text"
+                name="nombre_tutor"
+                value={editedCompetitor.nombre_tutor || ''}
+                onChange={handleChange}
+                className="modal-input"
+              />
+            </div>
+
             <div className="modal-form-group">
               <label className="modal-label">
                 Contacto Tutor
               </label>
               <input
                 type="tel"
-                name="contactoTutor"
-                value={editedCompetitor.contacto_tutor || editedCompetitor.contacto_tutor}
+                name="contacto_tutor"
+                value={editedCompetitor.contacto_tutor || ''}
                 onChange={handleChange}
                 className="modal-input"
               />

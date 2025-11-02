@@ -3,15 +3,18 @@ import React, { useEffect, useState } from "react";
 import type { Fase, Olimpista } from "../interfaces/Evaluacion";
 import EvaluacionTable from "../components/evaluadores/EvaluacionTable";
 import {
-  obtenerDatosDeEvaluacion, // <-- Función actualizada
-  type EvaluacionData,      // <-- Interfaz actualizada
-  type InfoEvaluador,         // <-- Interfaz nueva
+  obtenerDatosDeEvaluacion,
+  type EvaluacionData,
+  type InfoEvaluador,
   obtenerOlimpistasPorFase,
   guardarNotas,
   generarClasificados,
   enviarLista,
 } from "../services/evaluacionService";
-import { User, CalendarDays, Users } from 'lucide-react';
+// --- INICIO DE CORRECCIÓN DE ICONOS ---
+// Cambiamos de 'react-icons/fa' a 'lucide-react' para ser consistentes
+import { User, CalendarDays, Users } from 'lucide-react'; 
+// --- FIN DE CORRECCIÓN DE ICONOS ---
 import "./evaluacion.css";
 
 const EvaluacionPorFases: React.FC = () => {
@@ -23,14 +26,13 @@ const EvaluacionPorFases: React.FC = () => {
   const [fechaActual, setFechaActual] = useState<string>('');
   
   // --- Estados de UI ---
-  const [loading, setLoading] = useState(true); // Carga inicial de la página
-  const [loadingOlimpistas, setLoadingOlimpistas] = useState(false); // Carga de la tabla
+  const [loading, setLoading] = useState(true); 
+  const [loadingOlimpistas, setLoadingOlimpistas] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Efecto para cargar datos iniciales (fases, info evaluador, fecha)
+  // Efecto para cargar datos iniciales
   useEffect(() => {
-    // Setea la fecha actual
     const hoy = new Date();
     setFechaActual(hoy.toLocaleString('es-ES', {
       year: 'numeric',
@@ -47,7 +49,7 @@ const EvaluacionPorFases: React.FC = () => {
         setFases(data.fases);
         
         if (data.fases.length > 0) {
-          setFaseSeleccionada(data.fases[0]); // Activa la primera fase
+          setFaseSeleccionada(data.fases[0]);
         } else {
           setError("No hay fases asignadas para este nivel.");
         }
@@ -59,7 +61,7 @@ const EvaluacionPorFases: React.FC = () => {
     })();
   }, []);
 
-  // Efecto para cargar olimpistas cuando cambia la fase seleccionada
+  // Efecto para cargar olimpistas
   useEffect(() => {
     if (faseSeleccionada) {
       cargarOlimpistas(faseSeleccionada.id);
@@ -67,7 +69,6 @@ const EvaluacionPorFases: React.FC = () => {
   }, [faseSeleccionada]);
 
   // --- Funciones de Lógica ---
-
   const cargarOlimpistas = async (faseId: number) => {
     setLoadingOlimpistas(true);
     clearMessages();
@@ -87,11 +88,10 @@ const EvaluacionPorFases: React.FC = () => {
   };
 
   // --- Manejadores de Botones ---
-
   const handleGuardar = async () => {
     if (!faseSeleccionada) return;
     clearMessages();
-    setLoadingOlimpistas(true); // Bloquea la tabla mientras guarda
+    setLoadingOlimpistas(true);
     try {
       await guardarNotas(faseSeleccionada.id, olimpistas);
       setSuccess("Notas guardadas correctamente ✅");
@@ -104,7 +104,7 @@ const EvaluacionPorFases: React.FC = () => {
 
   const handleGenerarClasificados = async () => {
     if (!faseSeleccionada) return;
-    if (!window.confirm("¿Estás seguro de generar los clasificados? Esto calculará el estado (Aprobado/Reprobado).")) return;
+    if (!window.confirm("¿Estás seguro de generar los clasificados?")) return;
     
     clearMessages();
     setLoadingOlimpistas(true);
@@ -128,7 +128,6 @@ const EvaluacionPorFases: React.FC = () => {
     try {
       const res = await enviarLista(faseSeleccionada.id);
       setSuccess(res.message);
-      // Recargar fases para mostrar el nuevo estado (ej. "Aprobada")
       const data = await obtenerDatosDeEvaluacion();
       setFases(data.fases);
     } catch (err) {
@@ -138,9 +137,7 @@ const EvaluacionPorFases: React.FC = () => {
     setLoadingOlimpistas(false);
   };
 
-
   // --- Renderizado ---
-
   if (loading) {
     return <div className="evaluacion-container"><p>Cargando panel de evaluador...</p></div>;
   }
@@ -149,11 +146,11 @@ const EvaluacionPorFases: React.FC = () => {
     <div className="evaluacion-container">
       <h1 className="titulo">Evaluación de olimpistas</h1>
       
-      {/* --- INICIO: NUEVO HEADER DE INFORMACIÓN --- */}
       {infoEvaluador && (
         <div className="evaluador-info-header">
           <div className="info-item">
-            <FaUser className="info-icon" />
+            {/* --- ICONO CORREGIDO --- */}
+            <User className="info-icon" />
             <span>{infoEvaluador.nombre}</span>
           </div>
           <div className="info-item">
@@ -165,18 +162,16 @@ const EvaluacionPorFases: React.FC = () => {
             <span>{infoEvaluador.nivel}</span>
           </div>
           <div className="info-item info-fecha">
-            <FaCalendarAlt className="info-icon" />
+            {/* --- ICONO CORREGIDO --- */}
+            <CalendarDays className="info-icon" />
             <span>{fechaActual}</span>
           </div>
         </div>
       )}
-      {/* --- FIN: NUEVO HEADER DE INFORMACIÓN --- */}
 
-      {/* Alertas */}
       {error && <div className="alerta alerta-error">{error}</div>}
       {success && <div className="alerta alerta-exito">{success}</div>}
 
-      {/* Tabs dinámicos */}
       <div className="fases-tabs">
         {fases.map((f) => (
           <button
@@ -185,7 +180,7 @@ const EvaluacionPorFases: React.FC = () => {
             className={`fase-tab ${
               faseSeleccionada?.id === f.id ? "active" : ""
             }`}
-            disabled={loadingOlimpistas} // Deshabilita tabs mientras carga/guarda
+            disabled={loadingOlimpistas}
           >
             {f.nombre} ({f.estado})
           </button>
@@ -196,10 +191,10 @@ const EvaluacionPorFases: React.FC = () => {
         <p>Cargando olimpistas...</p>
       ) : (
         <>
-          {/* --- INICIO: NUEVO HEADER DE TABLA (Botones y Conteo) --- */}
           <div className="tabla-header-controles">
             <div className="info-olimpistas-conteo">
-              <FaUsers className="info-icon" />
+              {/* --- ICONO CORREGIDO --- */}
+              <Users className="info-icon" />
               <span>{olimpistas.length} olimpistas en esta fase</span>
             </div>
             <div className="botones-evaluacion">
@@ -226,7 +221,6 @@ const EvaluacionPorFases: React.FC = () => {
               </button>
             </div>
           </div>
-          {/* --- FIN: NUEVO HEADER DE TABLA --- */}
           
           <EvaluacionTable olimpistas={olimpistas} onChange={setOlimpistas} />
         </>

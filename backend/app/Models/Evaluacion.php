@@ -39,4 +39,9 @@ class Evaluacion extends Model
     {
         return $this->belongsTo(Estado_Olimpista::class, 'id_estado_olimpista', 'id_estado_olimpista');
     }
+    
+    public function equipo()
+    {
+        return $this->belongsTo(Equipo::class, 'id_equipo', 'id_equipo');
+    }
 }

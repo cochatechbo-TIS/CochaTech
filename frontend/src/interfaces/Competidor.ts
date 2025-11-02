@@ -9,6 +9,7 @@ export interface Competidor {
   nivel: string;
   grado: string;
   contacto_tutor: string;
+  nombre_tutor: string; // AGREGADO
   id_departamento: number;
   departamentoNombre?: string; 
   departamento?: {
