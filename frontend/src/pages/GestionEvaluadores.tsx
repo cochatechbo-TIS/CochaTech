@@ -3,7 +3,10 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import { EvaluadorTable } from "../components/evaluadores/EvaluadorTable"; // Asegúrate de que este componente exista
 import { EditEvaluadorModal } from "../components/evaluadores/EditEvaluadorModal"; // Asegúrate de que este componente exista
+import { NotificationModal } from '../components/common/NotificationModal';
 import type { Usuario } from "../interfaces/Usuario";
+
+type NotificationType = 'success' | 'error' | 'info' | 'confirm';
 
 const EVALUADORES_POR_PAGINA = 20;
 const GestionEvaluadores: React.FC = () => {
@@ -14,6 +17,15 @@ const GestionEvaluadores: React.FC = () => {
   const [error, setError] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [paginaActual, setPaginaActual] = useState(1); // Página inicial: 1
+
+   // ESTADO DE NOTIFICACIONES
+  const [notification, setNotification] = useState({
+    isVisible: false,
+    message: '',
+    type: 'info' as NotificationType,
+    title: undefined as string | undefined,
+    onConfirm: undefined as (() => void) | undefined,
+  });
 
   const API_BASE = "http://localhost:8000/api"; // URL base de la API
 
@@ -34,6 +46,29 @@ const GestionEvaluadores: React.FC = () => {
       baseURL: API_BASE,
       headers: headers,
     });
+  }, []);
+
+   // FUNCIONES DE NOTIFICACIÓN
+  const showNotification = useCallback((
+    message: string, 
+    type: NotificationType, 
+    onConfirm?: () => void,
+    title?: string
+  ) => {
+    setNotification({
+      isVisible: true,
+      message,
+      type,
+      title,
+      onConfirm,
+    });
+  }, []);
+
+  const closeNotification = useCallback(() => {
+    setNotification(prev => ({ 
+      ...prev, 
+      isVisible: false 
+    }));
   }, []);
 
   // 3. FUNCIÓN DE CARGA DE DATOS
@@ -61,8 +96,8 @@ const GestionEvaluadores: React.FC = () => {
           area: evaluador.area || "",
           id_rol: evaluador.id_rol,
           // Campos específicos de Evaluador
-          disponible: evaluador.disponible ?? true,
-          id_nivel: evaluador.id_nivel || null,
+          // disponible: evaluador.disponible ?? true,
+          // id_nivel: evaluador.id_nivel || null,
         })
       );
 
@@ -111,10 +146,20 @@ const GestionEvaluadores: React.FC = () => {
         )
       );
 
-      // RUTA DE EDICIÓN PARA EVALUADOR
-      await api.put(`/evaluador/${editedEvaluador.id_usuario}`, editedEvaluador);
+      // SOLO enviar los campos que el backend espera
+    const datosParaEnviar = {
+      nombre: editedEvaluador.nombre,
+      apellidos: editedEvaluador.apellidos,
+      ci: editedEvaluador.ci,
+      email: editedEvaluador.email,
+      telefono: editedEvaluador.telefono,
+      area: editedEvaluador.area,
+    };
 
-      alert('Evaluador actualizado correctamente.');
+      // RUTA DE EDICIÓN PARA EVALUADOR
+      await api.put(`/evaluador/${editedEvaluador.id_usuario}`, datosParaEnviar);
+
+      showNotification('Evaluador actualizado exitosamente', 'success');
     } catch (err: unknown) {
       console.error("Error al actualizar evaluador:", err);
 
@@ -128,14 +173,20 @@ const GestionEvaluadores: React.FC = () => {
         errorMessage = err.message;
       }
 
-      alert(errorMessage);
+      showNotification(errorMessage, 'error');
+      throw err;
     }
   };
 
   // Función de eliminación (usando optimistic updates)
-  const handleDeleteEvaluador = async (id: number) => {
+  const executeDeleteEvaluador = useCallback(async (id: number) => {
+    closeNotification(); // Cierra el modal de confirmación
+
     const evaluadoresAnteriores = [...evaluadores];
-    if (!window.confirm(`¿Estás seguro de que deseas eliminar al evaluador?`)) {
+    const evaluadorAEliminar = evaluadores.find(e => e.id_usuario === id);
+
+    if (!evaluadorAEliminar) {
+      showNotification('Error: No se encontró el evaluador para eliminar.', 'error');
       return;
     }
 
@@ -145,7 +196,7 @@ const GestionEvaluadores: React.FC = () => {
 
       // RUTA DE ELIMINACIÓN PARA EVALUADOR
       await api.delete(`/evaluador/${id}`);
-      alert("Evaluador eliminado exitosamente.");
+      showNotification("Evaluador eliminado exitosamente", 'success');
 
     } catch (err: unknown) {
       console.error("Error al eliminar evaluador:", err);
@@ -157,10 +208,25 @@ const GestionEvaluadores: React.FC = () => {
       } else if (err instanceof Error) {
         errorMessage = err.message;
       }
-      alert(errorMessage);
+      showNotification(errorMessage, 'error');
+      throw err;
     }
-  };
+  }, [api, evaluadores, showNotification, closeNotification]);
 
+  // Función que dispara la confirmación de eliminación
+  const handleDeleteEvaluador = useCallback((id: number) => {
+    const evaluador = evaluadores.find(e => e.id_usuario === id);
+    const nombreCompleto = evaluador 
+      ? `${evaluador.nombre} ${evaluador.apellidos}` 
+      : `con ID: ${id}`;
+    
+    showNotification(
+      `¿Estás seguro de que quieres eliminar a ${nombreCompleto}? Esta acción es irreversible.`,
+      'confirm',
+      () => executeDeleteEvaluador(id),
+      'Confirmar Eliminación'
+    );
+  }, [evaluadores, showNotification, executeDeleteEvaluador]);
 
   // Función de creación
   const handleCreateEvaluador = async (newEvaluador: Usuario) => {
@@ -176,22 +242,28 @@ const GestionEvaluadores: React.FC = () => {
         email: newEvaluador.email,
         telefono: newEvaluador.telefono,
         area: newEvaluador.area, 
-        id_nivel: newEvaluador.id_nivel, // Campo de Evaluador
-        disponible: newEvaluador.disponible ?? true, // Campo de Evaluador
-        id_rol: 3, // Asumiendo que 3 es el ID de rol para Evaluador
+        //id_nivel: newEvaluador.id_nivel, // Campo de Evaluador
+        //disponible: newEvaluador.disponible ?? true, // Campo de Evaluador
+        //id_rol: 3, // Asumiendo que 3 es el ID de rol para Evaluador
       });
 
-      if (response.data) {
-        // Asignar el ID (idealmente el devuelto por el servidor) y agregarlo
+            if (response.data && response.data.usuario) {
         const evaluadorCreado: Usuario = {
-            ...newEvaluador,
-            id_usuario: response.data.data?.id_usuario || Date.now(), // Usar el ID del servidor si existe
-            id_rol: 3,
+          id_usuario: response.data.usuario.id_usuario, // ✅ ID real del backend
+          nombre: response.data.usuario.nombre,
+          apellidos: response.data.usuario.apellidos,
+          ci: response.data.usuario.ci,
+          email: response.data.usuario.email,
+          telefono: response.data.usuario.telefono,
+          area: newEvaluador.area,
+          id_rol: response.data.usuario.id_rol || 3,
         };
+
         setEvaluadores((prev) => [...prev, evaluadorCreado]);
-        alert("Evaluador creado exitosamente");
+        showNotification("Evaluador creado exitosamente", 'success');
+        setIsCreateModalOpen(false);
       } else {
-        alert("No se recibió confirmación del servidor.");
+        showNotification("No se recibió confirmación del servidor.", 'error');
       }
 
     } catch (error: unknown) {
@@ -206,10 +278,9 @@ const GestionEvaluadores: React.FC = () => {
         errorMessage = error.message;
       }
 
-      alert(errorMessage);
+      showNotification(errorMessage, 'error');
       setError(errorMessage);
     } finally {
-      setIsCreateModalOpen(false);
       setLoading(false);
     }
   };
@@ -331,7 +402,7 @@ const GestionEvaluadores: React.FC = () => {
           </button>
         </div>
 
-        {/* 🧾 TABLA */}
+        {/* TABLA */}
         <EvaluadorTable
           usuario={evaluadoresPaginados}
           onEdit={handleEditEvaluador}
@@ -339,7 +410,7 @@ const GestionEvaluadores: React.FC = () => {
         />
       </div>
 
-      {/* 📄 PIE DE PÁGINA */}
+      {/* PIE DE PÁGINA */}
       {evaluadoresFiltrados.length > 0 && (
         <div className="pagination-section">
           <span className="pagination-info">
@@ -380,6 +451,14 @@ const GestionEvaluadores: React.FC = () => {
         onSave={handleCreateEvaluador}
         onCancel={() => setIsCreateModalOpen(false)}
         isOpen={isCreateModalOpen}
+      />
+      <NotificationModal
+        isVisible={notification.isVisible}
+        message={notification.message}
+        type={notification.type}
+        title={notification.title}
+        onClose={closeNotification}
+        onConfirm={notification.onConfirm}
       />
     </div>
   );

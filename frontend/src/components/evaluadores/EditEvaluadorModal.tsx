@@ -1,4 +1,4 @@
-// src/components/responsables/EditResponsableModal.tsx
+// src/components/evaluaddres/EditEvaluadorModal.tsx
 import React, { useState } from 'react';
 import { XIcon } from 'lucide-react';
 import type { Usuario } from '../../interfaces/Usuario';
