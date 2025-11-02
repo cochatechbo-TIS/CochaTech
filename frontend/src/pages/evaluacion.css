@@ -2,8 +2,8 @@
 
 .evaluacion-container {
   padding: 1.5rem;
-  width: 95%; /* Añadido para que no ocupe toda la pantalla */
-  margin: 0 auto; /* Añadido para centrar */
+  width: 95%;
+  margin: 0 auto;
 }
 
 .titulo {
@@ -12,126 +12,7 @@
   margin-bottom: 1rem;
 }
 
-.fases-tabs {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 0; /* Ajustado */
-  border-bottom: 2px solid #e5e7eb;
-}
-
-.fase-tab {
-  padding: 0.75rem 1.25rem; /* Más padding */
-  border: none;
-  background: none;
-  color: #6b7280;
-  font-weight: 500;
-  cursor: pointer;
-  margin-bottom: -2px; /* Alinea con el borde */
-  border-bottom: 2px solid transparent;
-}
-
-.fase-tab:disabled { /* Añadido */
-  color: #9ca3af;
-  cursor: not-allowed;
-}
-
-.fase-tab.active {
-  border-bottom: 2px solid #2563eb;
-  color: #2563eb;
-  font-weight: 600; /* Añadido */
-}
-
-.evaluacion-table-container {
-  overflow-x: auto;
-}
-
-.evaluacion-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.evaluacion-table th,
-.evaluacion-table td {
-  padding: 0.75rem; /* Más padding */
-  border: 1px solid #e5e7eb;
-  text-align: left;
-  vertical-align: middle; /* Añadido */
-}
-
-.evaluacion-table th { /* Añadido */
-  background-color: #f9fafb;
-  font-weight: 600;
-}
-
-.evaluacion-table input[type="number"],
-.evaluacion-table input[type="text"] {
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  padding: 0.5rem; /* Más padding */
-  width: 100%;
-  box-sizing: border-box; /* Añadido */
-}
-
-.evaluacion-table input[type="checkbox"] { /* Añadido */
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-.estado-aprobado {
-  color: #16a34a;
-  font-weight: 600;
-}
-
-.estado-reprobado {
-  color: #dc2626;
-  font-weight: 600;
-}
-
-/* --- ESTILOS MOVIDOS Y MODIFICADOS --- */
-.botones-evaluacion {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  /* margin-top: 1rem; <-- Eliminado */
-}
-
-.btn {
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
-  color: #fff;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s; /* Añadido */
-}
-
-.btn:disabled { /* Añadido */
-  background-color: #9ca3af;
-  cursor: not-allowed;
-}
-
-.btn-purple {
-  background-color: #9333ea;
-}
-.btn-purple:hover:not(:disabled) { /* Añadido */
-  background-color: #7e22ce;
-}
-
-.btn-blue {
-  background-color: #2563eb;
-}
-.btn-blue:hover:not(:disabled) { /* Añadido */
-  background-color: #1d4ed8;
-}
-
-.btn-green {
-  background-color: #16a34a;
-}
-.btn-green:hover:not(:disabled) { /* Añadido */
-  background-color: #15803d;
-}
-
-/* --- INICIO: CÓDIGO CSS NUEVO --- */
+/* --- Panel de Información del Evaluador --- */
 .evaluador-info-header {
   display: flex;
   flex-wrap: wrap;
@@ -173,6 +54,7 @@
   color: #6b7280;
 }
 
+/* --- Alertas de Éxito/Error --- */
 .alerta {
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
@@ -190,11 +72,42 @@
   border: 1px solid #bbf7d0;
 }
 
+/* --- Pestañas de Fases --- */
+.fases-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.fase-tab {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: none;
+  color: #6b7280;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: -2px;
+  border-bottom: 2px solid transparent;
+}
+
+.fase-tab:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.fase-tab.active {
+  border-bottom: 2px solid #2563eb;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* --- Controles de la Tabla (Botones y Conteo) --- */
 .tabla-header-controles {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap; /* Para pantallas pequeñas */
+  flex-wrap: wrap;
   gap: 1.5rem;
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
@@ -213,4 +126,94 @@
   font-size: 1.2rem;
   color: #333;
 }
-/* --- FIN: CÓDIGO CSS NUEVO --- */
+
+.botones-evaluacion {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* --- Botones --- */
+.btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.btn-purple {
+  background-color: #9333ea;
+}
+.btn-purple:hover:not(:disabled) {
+  background-color: #7e22ce;
+}
+
+.btn-blue {
+  background-color: #2563eb;
+}
+.btn-blue:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.btn-green {
+  background-color: #16a34a;
+}
+.btn-green:hover:not(:disabled) {
+  background-color: #15803d;
+}
+
+/* --- Tabla de Evaluación --- */
+.evaluacion-table-container {
+  overflow-x: auto;
+}
+
+.evaluacion-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.evaluacion-table th,
+.evaluacion-table td {
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.evaluacion-table th {
+  background-color: #f9fafb;
+  font-weight: 600;
+}
+
+.evaluacion-table input[type="number"],
+.evaluacion-table input[type="text"] {
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.evaluacion-table input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* --- Estados en la tabla --- */
+.estado-aprobado {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.estado-reprobado {
+  color: #dc2626;
+  font-weight: 600;
+}

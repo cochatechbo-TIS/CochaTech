@@ -8,6 +8,12 @@ use App\Http\Controllers\Responsable_Area_Controller;
 use App\Http\Controllers\Evaluador_Controller;
 use App\Http\Controllers\Generar_Lista_Controller;
 use App\Http\Controllers\Area_Controller;
+use App\Http\Controllers\Primera_Fase_Controller;
+use App\Http\Controllers\Clasificacion_Controller;
+use App\Http\Controllers\Fase_Dinamico_Controller;
+use App\Http\Controllers\Fase_Lista_Controller;
+use App\Http\Controllers\Fase_Consulta_Controller;
+//use App\Http\Controllers\EvaluacionController;
 
 use App\Http\Controllers\Evaluacion_Controller; // <-- AÑADIR EL NUEVO CONTROLLER
 use App\Http\Controllers\Nivel_Fase_Controller;
@@ -26,7 +32,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/areas/nombres', [Area_Controller::class, 'listarNombres']);
     // Grupo solo para ADMIN
     Route::middleware('role:administrador')->group(function () {
-        // ... (tus rutas de admin: /olimpistas, /responsable, /evaluador, etc.)
         Route::get('/olimpistas', [Gestion_Olimpista_Controller::class, 'index']);
         Route::put('/olimpistas/{id}', [Gestion_Olimpista_Controller::class, 'update']);
         Route::delete('/olimpistas/{id}', [Gestion_Olimpista_Controller::class, 'destroy']);
@@ -51,6 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/nivel-fase/aprobar/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'aprobar']);
     });
 
+    
 
     // --- INICIO DE CÓDIGO AÑADIDO ---
     // Grupo Evaluador
@@ -74,6 +80,12 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     // --- FIN DE CÓDIGO AÑADIDO ---
 
-    Route::get('/nivel-fase/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'mostrar']);
+    Route::get('/nivel-fase/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'mostrar']);//ver el estado y el comentario de la fase (no se si deberia ir a responsable y evaluador ... )
 
+    
+    Route::post('/primera/fase/{id}', [Primera_Fase_Controller::class, 'crearPrimeraFase']);
+    Route::post('/clasificacion/{id}', [Clasificacion_Controller::class, 'registrarEvaluaciones']);
+    Route::post('/fase-nivel/siguiente/{id}', [Fase_Dinamico_Controller::class, 'crearSiguienteFase']);
+    Route::get('/cantidad/fases/{id}', [Fase_Lista_Controller::class, 'listarFasesPorNivel']);
+    Route::get('/fase/{id}', [Fase_Consulta_Controller::class, 'mostrarFase']);
 });
