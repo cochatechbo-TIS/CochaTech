@@ -9,31 +9,19 @@ class FaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Fase 1
         Fase::firstOrCreate(
             ['nombre' => 'Fase 1 - Clasificatoria'],
-            [
-                'orden' => 1,
-                'nota_minima' => 51
-            ]
+            ['nota_minima' => 51, 'orden' => 1] // <-- Orden añadido
         );
 
-        // Fase 2
         Fase::firstOrCreate(
             ['nombre' => 'Fase 2 - Semifinal'],
-            [
-                'orden' => 2,
-                'nota_minima' => 55
-            ]
+            ['nota_minima' => 55, 'orden' => 2] // <-- Orden añadido
         );
 
-        // Fase 3
         Fase::firstOrCreate(
             ['nombre' => 'Fase 3 - Final'],
-            [
-                'orden' => 3,
-                'nota_minima' => 60
-            ]
+            ['nota_minima' => 60, 'orden' => 3] // <-- Orden añadido
         );
     }
 }

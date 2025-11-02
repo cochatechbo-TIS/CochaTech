@@ -1,32 +1,39 @@
 // src/pages/EvaluacionPorFases.tsx
 import React, { useEffect, useState } from "react";
-import type { Fase, Evaluable, InfoEvaluador, EvaluacionData } from "../interfaces/Evaluacion";
+import type { 
+  FasePestana, 
+  InfoEvaluador, 
+  Participante,
+  EvaluacionPayload
+} from "../interfaces/Evaluacion";
 import EvaluacionTable from "../components/evaluadores/EvaluacionTable";
 import {
-  obtenerDatosDeEvaluacion,
-  obtenerOlimpistasPorFase,
-  guardarNotas,
-  generarClasificados,
-  enviarLista,
+  getDatosInicialesEvaluador,
+  getParticipantesPorFase,
+  guardarYClasificar,
+  // --- INICIO DE CORRECCIÓN ---
+  enviarListaYCrearSiguienteFase // <-- Nombre correcto de la función
+  // --- FIN DE CORRECCIÓN ---
 } from "../services/evaluacionService";
-import { User, CalendarDays, Users } from 'lucide-react'; // <-- Usa Lucide
+import { User, CalendarDays, Users } from 'lucide-react';
 import "./evaluacion.css";
 
 const EvaluacionPorFases: React.FC = () => {
   // --- Estados para los datos ---
-  const [fases, setFases] = useState<Fase[]>([]);
   const [infoEvaluador, setInfoEvaluador] = useState<InfoEvaluador | null>(null);
-  const [faseSeleccionada, setFaseSeleccionada] = useState<Fase | null>(null);
-  const [evaluables, setEvaluables] = useState<Evaluable[]>([]); // <-- CORREGIDO
+  const [fases, setFases] = useState<FasePestana[]>([]);
+  const [faseSeleccionada, setFaseSeleccionada] = useState<FasePestana | null>(null);
+  const [participantes, setParticipantes] = useState<Participante[]>([]);
+  const [esGrupal, setEsGrupal] = useState(false);
   const [fechaActual, setFechaActual] = useState<string>('');
   
   // --- Estados de UI ---
   const [loading, setLoading] = useState(true);
-  const [loadingOlimpistas, setLoadingOlimpistas] = useState(false); // Renombrar a loadingEvaluables si se quiere
+  const [loadingParticipantes, setLoadingParticipantes] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Efecto para cargar datos iniciales
+  // Efecto para cargar datos iniciales (Panel y Pestañas)
   useEffect(() => {
     const hoy = new Date();
     setFechaActual(hoy.toLocaleString('es-ES', {
@@ -38,42 +45,45 @@ const EvaluacionPorFases: React.FC = () => {
     (async () => {
       try {
         setLoading(true);
-        const data: EvaluacionData = await obtenerDatosDeEvaluacion();
+        const data = await getDatosInicialesEvaluador();
         
         setInfoEvaluador(data.infoEvaluador);
         setFases(data.fases);
+        setEsGrupal(data.infoEvaluador.es_grupal);
         
         if (data.fases.length > 0) {
-          setFaseSeleccionada(data.fases[0]);
+          // Seleccionar la última fase disponible (la activa)
+          setFaseSeleccionada(data.fases[data.fases.length - 1]);
         } else {
           setError("No hay fases asignadas para este nivel.");
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
-        setError("No se pudieron cargar las fases. ¿Eres un evaluador con un nivel asignado?");
+        setError(err.response?.data?.message || "No se pudieron cargar los datos del evaluador.");
       }
       setLoading(false);
     })();
   }, []);
 
-  // Efecto para cargar "evaluables" (olimpistas o equipos)
+  // Efecto para cargar la tabla de participantes
   useEffect(() => {
     if (faseSeleccionada) {
-      cargarEvaluables(faseSeleccionada.id); // <-- CORREGIDO
+      cargarParticipantes(faseSeleccionada.id_nivel_fase);
     }
   }, [faseSeleccionada]);
 
-  const cargarEvaluables = async (faseId: number) => { // <-- CORREGIDO
-    setLoadingOlimpistas(true);
+  // --- Funciones de Lógica ---
+  const cargarParticipantes = async (idNivelFase: number) => {
+    setLoadingParticipantes(true);
     clearMessages();
     try {
-      const data = await obtenerOlimpistasPorFase(faseId);
-      setEvaluables(data); // <-- CORREGIDO
-    } catch (err) {
+      const data = await getParticipantesPorFase(idNivelFase);
+      setParticipantes(data.resultados || data.equipos || []);
+    } catch (err: any) {
       console.error(err);
-      setError("No se pudieron cargar los participantes."); // <-- CORREGIDO
+      setError(err.response?.data?.message || "No se pudieron cargar los participantes.");
     }
-    setLoadingOlimpistas(false);
+    setLoadingParticipantes(false);
   };
 
   const clearMessages = () => {
@@ -81,67 +91,69 @@ const EvaluacionPorFases: React.FC = () => {
     setSuccess(null);
   };
 
-  // --- Manejadores de Botones ---
-
-  const handleGuardar = async () => {
-    if (!faseSeleccionada) return;
-    clearMessages();
-    setLoadingOlimpistas(true);
-    try {
-      await guardarNotas(faseSeleccionada.id, evaluables); // <-- CORREGIDO
-      setSuccess("Notas guardadas correctamente ✅");
-    } catch (err) {
-      console.error("Error al guardar:", err); // Log más detallado
-      setError("Error al guardar las notas.");
-    }
-    setLoadingOlimpistas(false);
+  // Actualiza el estado local de la tabla
+  const handleTablaChange = (participantesActualizados: Participante[]) => {
+    setParticipantes(participantesActualizados);
   };
 
-  const handleGenerarClasificados = async () => {
+  // --- Manejadores de Botones ---
+
+  const handleGuardarYClasificar = async () => {
     if (!faseSeleccionada) return;
-    if (!window.confirm("¿Estás seguro de generar los clasificados?")) return;
+    
+    // 1. Mapear los datos de la tabla al formato que espera la API
+    const payload: EvaluacionPayload[] = participantes.map(p => ({
+      id_evaluacion: p.id_evaluacion,
+      nota: p.nota ?? 0, // Enviar 0 si es nulo
+      comentario: p.observaciones ?? '',
+      falta_etica: p.falta_etica ?? false,
+    }));
+
+    // 2. Confirmar
+    if (!window.confirm("¿Estás seguro de guardar y clasificar? Esta acción calculará los estados.")) return;
     
     clearMessages();
-    setLoadingOlimpistas(true);
+    setLoadingParticipantes(true);
     try {
-      const evaluablesActualizados = await generarClasificados(faseSeleccionada.id);
-      setEvaluables(evaluablesActualizados); // <-- CORREGIDO
-      setSuccess("Clasificados generados. Revisa la columna 'ESTADO'.");
-    } catch (err) {
-      console.error(err);
-      setError("Error al generar clasificados.");
+      const res = await guardarYClasificar(faseSeleccionada.id_nivel_fase, payload);
+      setSuccess(res.message); // Ej: "clasificasion hecha correctamente"
+      // Volver a cargar los participantes para ver los nuevos estados
+      await cargarParticipantes(faseSeleccionada.id_nivel_fase);
+    } catch (err: any) {
+      console.error("Error al clasificar:", err);
+      setError(err.response?.data?.error || "Error al guardar y clasificar.");
     }
-    setLoadingOlimpistas(false);
+    setLoadingParticipantes(false);
   };
 
   const handleEnviarLista = async () => {
-    if (!faseSeleccionada) return;
-    if (!window.confirm("¿Estás seguro de enviar la lista? Esta acción es final.")) return;
+    if (!infoEvaluador || !faseSeleccionada) return;
+    
+    // Lógica del nuevo controlador:
+    // El botón "Enviar" ahora se llama "Generar Siguiente Fase"
+    if (!window.confirm("¿Estás seguro de finalizar esta fase y generar la siguiente? Esta acción es final.")) return;
 
     clearMessages();
-    setLoadingOlimpistas(true);
+    setLoading(true); // Bloqueo general
     try {
-      const res = await enviarLista(faseSeleccionada.id);
-      setSuccess(res.message);
-      
-      // --- INICIO DE CORRECCIÓN ---
-      // 1. Recargar la lista de fases para obtener los nuevos estados
-      const data = await obtenerDatosDeEvaluacion();
+      const res = await enviarListaYCrearSiguienteFase(infoEvaluador.id_nivel);
+      setSuccess(res.message); // Ej: "Fase 2 generada correctamente."
+
+      // Recargar TODO para ver la nueva pestaña
+      const data = await getDatosInicialesEvaluador();
+      setInfoEvaluador(data.infoEvaluador);
       setFases(data.fases);
-
-      // 2. Actualizar la fase seleccionada localmente
-      // (Buscamos la versión actualizada de la fase en la nueva lista)
-      const faseActualizada = data.fases.find(f => f.id === faseSeleccionada.id);
-      if (faseActualizada) {
-        setFaseSeleccionada(faseActualizada);
+      if (data.fases.length > 0) {
+        setFaseSeleccionada(data.fases[data.fases.length - 1]);
       }
-    } catch (err) {
-      console.error(err);
-      setError("Error al enviar la lista.");
-    }
-    setLoadingOlimpistas(false);
-  };
 
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.error || "Error al generar la siguiente fase.");
+    }
+    setLoading(false);
+  };
+  
   // Lógica de UI para deshabilitar
   const isEditable = faseSeleccionada?.estado === 'En Proceso';
 
@@ -157,15 +169,15 @@ const EvaluacionPorFases: React.FC = () => {
         <div className="evaluador-info-header">
           <div className="info-item">
             <User className="info-icon" />
-            <span>{infoEvaluador.nombre}</span>
+            <span>{infoEvaluador.nombre_evaluador}</span>
           </div>
           <div className="info-item">
             <strong>Área:</strong>
-            <span>{infoEvaluador.area}</span>
+            <span>{infoEvaluador.nombre_area}</span>
           </div>
           <div className="info-item">
             <strong>Nivel:</strong>
-            <span>{infoEvaluador.nivel}</span>
+            <span>{infoEvaluador.nombre_nivel}</span>
           </div>
           <div className="info-item info-fecha">
             <CalendarDays className="info-icon" />
@@ -180,56 +192,58 @@ const EvaluacionPorFases: React.FC = () => {
       <div className="fases-tabs">
         {fases.map((f) => (
           <button
-            key={f.id}
+            key={f.id_nivel_fase}
             onClick={() => setFaseSeleccionada(f)}
             className={`fase-tab ${
-              faseSeleccionada?.id === f.id ? "active" : ""
+              faseSeleccionada?.id_nivel_fase === f.id_nivel_fase ? "active" : ""
             }`}
-            disabled={loadingOlimpistas}
+            disabled={loadingParticipantes || loading}
           >
-            {f.nombre} ({f.estado})
+            {f.nombre_fase} ({f.estado})
           </button>
         ))}
       </div>
 
-      {loadingOlimpistas ? (
+      {loadingParticipantes ? (
         <p>Cargando participantes...</p>
       ) : (
         <>
           <div className="tabla-header-controles">
             <div className="info-olimpistas-conteo">
               <Users className="info-icon" />
-              <span>{evaluables.length} participantes en esta fase</span>
+              <span>{participantes.length} participantes en esta fase</span>
             </div>
             <div className="botones-evaluacion">
+              
+              {/* --- BOTONES ADAPTADOS A LA NUEVA LÓGICA --- */}
+              
               <button 
-                onClick={handleGenerarClasificados}
-                className="btn btn-purple"
-                disabled={loadingOlimpistas || !isEditable}
+                onClick={handleGuardarYClasificar} // Nuevo nombre
+                className="btn btn-green" // Botón principal
+                disabled={loadingParticipantes || loading || !isEditable}
               >
-                Generar clasificados
+                {loadingParticipantes ? 'Guardando...' : 'Guardar y Clasificar'}
               </button>
+
               <button 
                 onClick={handleEnviarLista}
-                className="btn btn-blue"
-                disabled={loadingOlimpistas || !isEditable}
+                className="btn btn-blue" // Botón secundario
+                disabled={loadingParticipantes || loading || !isEditable}
               >
-                Enviar lista
+                Finalizar y Generar Siguiente Fase
               </button>
-              <button 
-                onClick={handleGuardar} 
-                className="btn btn-green"
-                disabled={loadingOlimpistas || !isEditable}
-              >
-                {loadingOlimpistas ? 'Guardando...' : 'Guardar notas'}
-              </button>
+
+              {/* Botón "Generar Clasificados" (el morado) eliminado
+                  porque el nuevo backend lo fusionó con "Guardar". */}
+              
             </div>
           </div>
           
           <EvaluacionTable 
-            evaluables={evaluables} // <-- CORREGIDO
-            onChange={setEvaluables} // <-- CORREGIDO
+            participantes={participantes} // <-- Nueva prop
+            onChange={handleTablaChange} // <-- Nueva prop
             isEditable={isEditable}
+            esGrupal={esGrupal} // <-- Nueva prop
           />
         </>
       )}

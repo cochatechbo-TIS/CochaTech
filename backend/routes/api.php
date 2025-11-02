@@ -61,6 +61,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // --- INICIO DE CÓDIGO AÑADIDO ---
     // Grupo Evaluador
     Route::middleware('role:evaluador')->group(function () {
+
+        // Endpoint CERO: Obtener la info del evaluador y sus fases
+        Route::get('/evaluador/inicio', [Evaluador_Controller::class, 'obtenerDatosIniciales']);
         // Endpoint 1: Obtener fases para las pestañas
         // Nota: Cambiamos la ruta de `/fases/nivel/{id}` a `/evaluador/fases`
         // porque obtenemos el nivel del usuario autenticado, es más seguro.
