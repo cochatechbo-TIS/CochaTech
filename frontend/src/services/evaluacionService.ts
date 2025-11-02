@@ -32,27 +32,25 @@ export async function obtenerDatosDeEvaluacion(): Promise<EvaluacionData> {
 
 
 // Obtener lista de olimpistas de una fase
-export async function obtenerOlimpistasPorFase(faseId: number): Promise<Olimpista[]> {
-  const response = await api.get(`/evaluacion/fase/${faseId}`);
+export async function obtenerOlimpistasPorFase(faseId: number): Promise<Evaluable[]> {
+  const response = await api.get<Evaluable[]>(`/evaluacion/fase/${faseId}`);
   return response.data;
 }
 
-// Guardar notas
-export async function guardarNotas(faseId: number, olimpistas: Olimpista[]): Promise<void> {
-  await api.post(`/evaluacion/fase/${faseId}/guardar`, { olimpistas });
+// Ahora envía un array de 'Evaluable'
+export async function guardarNotas(faseId: number, evaluables: Evaluable[]): Promise<void> {
+  // El backend espera la clave 'evaluables'
+  await api.post(`/evaluacion/fase/${faseId}/guardar`, { evaluables });
 }
 
 /**
  * Llama a la API para procesar las notas y asignar estados.
  */
-export async function generarClasificados(faseId: number): Promise<Olimpista[]> {
+export async function generarClasificados(faseId: number): Promise<Evaluable[]> {
   const response = await api.post(`/evaluacion/fase/${faseId}/generar-clasificados`);
-  return response.data; // Devuelve la lista actualizada
+  return response.data; // El backend ahora devuelve la lista Evaluable[] actualizada
 }
 
-/**
- * Llama a la API para marcar la fase como "Enviada" o "Finalizada".
- */
 export async function enviarLista(faseId: number): Promise<{ message: string }> {
   const response = await api.post(`/evaluacion/fase/${faseId}/enviar-lista`);
   return response.data;

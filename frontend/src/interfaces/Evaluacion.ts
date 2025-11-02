@@ -20,3 +20,27 @@ export interface EvaluacionResponse {
   fases: Fase[];
   olimpistas: Olimpista[];
 }
+
+export interface Evaluable {
+  id: number;          // ID del Olimpista o del Equipo
+  tipo: 'olimpista' | 'equipo';
+  nombre: string;      // Nombre del Olimpista o del Equipo
+  ci: string | null;
+  institucion: string;
+  integrantes: string | null; // Nombres de integrantes (solo para equipo)
+  
+  // Campos de evaluación
+  nota: number | null;
+  falta_etica: boolean;
+  observaciones: string;
+  estado: string;
+}
+export interface InfoEvaluador {
+  nombre: string;
+  nivel: string;
+  area: string;
+}
+export interface EvaluacionData {
+  infoEvaluador: InfoEvaluador;
+  fases: Fase[];
+}

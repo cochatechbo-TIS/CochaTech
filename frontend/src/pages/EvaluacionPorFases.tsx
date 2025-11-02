@@ -1,20 +1,15 @@
 // src/pages/EvaluacionPorFases.tsx
 import React, { useEffect, useState } from "react";
-import type { Fase, Olimpista } from "../interfaces/Evaluacion";
+import type { Fase, Evaluable, InfoEvaluador, EvaluacionData } from "../interfaces/Evaluacion";
 import EvaluacionTable from "../components/evaluadores/EvaluacionTable";
 import {
   obtenerDatosDeEvaluacion,
-  type EvaluacionData,
-  type InfoEvaluador,
   obtenerOlimpistasPorFase,
   guardarNotas,
   generarClasificados,
   enviarLista,
 } from "../services/evaluacionService";
-// --- INICIO DE CORRECCIÓN DE ICONOS ---
-// Cambiamos de 'react-icons/fa' a 'lucide-react' para ser consistentes
-import { User, CalendarDays, Users } from 'lucide-react'; 
-// --- FIN DE CORRECCIÓN DE ICONOS ---
+import { User, CalendarDays, Users } from 'lucide-react'; // <-- Usa Lucide
 import "./evaluacion.css";
 
 const EvaluacionPorFases: React.FC = () => {
@@ -22,12 +17,12 @@ const EvaluacionPorFases: React.FC = () => {
   const [fases, setFases] = useState<Fase[]>([]);
   const [infoEvaluador, setInfoEvaluador] = useState<InfoEvaluador | null>(null);
   const [faseSeleccionada, setFaseSeleccionada] = useState<Fase | null>(null);
-  const [olimpistas, setOlimpistas] = useState<Olimpista[]>([]);
+  const [evaluables, setEvaluables] = useState<Evaluable[]>([]); // <-- CORREGIDO
   const [fechaActual, setFechaActual] = useState<string>('');
   
   // --- Estados de UI ---
-  const [loading, setLoading] = useState(true); 
-  const [loadingOlimpistas, setLoadingOlimpistas] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingOlimpistas, setLoadingOlimpistas] = useState(false); // Renombrar a loadingEvaluables si se quiere
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -61,23 +56,22 @@ const EvaluacionPorFases: React.FC = () => {
     })();
   }, []);
 
-  // Efecto para cargar olimpistas
+  // Efecto para cargar "evaluables" (olimpistas o equipos)
   useEffect(() => {
     if (faseSeleccionada) {
-      cargarOlimpistas(faseSeleccionada.id);
+      cargarEvaluables(faseSeleccionada.id); // <-- CORREGIDO
     }
   }, [faseSeleccionada]);
 
-  // --- Funciones de Lógica ---
-  const cargarOlimpistas = async (faseId: number) => {
+  const cargarEvaluables = async (faseId: number) => { // <-- CORREGIDO
     setLoadingOlimpistas(true);
     clearMessages();
     try {
       const data = await obtenerOlimpistasPorFase(faseId);
-      setOlimpistas(data);
+      setEvaluables(data); // <-- CORREGIDO
     } catch (err) {
       console.error(err);
-      setError("No se pudieron cargar los olimpistas.");
+      setError("No se pudieron cargar los participantes."); // <-- CORREGIDO
     }
     setLoadingOlimpistas(false);
   };
@@ -88,15 +82,16 @@ const EvaluacionPorFases: React.FC = () => {
   };
 
   // --- Manejadores de Botones ---
+
   const handleGuardar = async () => {
     if (!faseSeleccionada) return;
     clearMessages();
     setLoadingOlimpistas(true);
     try {
-      await guardarNotas(faseSeleccionada.id, olimpistas);
+      await guardarNotas(faseSeleccionada.id, evaluables); // <-- CORREGIDO
       setSuccess("Notas guardadas correctamente ✅");
     } catch (err) {
-      console.error(err);
+      console.error("Error al guardar:", err); // Log más detallado
       setError("Error al guardar las notas.");
     }
     setLoadingOlimpistas(false);
@@ -109,8 +104,8 @@ const EvaluacionPorFases: React.FC = () => {
     clearMessages();
     setLoadingOlimpistas(true);
     try {
-      const olimpistasActualizados = await generarClasificados(faseSeleccionada.id);
-      setOlimpistas(olimpistasActualizados);
+      const evaluablesActualizados = await generarClasificados(faseSeleccionada.id);
+      setEvaluables(evaluablesActualizados); // <-- CORREGIDO
       setSuccess("Clasificados generados. Revisa la columna 'ESTADO'.");
     } catch (err) {
       console.error(err);
@@ -128,8 +123,18 @@ const EvaluacionPorFases: React.FC = () => {
     try {
       const res = await enviarLista(faseSeleccionada.id);
       setSuccess(res.message);
+      
+      // --- INICIO DE CORRECCIÓN ---
+      // 1. Recargar la lista de fases para obtener los nuevos estados
       const data = await obtenerDatosDeEvaluacion();
       setFases(data.fases);
+
+      // 2. Actualizar la fase seleccionada localmente
+      // (Buscamos la versión actualizada de la fase en la nueva lista)
+      const faseActualizada = data.fases.find(f => f.id === faseSeleccionada.id);
+      if (faseActualizada) {
+        setFaseSeleccionada(faseActualizada);
+      }
     } catch (err) {
       console.error(err);
       setError("Error al enviar la lista.");
@@ -137,7 +142,9 @@ const EvaluacionPorFases: React.FC = () => {
     setLoadingOlimpistas(false);
   };
 
-  // --- Renderizado ---
+  // Lógica de UI para deshabilitar
+  const isEditable = faseSeleccionada?.estado === 'En Proceso';
+
   if (loading) {
     return <div className="evaluacion-container"><p>Cargando panel de evaluador...</p></div>;
   }
@@ -149,7 +156,6 @@ const EvaluacionPorFases: React.FC = () => {
       {infoEvaluador && (
         <div className="evaluador-info-header">
           <div className="info-item">
-            {/* --- ICONO CORREGIDO --- */}
             <User className="info-icon" />
             <span>{infoEvaluador.nombre}</span>
           </div>
@@ -162,7 +168,6 @@ const EvaluacionPorFases: React.FC = () => {
             <span>{infoEvaluador.nivel}</span>
           </div>
           <div className="info-item info-fecha">
-            {/* --- ICONO CORREGIDO --- */}
             <CalendarDays className="info-icon" />
             <span>{fechaActual}</span>
           </div>
@@ -188,41 +193,44 @@ const EvaluacionPorFases: React.FC = () => {
       </div>
 
       {loadingOlimpistas ? (
-        <p>Cargando olimpistas...</p>
+        <p>Cargando participantes...</p>
       ) : (
         <>
           <div className="tabla-header-controles">
             <div className="info-olimpistas-conteo">
-              {/* --- ICONO CORREGIDO --- */}
               <Users className="info-icon" />
-              <span>{olimpistas.length} olimpistas en esta fase</span>
+              <span>{evaluables.length} participantes en esta fase</span>
             </div>
             <div className="botones-evaluacion">
               <button 
                 onClick={handleGenerarClasificados}
                 className="btn btn-purple"
-                disabled={loadingOlimpistas}
+                disabled={loadingOlimpistas || !isEditable}
               >
                 Generar clasificados
               </button>
               <button 
                 onClick={handleEnviarLista}
                 className="btn btn-blue"
-                disabled={loadingOlimpistas}
+                disabled={loadingOlimpistas || !isEditable}
               >
                 Enviar lista
               </button>
               <button 
                 onClick={handleGuardar} 
                 className="btn btn-green"
-                disabled={loadingOlimpistas}
+                disabled={loadingOlimpistas || !isEditable}
               >
                 {loadingOlimpistas ? 'Guardando...' : 'Guardar notas'}
               </button>
             </div>
           </div>
           
-          <EvaluacionTable olimpistas={olimpistas} onChange={setOlimpistas} />
+          <EvaluacionTable 
+            evaluables={evaluables} // <-- CORREGIDO
+            onChange={setEvaluables} // <-- CORREGIDO
+            isEditable={isEditable}
+          />
         </>
       )}
     </div>

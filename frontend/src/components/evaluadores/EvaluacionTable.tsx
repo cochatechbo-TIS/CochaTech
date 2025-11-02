@@ -1,83 +1,123 @@
 // src/components/evaluadores/EvaluacionTable.tsx
 import React from "react";
-import type { Olimpista } from "../../interfaces/Evaluacion";
+import type { Evaluable } from "../../interfaces/Evaluacion"; // <-- CORREGIDO
 import "../../pages/evaluacion.css";
 
 interface Props {
-  olimpistas: Olimpista[];
-  onChange: (updated: Olimpista[]) => void;
+  evaluables: Evaluable[]; // <-- CORREGIDO
+  onChange: (updated: Evaluable[]) => void; // <-- CORREGIDO
+  isEditable: boolean; // <-- CORREGIDO (asegúrate de que esté en la interfaz)
 }
 
-const EvaluacionTable: React.FC<Props> = ({ olimpistas, onChange }) => {
+// CORREGIDO: Asegúrate de que 'isEditable' esté en la lista de parámetros
+const EvaluacionTable: React.FC<Props> = ({ evaluables, onChange, isEditable }) => {
+  
+  // Las funciones handle ahora operan sobre 'evaluables'
   const handleNotaChange = (id: number, value: number) => {
-    const updated = olimpistas.map(o =>
-      o.id === id ? { ...o, nota: Math.min(100, Math.max(0, value)) } : o
+    const updated = evaluables.map(e =>
+      e.id === id ? { ...e, nota: Math.min(100, Math.max(0, value)) } : e
     );
     onChange(updated);
   };
 
   const handleObsChange = (id: number, value: string) => {
-    const updated = olimpistas.map(o =>
-      o.id === id ? { ...o, observaciones: value } : o
+    const updated = evaluables.map(e =>
+      e.id === id ? { ...e, observaciones: value } : e
     );
     onChange(updated);
   };
 
   const handleFaltaEticaChange = (id: number, checked: boolean) => {
-    const updated = olimpistas.map(o =>
-      o.id === id ? { ...o, falta_etica: checked } : o
+    const updated = evaluables.map(e =>
+      e.id === id ? { ...e, falta_etica: checked } : e
     );
     onChange(updated);
   };
+
+  // Determinar si es una tabla de equipos o individuos
+  const esGrupal = evaluables.length > 0 && evaluables[0].tipo === 'equipo';
 
   return (
     <div className="evaluacion-table-container">
       <table className="evaluacion-table">
         <thead>
-          <tr>
-            <th>NOMBRE</th>
-            <th>CI</th>
-            <th>INSTITUCIÓN</th>
-            <th>NOTA (0-100)</th>
-            <th>FALTA ÉTICA</th>
-            <th>OBSERVACIONES</th>
-            <th>ESTADO</th>
-          </tr>
+          {/* Renderizado condicional del Header */}
+          {esGrupal ? (
+            <tr>
+              <th>EQUIPO</th>
+              <th>INSTITUCIÓN</th>
+              <th>INTEGRANTES</th>
+              <th>NOTA (0-100)</th>
+              <th>FALTA ÉTICA</th>
+              <th>OBSERVACIONES</th>
+              <th>ESTADO</th>
+            </tr>
+          ) : (
+            <tr>
+              <th>NOMBRE</th>
+              <th>CI</th>
+              <th>INSTITUCIÓN</th>
+              <th>NOTA (0-100)</th>
+              <th>FALTA ÉTICA</th>
+              <th>OBSERVACIONES</th>
+              <th>ESTADO</th>
+            </tr>
+          )}
         </thead>
         <tbody>
-          {olimpistas.map(o => (
-            <tr key={o.id}>
-              <td className="font-bold">{o.nombre}</td>
-              <td>{o.ci}</td>
-              <td>{o.institucion}</td>
+          {evaluables.map(e => (
+            <tr key={e.id}>
+              {/* Renderizado condicional de las celdas */}
+              <td className="font-bold">{e.nombre}</td>
+              
+              {esGrupal ? (
+                // Columna 2: Institución
+                <td>{e.institucion}</td>
+              ) : (
+                // Columna 2: CI
+                <td>{e.ci}</td>
+              )}
+
+              {esGrupal ? (
+                // Columna 3: Integrantes
+                <td>{e.integrantes}</td>
+              ) : (
+                 // Columna 3: Institución
+                 <td>{e.institucion}</td>
+              )}
+              
+              {/* Columnas comunes */}
               <td>
                 <input
                   type="number"
                   min={0}
                   max={100}
-                  value={o.nota ?? ""}
-                  onChange={e => handleNotaChange(o.id, Number(e.target.value))}
+                  value={e.nota ?? ""}
+                  onChange={evt => handleNotaChange(e.id, Number(evt.target.value))}
+                  disabled={!isEditable}
                 />
               </td>
               <td className="text-center">
                 <input
                   type="checkbox"
-                  checked={o.falta_etica}
-                  onChange={e => handleFaltaEticaChange(o.id, e.target.checked)}
+                  checked={e.falta_etica}
+                  onChange={evt => handleFaltaEticaChange(e.id, evt.target.checked)}
+                  disabled={!isEditable}
                 />
               </td>
               <td>
                 <input
                   type="text"
-                  value={o.observaciones}
-                  onChange={e => handleObsChange(o.id, e.target.value)}
-                  placeholder="Observaciones..."
+                  value={e.observaciones}
+                  onChange={evt => handleObsChange(e.id, evt.target.value)}
+                  placeholder={isEditable ? "Observaciones..." : "No editable"}
+                  disabled={!isEditable}
                 />
               </td>
               <td className="estado">
-                {o.estado === "Aprobado" ? (
+                {e.estado === "Aprobado" ? (
                   <span className="estado-aprobado">Aprobado</span>
-                ) : o.estado === "Reprobado" ? (
+                ) : e.estado === "Reprobado" ? (
                   <span className="estado-reprobado">Reprobado</span>
                 ) : (
                   "-"
