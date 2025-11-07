@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute'; // <-- Nuestro NUEVO ProtectedRoute con roles
 import Listas from './components/Lista Competidores/ListaCompetidores';
 import { useAuth } from './context/AuthContext'; // <-- Importar useAuth
+import GestionFasesAdmin from './pages/GestionFasesAdmin'; // AÑADIR ESTE IMPORT
 
 // --- ¡IMPORTAR NUEVAS PÁGINAS! ---
 import ForgotPassword from './pages/ForgotPassword';
@@ -137,6 +138,7 @@ function App() {
         <Route path="/administrador/final" element={<Layout showNavbar={true}><Final /></Layout>} />
         <Route path="/administrador/reportes" element={<Layout showNavbar={true}><Reportes /></Layout>} />
         <Route path="/administrador/historial" element={<Layout showNavbar={true}><Historial /></Layout>} />
+        <Route path="/administrador/gestionar-fases" element={<Layout showNavbar={true}><GestionFasesAdmin /></Layout>} />
       </Route>
 
       {/* --- RUTAS DE RESPONSABLE --- */}
@@ -145,8 +147,14 @@ function App() {
         <Route path="/responsable/inicio" element={<Layout showNavbar={true}><Inicio /></Layout>} />
         <Route path="/responsable/listas" element={<Layout showNavbar={true}><Listas /></Layout>} />
         <Route path="/responsable/informes" element={<Layout showNavbar={true}><Reportes /></Layout>} />
-D   </Route>
+      </Route>
 
+      <Route element={<ProtectedRoute allowedRoles={['administrador', 'responsable']} />}>
+      <Route
+        path="/gestionar-fases"
+        element={<Layout showNavbar={true}><GestionFasesAdmin /></Layout>}
+      />
+      </Route>
       {/* --- RUTAS DE EVALUADOR --- */}
       {/* Grupo de rutas protegidas para 'evaluador' */}
       <Route element={<ProtectedRoute allowedRoles={['evaluador']} />}>

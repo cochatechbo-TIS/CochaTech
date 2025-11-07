@@ -47,8 +47,8 @@ class Generar_Lista_Controller extends Controller
                     'nombre' => $n->nombre,
                     'competidores' => $conteos[$n->id_nivel]->total ?? 0,
                     'fasesAprobadas' => 0,         // temporal (por ahora en cero)
-                    'faseTotales' => $totalFases, 
-                    'evaluador' => $n->evaluador?->nombre_completo ?? '',
+                    'faseTotales' => $totalFases,
+                    'evaluador' => $n->evaluador?->usuario?->nombre . ' ' . $n->evaluador?->usuario?->apellidos ?? '', // <-- MODIFICACIÓN: Usar nombre y apellidos del usuario
                     'area' => $nombre_area,
                 ];
             })

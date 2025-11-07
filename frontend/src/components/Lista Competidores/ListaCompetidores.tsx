@@ -19,6 +19,7 @@ function Listas({ area = AREA_DEFAULT }: ValidacionListasProps) {
   const [filtroNivel, setFiltroNivel] = useState('');
   const [filtroArea] = useState('');
   const [selectedArea, setSelectedArea] = useState<string>('');
+  const [areaResponsable, setAreaResponsable] = useState<string>(''); // <-- NUEVO ESTADO
   const [areas, setAreas] = useState<string[]>([]);
 
   // ========== USUARIO ==========
@@ -103,6 +104,11 @@ function Listas({ area = AREA_DEFAULT }: ValidacionListasProps) {
           evaluador: item.evaluador || '',
         }));
 
+        // --- INICIO DE LA MODIFICACIÓN ---
+        // Si no es admin y hay niveles, extraemos el área del primer nivel.
+        if (!isAdmin && nivelesRaw.length > 0 && nivelesRaw[0].area) {
+          setAreaResponsable(nivelesRaw[0].area);
+        }
         setNiveles(nivelesAdaptados);
       } catch (err: unknown) {
         if (axios.isAxiosError(err)) {
@@ -117,7 +123,7 @@ function Listas({ area = AREA_DEFAULT }: ValidacionListasProps) {
     };
 
     fetchNiveles();
-  }, [api, selectedArea, isAdmin]);
+  }, [api, selectedArea, isAdmin]); // No es necesario añadir areaResponsable a las dependencias
 
   // ========== UTILIDADES ==========
   const calcularProgreso = (aprobadas: number, total: number): number => {
@@ -179,7 +185,7 @@ function Listas({ area = AREA_DEFAULT }: ValidacionListasProps) {
 
   const handleGestionarFases = useCallback(
     (nivelId: number) => {
-      navigate('/evaluacion', { state: { nivelId } });
+      navigate('/gestionar-fases', { state: { nivelId } });// AÑADIDO para el admin
     },
     [navigate]
   );
@@ -234,10 +240,10 @@ function Listas({ area = AREA_DEFAULT }: ValidacionListasProps) {
           <path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
         <div className="info-content">
-          <h3 className="info-title">Validación de niveles para el área {selectedArea || area}</h3>
+          <h3 className="info-title">Validación de niveles para el área: {isAdmin ? selectedArea || '...' : areaResponsable || '...'}</h3>
           <p className="info-text">
-            Como responsable del área de {area}, usted puede gestionar todos los niveles asignados 
-            y asignar evaluadores a cada nivel. Haga clic en "Gestionar fases" para ver y validar 
+            Como responsable, usted puede gestionar todos los niveles asignados a su área
+            y asignar evaluadores. Haga clic en "Gestionar fases" para ver y validar 
             las listas de cada nivel.
           </p>
         </div>
@@ -245,7 +251,7 @@ function Listas({ area = AREA_DEFAULT }: ValidacionListasProps) {
 
       {/* Tabla */}
       <div className="table-container">
-        <h2 className="validacion-subtitle">Área: {selectedArea || area}</h2>
+        <h2 className="validacion-subtitle">Área: {isAdmin ? selectedArea || '...' : areaResponsable || '...'}</h2>
         <table className="niveles-table">
           <thead>
             <tr>

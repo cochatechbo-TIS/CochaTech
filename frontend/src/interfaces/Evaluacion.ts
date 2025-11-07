@@ -1,4 +1,4 @@
-// src/types/Evaluacion.ts
+// src/interfaces/Evaluacion.ts
 export interface Fase {
   id: number;
   nombre: string; // Ej: "Fase 1 - Clasificatoria"
@@ -100,4 +100,11 @@ export interface EvaluacionPayload {
   nota: number;
   comentario: string;
   falta_etica: boolean;
+}
+
+export interface InfoNivelAdmin {
+  nombre: string;
+  area: string;
+  esGrupal: boolean;
+  evaluador?: string | null; // <- AGREGADO
 }
