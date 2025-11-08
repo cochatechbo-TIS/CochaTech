@@ -2,24 +2,26 @@
 
 import React, { useEffect } from 'react';
 import './ModalStyle.css';
-import { CircleCheckBig, CircleX, CircleAlert, AlertTriangle } from 'lucide-react';
+import { CircleCheckBig, CircleX, CircleAlert, AlertTriangle, MessageSquareText } from 'lucide-react';
 
-type NotificationType = 'success' | 'error' | 'info' | 'confirm';
+type NotificationType = 'success' | 'error' | 'info' | 'confirm' | 'input';
 
 interface NotificationModalProps {
   isVisible: boolean;
   message: string;
   type: NotificationType;
   title?: string;
-  onClose: () => void; // Para cerrar el Toast o el Modal simple
-  onConfirm?: () => void; // Solo para el Modal de Confirmación
+  onClose: () => void;
+  onConfirm?: (value?: string) => void; // Acepta un valor opcional (para el input)
 }
 
+// Mapa de configuración para cada tipo de notificación
 const typeMap = {
   success: { Icon: CircleCheckBig, title: 'Éxito', className: 'toast-success', isToast: true },
   error: { Icon: CircleX, title: 'Error', className: 'toast-error', isToast: true },
   info: { Icon: CircleAlert, title: 'Información', className: 'toast-info', isToast: true },
   confirm: { Icon: AlertTriangle, title: 'Confirmar', className: 'modal-error', isToast: false },
+  input: { Icon: MessageSquareText, title: 'Entrada Requerida', className: 'modal-info', isToast: false },
 };
 
 export const NotificationModal: React.FC<NotificationModalProps> = ({
@@ -30,10 +32,11 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
   onClose,
   onConfirm,
 }) => {
-  const DURATION = 9000; // 9 segundos para Toast
+  const DURATION = 5000; // 5 segundos para Toast
+  const [inputValue, setInputValue] = React.useState('');
 
   const { Icon, title: defaultTitle, className, isToast } = typeMap[type];
-  const modalTitle = title || defaultTitle;
+  const finalTitle = title || defaultTitle;
 
   // Lógica para que el Toast se cierre automáticamente
   useEffect(() => {
@@ -44,6 +47,13 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
       return () => clearTimeout(timer);
     }
   }, [isVisible, isToast, onClose]);
+
+  // Limpiar el input cuando el modal se hace visible
+  useEffect(() => {
+    if (isVisible && type === 'input') {
+      setInputValue('');
+    }
+  }, [isVisible, type]);
 
   if (!isVisible) return null;
 
@@ -73,20 +83,36 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
       <div className={contentClass}>
         
         <div className="modal-header">
-          <h3 className="modal-title">{modalTitle}</h3>
+          <h3 className="modal-title">{finalTitle}</h3>
         </div>
         
         <p className="modal-message">{message}</p>
 
+        {/* Área de texto para el tipo 'input' */}
+        {type === 'input' && (
+          <div className="modal-input-container">
+            <textarea
+              className="modal-textarea"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Escriba aquí..."
+              rows={4}
+            />
+          </div>
+        )}
+
         {/* Botones de Confirmación/Aceptar */}
         <div className="modal-actions">
-          {type === 'confirm' ? (
+          {type === 'confirm' || type === 'input' ? (
             <>
               <button onClick={onClose} className="modal-btn modal-btn-secondary">
                 Cancelar
               </button>
-              <button onClick={onConfirm} className="modal-btn modal-btn-primary">
-                Sí, Confirmar
+              <button 
+                onClick={() => onConfirm?.(inputValue)} 
+                className="modal-btn modal-btn-primary"
+              >
+                {type === 'confirm' ? 'Sí, Confirmar' : 'Rechazar lista'}
               </button>
             </>
           ) : (

@@ -2,11 +2,15 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import EvaluacionTable from "../components/evaluadores/EvaluacionTable";
+import { NotificationModal } from "../components/common/NotificationModal";
 import api from "../services/api";
 import type { FasePestana, InfoNivelAdmin, Participante } from "../interfaces/Evaluacion";
-import "./evaluacion.css";
 import { User, Users } from 'lucide-react';
 import axios from 'axios';
+
+// ✅ Tipado para el estado de la notificación
+type NotificationType = 'success' | 'error' | 'info' | 'confirm' | 'input';
+
 //✅ Tipado para location.state
 interface LocationState {
   nivelId: number;
@@ -23,6 +27,15 @@ const GestionFasesAdmin: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [loadingParticipantes, setLoadingParticipantes] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // ✅ Estado para el modal de notificación
+  const [notification, setNotification] = useState({
+    isVisible: false,
+    message: '',
+    type: 'info' as NotificationType,
+    title: undefined as string | undefined,
+    onConfirm: undefined as ((value?: string) => void) | undefined,
+  });
   // Cargar fases del nivel
   useEffect(() => {
     if (nivelId) {
@@ -33,6 +46,26 @@ const GestionFasesAdmin: React.FC = () => {
       setLoading(false);
     }
   }, [nivelId]);
+
+  // ✅ Funciones para manejar notificaciones
+  const showNotification = (
+    message: string,
+    type: NotificationType,
+    onConfirm?: (value?: string) => void,
+    title?: string
+  ) => {
+    setNotification({
+      isVisible: true,
+      message,
+      type,
+      title,
+      onConfirm,
+    });
+  };
+
+  const closeNotification = () => {
+    setNotification(prev => ({ ...prev, isVisible: false }));
+  };
   
   // ✅ NUEVA FUNCIÓN: Obtener el nombre del evaluador
   const cargarInfoNivel = async () => {
@@ -150,10 +183,10 @@ const GestionFasesAdmin: React.FC = () => {
       setLoadingParticipantes(true);
       setError(null);
 
-      console.log("🔍 Cargando participantes para fase:", idNivelFase);
+      console.log("Cargando participantes para fase:", idNivelFase);
 
       const response = await api.get(`/fase/${idNivelFase}`);
-      console.log("✅ Respuesta de participantes:", response.data);
+      console.log("Respuesta de participantes:", response.data);
 
       const data = response.data;
       
@@ -206,16 +239,16 @@ const GestionFasesAdmin: React.FC = () => {
     }
   };
   
-  const handleRechazar = async () => {
+  // Lógica de rechazo extraída para ser llamada por el modal
+  const executeRechazar = async (comentario: string) => {
     if (!faseSeleccionada) return;
-    const comentario = prompt("Ingrese el motivo del rechazo:");
-    if (!comentario) return;
-    
+    closeNotification(); // Cierra el modal de input
+
     try {
       await api.post(`/nivel-fase/rechazar/${faseSeleccionada.id_nivel_fase}`, {
         comentario
       });
-      alert("Fase rechazada correctamente");
+      showNotification("Fase rechazada correctamente. Se notificará al evaluador.", 'success');
       cargarFases();
     } catch (error) {
       console.error("Error al rechazar:", error);
@@ -223,13 +256,29 @@ const GestionFasesAdmin: React.FC = () => {
       if (axios.isAxiosError(error)) {
         errorMsg = error.response?.data?.message || errorMsg;
       }
-    alert(errorMsg);
+      showNotification(errorMsg, 'error');
     }
+  };
+
+  // Manejador del botón "Rechazar Fase" que ahora abre el modal
+  const handleRechazar = () => {
+    if (!faseSeleccionada) return;
+
+    showNotification(
+      `Está a punto de rechazar la "${faseSeleccionada.nombre_fase}". Por favor, detalle el motivo para que el evaluador pueda hacer las correcciones necesarias.`,
+      'input',
+      (comentario) => {
+        if (comentario && comentario.trim()) {
+          executeRechazar(comentario.trim());
+        }
+      },
+      'Motivo del Rechazo'
+    );
   };
   // Loading state
   if (loading) {
     return (
-      <div className="evaluacion-container">
+      <div className="gestion-competidores-page">
         <div style={{ textAlign: 'center', padding: '2rem' }}>
           <p>⏳ Cargando información...</p>
         </div>
@@ -245,7 +294,8 @@ const GestionFasesAdmin: React.FC = () => {
     );
   }
   return (
-    <div className="evaluacion-container">
+    <div className="gestion-competidores-page">
+      <div className="page-content-wrapper">
       <h1 className="titulo">Gestión de Fases</h1>
 
     {infoNivel && (
@@ -291,10 +341,29 @@ const GestionFasesAdmin: React.FC = () => {
           </button>
         ))}
       </div>
-      <div className="info-olimpistas-conteo">
-              <Users className="info-icon" />
-              <span>{participantes.length} participantes en esta fase</span>
-            </div>
+      <div className="tabla-header-controles">
+        <div className="info-olimpistas-conteo">
+          <Users className="info-icon" />
+          <span>{participantes.length} participantes en esta fase</span>
+        </div>
+        {/* Botones de acción movidos aquí */}
+        {faseSeleccionada && faseSeleccionada.estado !== 'Aprobada' && (
+          <div className="botones-evaluacion">
+            <button
+              onClick={handleAprobar}
+              className="btn btn-green"
+              disabled={loadingParticipantes}
+            >
+              Aprobar Fase
+            </button>
+            <button onClick={handleRechazar} className="btn btn-red"
+              disabled={loadingParticipantes}
+            >
+              Rechazar Fase
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Tabla de participantes */}
       {loadingParticipantes ? (
@@ -307,24 +376,17 @@ const GestionFasesAdmin: React.FC = () => {
           esGrupal={infoNivel?.esGrupal || false}
         />
       )}
-      
-      {/* Botones de acción */}
-      {faseSeleccionada && faseSeleccionada.estado !== 'Aprobada' && (
-        <div className="botones-evaluacion">
-          <button 
-            onClick={handleAprobar}
-            className="btn btn-green"
-            disabled={loadingParticipantes}
-            >
-            Aprobar Fase
-          </button>
-          <button onClick={handleRechazar} className="btn btn-red"
-            disabled={loadingParticipantes}
-            >
-            Rechazar Fase
-          </button>
-        </div>
-      )}
+
+      {/* ✅ Renderizado del modal de notificación */}
+      <NotificationModal
+        isVisible={notification.isVisible}
+        message={notification.message}
+        type={notification.type}
+        title={notification.title}
+        onClose={closeNotification}
+        onConfirm={notification.onConfirm}
+      />
+    </div>
     </div>
   );
 };
