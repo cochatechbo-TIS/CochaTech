@@ -107,4 +107,5 @@ export interface InfoNivelAdmin {
   area: string;
   esGrupal: boolean;
   evaluador?: string | null; // <- AGREGADO
+  es_Fase_final?: boolean;
 }

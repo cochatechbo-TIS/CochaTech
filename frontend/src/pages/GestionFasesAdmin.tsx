@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import EvaluacionTable from "../components/evaluadores/EvaluacionTable";
 import { NotificationModal } from "../components/common/NotificationModal";
 import api from "../services/api";
-import type { FasePestana, InfoNivelAdmin, Participante } from "../interfaces/Evaluacion";
+import type { FaseConsultaData, FasePestana, InfoNivelAdmin, Participante } from "../interfaces/Evaluacion";
 import { User, Users } from 'lucide-react';
 import axios from 'axios';
 
@@ -119,6 +119,7 @@ const GestionFasesAdmin: React.FC = () => {
             nombre: nivelEncontrado.nombre,
             area: nivelEncontrado.area,
             esGrupal: prev?.esGrupal || false
+
           }));
         }
       }
@@ -177,7 +178,7 @@ const GestionFasesAdmin: React.FC = () => {
       cargarParticipantes(faseSeleccionada.id_nivel_fase);
     }
   }, [faseSeleccionada]);
-  
+
   const cargarParticipantes = async (idNivelFase: number) => {
     try {
       setLoadingParticipantes(true);
@@ -188,7 +189,8 @@ const GestionFasesAdmin: React.FC = () => {
       const response = await api.get(`/fase/${idNivelFase}`);
       console.log("Respuesta de participantes:", response.data);
 
-      const data = response.data;
+      const data = response.data as FaseConsultaData;
+      console.log("Respuesta de participantes:", data);
       
       // Adaptar según tipo (individual/grupal)
       if (data.tipo === 'grupal') {
@@ -202,7 +204,14 @@ const GestionFasesAdmin: React.FC = () => {
         const esGrupal = data.tipo === 'grupal';
         // Si 'prev' no existe, inicializamos el objeto.
         // Si 'prev' existe, lo usamos como base para no perder el evaluador.
-        return { ...prev, nombre: data.nivel, area: data.area, esGrupal: esGrupal, evaluador: prev?.evaluador || "Cargando..." };
+        return {
+          ...prev,
+          nombre: data.nivel,
+          area: data.area,
+          esGrupal: esGrupal,
+          evaluador: prev?.evaluador || "Cargando...",
+          es_Fase_final: data.es_Fase_final
+        };
       });
     } catch (error) {
       console.error("Error al cargar participantes:", error);
@@ -217,25 +226,36 @@ const GestionFasesAdmin: React.FC = () => {
   };
   
   const handleAprobar = async () => {
-    if (!faseSeleccionada || !nivelId) return;
-    if (!confirm("¿Está seguro de aprobar esta fase? Esta acción generará la siguiente fase con los participantes clasificados.")) return;
-    
-    try {
-      // --- INICIO DE LA MODIFICACIÓN ---
-      // En lugar de solo aprobar, llamamos al endpoint que crea la siguiente fase.
-      // Este controlador se encarga de aprobar la fase actual y generar la nueva.
-      const response = await api.post(`/fase-nivel/siguiente/${nivelId}`);
-      alert(response.data.message || "Siguiente fase generada correctamente.");
-      // --- FIN DE LA MODIFICACIÓN ---
+    if (!faseSeleccionada || !nivelId || !infoNivel) return;
 
-      cargarFases(); // Recargar para ver el nuevo estado
+    try {
+      const esUltimaFaseActual = infoNivel.es_Fase_final;
+
+      // Mensaje de confirmación dinámico
+      const confirmMessage = infoNivel.es_Fase_final
+        ? "¿Está seguro de aprobar esta fase final? Esta acción marcará la fase como completada."
+        : "¿Está seguro de aprobar esta fase? Esta acción generará la siguiente fase con los participantes clasificados.";
+
+      if (!window.confirm(confirmMessage)) return;
+
+      if (esUltimaFaseActual) {
+        // Lógica para la última fase: solo aprobar
+        await api.post(`/nivel-fase/aprobar/${faseSeleccionada.id_nivel_fase}`);
+        showNotification("Fase final aprobada correctamente.", "success");
+      } else {
+        // Lógica para fases no finales: generar siguiente fase
+        const response = await api.post(`/fase-nivel/siguiente/${nivelId}`);
+        showNotification(response.data.message || "Siguiente fase generada correctamente.", 'success');
+      }
+
+      cargarFases(); // Recargar para ver el nuevo estado y la nueva fase si se generó
     } catch (error) {
       console.error("Error al aprobar:", error);
-      let errorMsg = "Error al aprobar y generar la siguiente fase.";
+      let errorMsg = "Error al procesar la aprobación.";
       if (axios.isAxiosError(error)) {
         errorMsg = error.response?.data?.error || error.response?.data?.message || errorMsg;
       }
-      alert(errorMsg);
+      showNotification(errorMsg, 'error');
     }
   };
   
@@ -280,7 +300,7 @@ const GestionFasesAdmin: React.FC = () => {
     return (
       <div className="gestion-competidores-page">
         <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <p>⏳ Cargando información...</p>
+          <p>Cargando información...</p>
         </div>
       </div>
     );
