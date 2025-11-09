@@ -1,9 +1,9 @@
 // src/components/carga-masiva/CargarCSV.tsx
 import React, { useRef } from 'react';
-import axios from 'axios'; // ✅ Importar axios
+import api from '../../services/api'; // Importamos la instancia centralizada
 import { useNavigate } from "react-router-dom";
 import './CargarCSV.css';
-
+import axios from 'axios';
 interface CargarCSVProps {
   onVerLista?: () => void;
   onGenerarListas?: () => void;
@@ -12,26 +12,6 @@ interface CargarCSVProps {
 function CargarCSV({ onVerLista }: CargarCSVProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
-
-  const API_BASE = 'http://localhost:8000/api'; // ✅ define tu base URL
-
-  // ✅ Cliente axios autenticado
-  const api = React.useMemo(() => {
-    const token = localStorage.getItem('authToken');
-
-    const headers: Record<string, string> = {
-      'Accept': 'application/json',
-    };
-
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    return axios.create({
-      baseURL: API_BASE,
-      headers: headers,
-    });
-  }, [API_BASE]);
 
   // ✅ Función para subir archivo CSV al backend (con token)
   const uploadFile = async (file: File) => {

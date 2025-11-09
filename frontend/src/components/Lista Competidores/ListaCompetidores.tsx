@@ -2,9 +2,9 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Listas.css';
-import type { Nivel, ValidacionListasProps } from './tipo';
 import axios from 'axios';
-import type { AxiosInstance } from 'axios';
+import type { Nivel, ValidacionListasProps } from './tipo'; // Asumiendo que 'tipo' está en el mismo directorio
+import api from '../../services/api'; // <-- IMPORTAMOS LA INSTANCIA DE AXIOS
 
 // ========== CONSTANTES ==========
 const AREA_DEFAULT = 'Robótica';
@@ -27,18 +27,6 @@ function Listas({ area = AREA_DEFAULT }: ValidacionListasProps) {
   const user = storedUser ? JSON.parse(storedUser) : null;
   const isAdmin = user?.rol?.nombre_rol === 'administrador';
 
-  // ========== AXIOS INSTANCE ==========
-  const API_BASE = 'http://localhost:8000/api';
-  const api: AxiosInstance = useMemo(() => {
-    const token = localStorage.getItem('authToken');
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return axios.create({ baseURL: API_BASE, headers });
-  }, []);
-
   // ========== CARGAR ÁREAS ==========
   useEffect(() => {
     const fetchAreas = async () => {
@@ -54,7 +42,7 @@ function Listas({ area = AREA_DEFAULT }: ValidacionListasProps) {
       }
     };
     fetchAreas();
-  }, [api]);
+  }, []);
 
   // ========== CARGAR NIVELES ==========
   useEffect(() => {
@@ -121,9 +109,8 @@ function Listas({ area = AREA_DEFAULT }: ValidacionListasProps) {
         }
       }
     };
-
     fetchNiveles();
-  }, [api, selectedArea, isAdmin]); // No es necesario añadir areaResponsable a las dependencias
+  }, [selectedArea, isAdmin]); // No es necesario añadir areaResponsable a las dependencias
 
   // ========== UTILIDADES ==========
   const calcularProgreso = (aprobadas: number, total: number): number => {

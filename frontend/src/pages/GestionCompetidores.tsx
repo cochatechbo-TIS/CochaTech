@@ -2,6 +2,7 @@
 // src/pages/GestionCompetidores.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import api from '../services/api'; // Importamos la instancia centralizada de Axios
 
 import { CompetitorTable } from '../components/competidores/CompetitorTable';
 import CargarCSV from '../components/carga masiva/CargarCSV';
@@ -38,29 +39,6 @@ const GestionCompetidores: React.FC = () => {
         onConfirm: undefined as (() => void) | undefined, // Cambiar a undefined
     });
   
-  // URL base de la API
-  const API_BASE = 'http://localhost:8000/api';
-
-  const api = React.useMemo(() => {
-      // 1. Obtener el token del almacenamiento local
-      const token = localStorage.getItem('authToken'); 
-      
-      const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-      };
-
-      // 2. Si el token existe, añade el header de Autorización
-      if (token) {
-          headers['Authorization'] = `Bearer ${token}`; 
-      }
-
-      return axios.create({
-          baseURL: API_BASE,
-          headers: headers, // Usamos el nuevo objeto headers
-      });
-  }, [API_BASE]); 
-
   const showNotification = useCallback((
     message: string, 
     type: NotificationType, 
@@ -81,7 +59,6 @@ const GestionCompetidores: React.FC = () => {
     }, []);
 
   const fetchCompetidores = useCallback(async () => {
-
     try {
       setLoading(true);
       setError('');
@@ -127,7 +104,7 @@ const GestionCompetidores: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [api]);
+  }, []);
 
   // Cargar competidores solo al montar el componente
 
@@ -253,7 +230,7 @@ const GestionCompetidores: React.FC = () => {
         showNotification(errorMessage, 'error');
         throw err;
     }
-}, [api, competidores, showNotification, closeNotification]);
+}, [competidores, showNotification, closeNotification]);
 
 // OPTIMIZADO: Eliminar competidor (DISPARA LA CONFIRMACIÓN)
   const handleDeleteCompetitor = useCallback((ci: string) => {

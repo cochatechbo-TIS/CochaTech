@@ -1,6 +1,7 @@
 // src/pages/GestionResponsables.tsx
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import axios from "axios"; // Necesitas importar axios
+import React, { useState, useEffect, useCallback } from "react";
+import axios from "axios";
+import api from "../services/api";
 import { ResponsableTable } from "../components/responsables/ResponsableTable";
 import { EditResponsableModal } from "../components/responsables/EditResponsableModal";
 import { NotificationModal } from '../components/common/NotificationModal';
@@ -26,27 +27,6 @@ const GestionResponsables: React.FC = () => {
     title: undefined as string | undefined,
     onConfirm: undefined as (() => void) | undefined,
   });
-
-  const API_BASE = "http://localhost:8000/api"; // URL base de la API
-
-  // 2. CONFIGURACIÓN AXIOS CON AUTH (REUTILIZADA DE COMPETIDORES)
-  const api = useMemo(() => {
-    const token = localStorage.getItem("authToken");
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    };
-
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
-    return axios.create({
-      baseURL: API_BASE,
-      headers: headers,
-    });
-  }, []);
 
   
   // FUNCIONES DE NOTIFICACIÓN
@@ -118,7 +98,7 @@ const GestionResponsables: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [api]);
+  }, []);
 
   // 4. EJECUTAR LA CARGA AL MONTAR
   useEffect(() => {
@@ -196,7 +176,7 @@ const GestionResponsables: React.FC = () => {
         showNotification(errorMessage, 'error');
         throw err;
       }
-    }, [api, responsables, showNotification, closeNotification]);
+    }, [responsables, showNotification, closeNotification]);
 
     // Función que dispara la confirmación de eliminación
   const handleDeleteResponsable = useCallback((id: number) => {

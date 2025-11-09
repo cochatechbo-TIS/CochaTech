@@ -1,6 +1,7 @@
 // src/pages/GestionEvaluadores.tsx
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
+import api from "../services/api"; // Importamos la instancia centralizada de Axios
 import { EvaluadorTable } from "../components/evaluadores/EvaluadorTable"; // Asegúrate de que este componente exista
 import { EditEvaluadorModal } from "../components/evaluadores/EditEvaluadorModal"; // Asegúrate de que este componente exista
 import { NotificationModal } from '../components/common/NotificationModal';
@@ -26,27 +27,6 @@ const GestionEvaluadores: React.FC = () => {
     title: undefined as string | undefined,
     onConfirm: undefined as (() => void) | undefined,
   });
-
-  const API_BASE = "http://localhost:8000/api"; // URL base de la API
-
-  // 2. CONFIGURACIÓN AXIOS CON AUTH
-  const api = useMemo(() => {
-    const token = localStorage.getItem("authToken");
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    };
-
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
-    return axios.create({
-      baseURL: API_BASE,
-      headers: headers,
-    });
-  }, []);
 
    // FUNCIONES DE NOTIFICACIÓN
   const showNotification = useCallback((
@@ -118,7 +98,7 @@ const GestionEvaluadores: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [api]);
+  }, []);
 
   // 4. EJECUTAR LA CARGA AL MONTAR
   useEffect(() => {
@@ -211,7 +191,7 @@ const GestionEvaluadores: React.FC = () => {
       showNotification(errorMessage, 'error');
       throw err;
     }
-  }, [api, evaluadores, showNotification, closeNotification]);
+  }, [evaluadores, showNotification, closeNotification]);
 
   // Función que dispara la confirmación de eliminación
   const handleDeleteEvaluador = useCallback((id: number) => {
