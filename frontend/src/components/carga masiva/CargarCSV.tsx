@@ -1,9 +1,14 @@
 // src/components/carga-masiva/CargarCSV.tsx
-import React, { useRef } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import api from '../../services/api'; // Importamos la instancia centralizada
 import { useNavigate } from "react-router-dom";
 import './CargarCSV.css';
 import axios from 'axios';
+import { NotificationModal } from '../common/NotificationModal'; // Importamos el modal
+
+// Tipos para el modal de notificación
+type NotificationType = 'success' | 'error' | 'info' | 'confirm';
+
 interface CargarCSVProps {
   onVerLista?: () => void;
   onGenerarListas?: () => void;
@@ -12,6 +17,38 @@ interface CargarCSVProps {
 function CargarCSV({ onVerLista }: CargarCSVProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+
+  // Estado para controlar el modal de notificaciones
+  const [notification, setNotification] = useState({
+    isVisible: false,
+    message: '',
+    type: 'info' as NotificationType,
+    title: undefined as string | undefined,
+    onConfirm: undefined as (() => void) | undefined,
+  });
+
+  const [confirmDialog, setConfirmDialog] = useState<{
+  isVisible: boolean;
+  file?: File;
+}>({ isVisible: false });
+
+  // Función para mostrar una notificación
+  const showNotification = useCallback((
+    message: string,
+    type: NotificationType,
+    title?: string
+  ) => {
+    setNotification({
+      isVisible: true,
+      message,
+      type,
+      title,
+      onConfirm: undefined, // No se usa confirmación aquí
+    });
+  }, []);
+
+  // Función para cerrar la notificación
+  const closeNotification = useCallback(() => setNotification(prev => ({ ...prev, isVisible: false })), []);
 
   // ✅ Función para subir archivo CSV al backend (con token)
   const uploadFile = async (file: File) => {
@@ -28,18 +65,21 @@ function CargarCSV({ onVerLista }: CargarCSVProps) {
       const data = response.data;
 
       if (response.status === 200) {
-        let successMessage = `✅ ¡Archivo cargado exitosamente!
-Total insertados: ${data.total_insertados}
-Total errores: ${data.total_errores}`;
+        let successMessage = `Se procesó el archivo. Total de registros insertados: ${data.total_insertados}. Total de errores encontrados: ${data.total_errores}.`;
+        let notificationType: NotificationType = 'success';
+        let notificationTitle = 'Carga Exitosa';
 
         if (data.total_errores > 0) {
-          successMessage += `\n⚠️ Revisa los ${data.total_errores} errores.`;
+          notificationType = 'info'; // Cambiamos a 'info' si hay errores para que no parezca un éxito total
+          notificationTitle = 'Carga con Errores';
+          successMessage += ` Por favor, revisa los ${data.total_errores} registros que no pudieron ser importados.`;
         }
 
-        alert(successMessage);
+        showNotification(successMessage, notificationType, notificationTitle);
         console.log('Datos de inserción:', data);
       } else {
-        alert(`❌ Error en la carga: ${data.message || 'Error desconocido'}`);
+        // Usamos el modal de error
+        showNotification(data.message || 'Ocurrió un error desconocido durante la carga.', 'error', 'Error en la Carga');
         console.error('Error del servidor:', data);
       }
 
@@ -59,7 +99,7 @@ Total errores: ${data.total_errores}`;
         errorMessage = error.message;
       }
 
-      alert(errorMessage);
+      showNotification(errorMessage, 'error', 'Error de Conexión');
       return false;
     }
   };
@@ -67,10 +107,8 @@ Total errores: ${data.total_errores}`;
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileObj = e.target.files?.[0];
     if (fileObj && fileObj.name.endsWith('.csv')) {
-      if (window.confirm(`¿Deseas cargar el archivo ${fileObj.name}? Esta acción guardará los datos en la base de datos.`)) {
-        await uploadFile(fileObj);
-      }
-
+      setConfirmDialog({ isVisible: true, file: fileObj });
+     
       // Limpiar input (sea éxito o cancelación)
       if (inputRef.current) {
         inputRef.current.value = '';
@@ -84,7 +122,7 @@ Total errores: ${data.total_errores}`;
   if (onVerLista) {
     onVerLista();
   } else {
-    alert('Función VER LISTA - En desarrollo');
+    showNotification('Esta función te permitirá ver la lista completa de olimpistas registrados.', 'info', 'Función "Ver Lista"');
   }
 };
 
@@ -119,6 +157,30 @@ Total errores: ${data.total_errores}`;
           ref={inputRef}
           className="csv-file-input-hidden"
           onChange={handleFileChange}
+        />
+      </div>
+
+      {/* Componente de Notificación */}
+      <div className="notification-container-wrapper">
+        <NotificationModal
+          isVisible={notification.isVisible}
+          message={notification.message}
+          type={notification.type}
+          title={notification.title}
+          onClose={closeNotification}
+        />
+        <NotificationModal
+          isVisible={confirmDialog.isVisible}
+          type="confirm"
+          title="Confirmar Carga"
+          message={`¿Deseas cargar el archivo ${confirmDialog.file?.name}? Esta acción guardará los datos en la base de datos.`}
+          onClose={() => setConfirmDialog({ isVisible: false })}
+          onConfirm={async () => {
+            if (confirmDialog.file) {
+              await uploadFile(confirmDialog.file);
+            }
+            setConfirmDialog({ isVisible: false });
+          }}
         />
       </div>
     </div>
