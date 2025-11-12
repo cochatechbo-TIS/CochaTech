@@ -201,12 +201,7 @@ function Listas({ area = AREA_DEFAULT }: ValidacionListasProps) {
               className="search-input"
             />
           </div>
-          <select value={filtroNivel} onChange={handleNivelChange} className="filter-select">
-            <option value="">Todos los niveles</option>
-            {niveles.map(nivel => (
-              <option key={nivel.id} value={nivel.nombre}>{nivel.nombre}</option>
-            ))}
-          </select>
+          
           {isAdmin && (
             <select value={selectedArea} onChange={handleAreaChange} className="filter-select">
               <option value="">Todas las áreas</option>
@@ -215,6 +210,13 @@ function Listas({ area = AREA_DEFAULT }: ValidacionListasProps) {
               ))}
             </select>
           )}
+          <select value={filtroNivel} onChange={handleNivelChange} className="filter-select">
+            <option value="">Todos los niveles</option>
+            {niveles.map(nivel => (
+              <option key={nivel.id} value={nivel.nombre}>{nivel.nombre}</option>
+            ))}
+          </select>
+          
         </div>
       </div>
 

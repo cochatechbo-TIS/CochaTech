@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute'; // <-- Nuestro NUEVO P
 import Listas from './components/Lista Competidores/ListaCompetidores';
 import { useAuth } from './context/AuthContext'; // <-- Importar useAuth
 import GestionFasesAdmin from './pages/GestionFasesAdmin'; // AÑADIR ESTE IMPORT
+import Reportes from './components/ReportesFinales/ReportesFinales'; //importe de los reportes
 
 // --- ¡IMPORTAR NUEVAS PÁGINAS! ---
 import ForgotPassword from './pages/ForgotPassword';
@@ -60,12 +61,12 @@ const Final = () => (
   </div>
 );*/
 
-const Reportes = () => ( // 'Reportes' e 'Informes' es lo mismo, usaré 'Reportes'
+/*const Reportes = () => ( // 'Reportes' e 'Informes' es lo mismo, usaré 'Reportes'
   <div className="p-8">
     <h1 className="text-3xl font-bold text-gray-800 mb-4">Reportes</h1>
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
-);
+);*/
 
 const Historial = () => (
   <div className="p-8">
