@@ -1,6 +1,7 @@
 // src/components/reportes/CeremoniaPremiacion.tsx
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import './CeremoniaPremiacion.css';
+import api from '../../services/api';
 import { useFiltrosAreaNivel } from '../../hooks/useFiltrosAreaNivel';
 import FiltrosAreaNivel from '../../components/filtrosAreaNivel/FiltrosAreaNivel';
 
@@ -13,70 +14,87 @@ interface ParticipantePremiacion {
   nivel: string;
   posicion: string;
 }
+function CeremoniaPremiacion() {
+  const [participantes, setParticipantes] = useState<ParticipantePremiacion[]>([]);
+  const [busqueda, setBusqueda] = useState('');
 
-interface CeremoniaPremiacionProps {
-  area?: string;
-  nivel?: string;
-}
+  const {
+    areas,
+    niveles,
+    selectedArea,
+    selectedAreaId,
+    selectedNivel,
+    selectedNivelId,
+    handleAreaChange,
+    handleNivelChange
+  } = useFiltrosAreaNivel();
 
-// ========== DATOS DE PRUEBA ==========
-const PARTICIPANTES_PREMIACION: ParticipantePremiacion[] = [
-  {
-    id: 1,
-    nombre: 'Juan Pérez',
-    unidadEducativa: 'Colegio Nacional Simón Bolívar',
-    area: 'Matemática',
-    nivel: 'Avanzado',
-    posicion: 'Oro'
-  },
-  {
-    id: 2,
-    nombre: 'Carlos Mamani',
-    unidadEducativa: 'Colegio Don Bosco',
-    area: 'Matemática',
-    nivel: 'Avanzado',
-    posicion: 'Plata'
-  },
-  {
-    id: 3,
-    nombre: 'María López',
-    unidadEducativa: 'Unidad Educativa La Salle',
-    area: 'Matemática',
-    nivel: 'Avanzado',
-    posicion: 'Plata'
-  },
-  {
-    id: 4,
-    nombre: 'Pedro Flores',
-    unidadEducativa: 'Colegio Alemán',
-    area: 'Matemática',
-    nivel: 'Avanzado',
-    posicion: 'Bronce'
-  },
-  {
-    id: 5,
-    nombre: 'Laura Torrez',
-    unidadEducativa: 'Colegio Saint Andrews',
-    area: 'Matemática',
-    nivel: 'Avanzado',
-    posicion: 'Bronce'
-  },
-  {
-    id: 6,
-    nombre: 'Monica Torrez',
-    unidadEducativa: 'Colegio Saint Andrews',
-    area: 'Matemática',
-    nivel: 'Avanzado',
-    posicion: 'Mencion Honor'
-  }
-];
+   // ========== CARGAR DATOS DEL BACKEND ==========
+  useEffect(() => {
+    const cargar = async () => {
+      if (!selectedAreaId || !selectedNivelId) return;
+
+      try {
+        const resp = await api.get(`/reporte-ceremonia/${selectedAreaId}/${selectedNivelId}`);
+
+        const premiados = resp.data?.premiados || [];
+
+        const parsed = premiados.map((p: any, index: number) => ({
+          id: index + 1,
+          nombre: p.nombre,
+          unidadEducativa: p.institucion,
+          area: p.area,
+          nivel: p.nivel,
+          posicion: p.posicion
+        }));
+
+        setParticipantes(parsed);
+      } catch (err) {
+        console.error("Error cargando premiación:", err);
+        setParticipantes([]);
+      }
+    };
+
+    cargar();
+  }, [selectedAreaId, selectedNivelId]);
+
+  // ========== FILTRADO DE PARTICIPANTES ==========
+  const participantesFiltrados = useMemo(() => {
+    let resultado = participantes;
+
+    // Filtrar por área
+    if (selectedArea) {
+      resultado = resultado.filter(p => p.area === selectedArea);
+    }
+
+    // Filtrar por nivel
+    if (selectedNivel) {
+      resultado = resultado.filter(p => p.nivel === selectedNivel);
+    }
+
+    // Filtrar por búsqueda
+    if (busqueda.trim()) {
+      const searchLower = busqueda.toLowerCase().trim();
+      resultado = resultado.filter(p =>
+        p.nombre.toLowerCase().includes(searchLower) ||
+        p.unidadEducativa.toLowerCase().includes(searchLower)
+      );
+    }
+
+    return resultado;
+  }, [participantes, selectedArea, selectedNivel, busqueda]);
 
 // ========== UTILIDADES ==========
-const getPosicionClass = (posicion: string): string => {
-  const posicionLower = posicion.toLowerCase();
-  if (posicionLower === 'oro') return 'posicion-oro';
-  if (posicionLower === 'plata') return 'posicion-plata';
-  if (posicionLower === 'bronce') return 'posicion-bronce';
+const getPosicionClass = (posicion?: string | number): string => {
+  if (!posicion) return '';
+
+  const str = posicion.toString().toLowerCase();
+
+  if (str === '1' || str.includes('oro')) return 'posicion-oro';
+  if (str === '2' || str.includes('plata')) return 'posicion-plata';
+  if (str === '3' || str.includes('bronce')) return 'posicion-bronce';
+  if (str.includes('mención')) return 'posicion-mencion';
+
   return '';
 };
 
@@ -102,7 +120,7 @@ const exportarExcel = (participantes: ParticipantePremiacion[], area: string, ni
           <thead>
             <tr>
               <th>Nombre</th>
-              <th>Unidad Educativa</th>
+              <th>Institución</th>
               <th>Área</th>
               <th>Nivel</th>
               <th>Posición</th>
@@ -204,54 +222,14 @@ const exportarPDF = (participantes: ParticipantePremiacion[], area: string, nive
   }, 250);
 };
 
-// ========== COMPONENTE ==========
-function CeremoniaPremiacion({ area, nivel }: CeremoniaPremiacionProps) {
-  const [participantes] = useState<ParticipantePremiacion[]>(PARTICIPANTES_PREMIACION);
-  const [busqueda, setBusqueda] = useState('');
-  // Usar el hook personalizado para filtros
-  const {
-    areas,
-    niveles: nivelesDisponibles,
-    selectedArea,
-    selectedNivel,
-    handleAreaChange,
-    handleNivelChange
-  } = useFiltrosAreaNivel();
-
-  // ========== FILTRADO DE PARTICIPANTES ==========
-  const participantesFiltrados = useMemo(() => {
-    let resultado = participantes;
-
-    // Filtrar por área
-    if (selectedArea) {
-      resultado = resultado.filter(p => p.area === selectedArea);
-    }
-
-    // Filtrar por nivel
-    if (selectedNivel) {
-      resultado = resultado.filter(p => p.nivel === selectedNivel);
-    }
-
-    // Filtrar por búsqueda
-    if (busqueda.trim()) {
-      const searchLower = busqueda.toLowerCase().trim();
-      resultado = resultado.filter(p =>
-        p.nombre.toLowerCase().includes(searchLower) ||
-        p.unidadEducativa.toLowerCase().includes(searchLower)
-      );
-    }
-
-    return resultado;
-  }, [participantes, selectedArea, selectedNivel, busqueda]);
-
   // ========== MANEJADORES ==========
   const handleExportarExcel = useCallback(() => {
-    exportarExcel(participantesFiltrados, selectedArea || area || 'Todos', selectedNivel || nivel || 'Todos');
-  }, [participantesFiltrados, selectedArea, selectedNivel, area, nivel]);
+    exportarExcel(participantesFiltrados, selectedArea ?? 'Todos', selectedNivel ?? 'Todos');
+  }, [participantesFiltrados, selectedArea, selectedNivel]);
 
   const handleExportarPDF = useCallback(() => {
-    exportarPDF(participantesFiltrados, selectedArea || area || 'Todos', selectedNivel || nivel || 'Todos');
-  }, [participantesFiltrados, selectedArea, selectedNivel, area, nivel]);
+    exportarPDF(participantesFiltrados, selectedArea ?? 'Todos', selectedNivel ?? 'Todos');
+  }, [participantesFiltrados, selectedArea, selectedNivel]);
   return (
     <div className="ceremonia-container">
       {/* Header con botones de exportación */}
@@ -295,7 +273,7 @@ function CeremoniaPremiacion({ area, nivel }: CeremoniaPremiacionProps) {
       {/* Filtros usando el componente reutilizable */}
       <FiltrosAreaNivel
         areas={areas}
-        niveles={nivelesDisponibles}
+        niveles={niveles}
         selectedArea={selectedArea}
         selectedNivel={selectedNivel}
         onAreaChange={handleAreaChange}
@@ -303,7 +281,6 @@ function CeremoniaPremiacion({ area, nivel }: CeremoniaPremiacionProps) {
         showBusqueda={true}
         busqueda={busqueda}
         onBusquedaChange={setBusqueda}
-        placeholderBusqueda="Buscar por nombre o unidad educativa..."
       />
       {/* Tabla */}
       <div className="ceremonia-table-container">

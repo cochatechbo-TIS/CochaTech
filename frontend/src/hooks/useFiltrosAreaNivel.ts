@@ -1,11 +1,23 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 
+interface Area {
+  id_area: number;
+  nombre: string;
+}
+
+interface Nivel {
+  id: number;
+  nombre: string;
+}
+
 export const useFiltrosAreaNivel = () => {
-  const [areas, setAreas] = useState<string[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
   const [selectedArea, setSelectedArea] = useState<string>('');
-  const [niveles, setNiveles] = useState<string[]>([]);
+  const [selectedAreaId, setSelectedAreaId] = useState<number | null>(null);
+  const [niveles, setNiveles] = useState<Nivel[]>([]);
   const [selectedNivel, setSelectedNivel] = useState<string>('');
+  const [selectedNivelId, setSelectedNivelId] = useState<number | null>(null);
 
   // Cargar áreas
   useEffect(() => {
@@ -30,10 +42,13 @@ export const useFiltrosAreaNivel = () => {
 
       try {
         const response = await api.get(`/niveles/area/${selectedArea}`);
-        const nivelesData = Array.isArray(response.data) ? response.data : response.data?.data || [];
+        const data = response.data?.data || [];
         
-        const nombresNiveles = nivelesData.map((nivel: any) => nivel.nombre);
-        setNiveles(nombresNiveles);
+        const nivelesData = data.map((nivel: any) => ({
+          id: nivel.id,
+          nombre: nivel.nombre,
+        }));
+        setNiveles(nivelesData);
       } catch (error) {
         console.error('Error al cargar niveles:', error);
         setNiveles([]);
@@ -43,27 +58,30 @@ export const useFiltrosAreaNivel = () => {
     fetchNivelesPorArea();
   }, [selectedArea]);
 
-  const handleAreaChange = useCallback((area: string) => {
-    setSelectedArea(area);
+  const handleAreaChange = useCallback((areaNombre: string) => {
+    setSelectedArea(areaNombre);
     setSelectedNivel(''); // Resetear nivel al cambiar área
-  }, []);
 
-  const handleNivelChange = useCallback((nivel: string) => {
-    setSelectedNivel(nivel);
-  }, []);
+    const area = areas.find((a) => a.nombre === areaNombre);
+      setSelectedAreaId(area?.id_area ?? null);
+    },
+    [areas]
+  );
 
-  const resetFiltros = useCallback(() => {
-    setSelectedArea('');
-    setSelectedNivel('');
-  }, []);
+  const handleNivelChange = useCallback((nivelNombre: string) => {
+    setSelectedNivel(nivelNombre);
+    const nivel = niveles.find((n) => n.nombre === nivelNombre);
+    setSelectedNivelId(nivel?.id ?? null);
+  }, [niveles]);
 
   return {
-    areas,
-    niveles,
+    areas: areas.map(a => a.nombre),            // SOLO nombres
+    niveles: niveles.map(n => n.nombre),        // SOLO nombres
     selectedArea,
     selectedNivel,
+    selectedAreaId,
+    selectedNivelId,
     handleAreaChange,
     handleNivelChange,
-    resetFiltros
   };
 };

@@ -24,7 +24,7 @@ const FiltrosAreaNivel: React.FC<FiltrosAreaNivelProps> = ({
   showBusqueda = false,
   busqueda = '',
   onBusquedaChange,
-  placeholderBusqueda = 'Buscar...'
+  placeholderBusqueda = ' Buscar algo...'
 }) => {
   return (
     <div className="filtros-container">
