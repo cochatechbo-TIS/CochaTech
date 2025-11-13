@@ -111,3 +111,14 @@ export interface InfoNivelAdmin {
   evaluador?: string | null; // <- AGREGADO
   es_Fase_final?: boolean;
 }
+// --- 4. Estructura de la respuesta del endpoint /premiacion/asignar/{id} ---
+export interface ParticipantePremiacion {
+    nombre: string; // Nombre completo (individual) o nombre_equipo (grupal)
+    ci: string | null; // CI (individual)
+    institucion: string;
+    nota: number;
+    falta_etica: boolean;
+    observaciones: string | null;
+    estado: string | null;
+    medalla: string | null; // El nombre de la medalla
+}

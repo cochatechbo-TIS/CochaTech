@@ -144,7 +144,6 @@ const EvaluacionTable: React.FC<Props> = ({
                   {p.medalla ?? "—"}
                 </td>
               )}
-
             </tr>
           ))}
         </tbody>

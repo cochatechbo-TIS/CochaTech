@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import EvaluacionTable from "../components/evaluadores/EvaluacionTable";
 import { NotificationModal } from "../components/common/NotificationModal";
 import api from "../services/api";
-import type { FaseConsultaData, FasePestana, InfoNivelAdmin, Participante } from "../interfaces/Evaluacion";
+import type { FaseConsultaData, FasePestana, InfoNivelAdmin, Participante, ParticipantePremiacion } from "../interfaces/Evaluacion";
 import { User, Users, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 
@@ -256,12 +256,7 @@ const GestionFasesAdmin: React.FC = () => {
       console.log("Respuesta de participantes:", data);
       
       // Adaptar según tipo (individual/grupal)
-      if (data.tipo === 'grupal') {
-        setParticipantes(data.equipos || []);
-      } else {
-        setParticipantes(data.resultados || []);
-      }
-      
+      const participantesIniciales = (data.tipo === 'grupal' ? data.equipos : data.resultados) || [];      
       // Actualizar info del nivel con los datos de la fase
       setInfoNivel(prev => {
         const esGrupal = data.tipo === 'grupal';
@@ -275,12 +270,68 @@ const GestionFasesAdmin: React.FC = () => {
         };
       });
 
-      // --- 3. OBTENER DETALLES DE LA FASE (INCLUYENDO COMENTARIO) ---
-      if (faseSeleccionada?.estado === 'Rechazada') {
-        const faseDetalleResponse = await api.get(`/nivel-fase/${idNivelFase}`);
-        const comentario = faseDetalleResponse.data?.comentario;
-        if (comentario) setComentarioFase(comentario);
-      }
+      // 3. Comentario de Rechazo
+        if (faseSeleccionada?.estado === 'Rechazada') {
+            const faseDetalleResponse = await api.get(`/nivel-fase/${idNivelFase}`);
+            const comentario = faseDetalleResponse.data?.comentario;
+            if (comentario) setComentarioFase(comentario);
+        }
+
+        let participantesFinales: Participante[] = participantesIniciales;
+// 4. LÓGICA CLAVE: ASIGNAR MEDALLAS SI LA FASE ESTÁ APROBADA Y ES FINAL
+        if (data.es_Fase_final && faseSeleccionada?.estado === 'Aprobada') {
+            console.log("Fase final aprobada. Asignando/Consultando Premios...");
+            try {
+                // Llamada al endpoint para RE-ASIGNAR/CONSULTAR premiaciones
+                const premiacionesResponse = await api.get(`/premiacion/asignar/${nivelId}`);
+                const premiados: ParticipantePremiacion[] = premiacionesResponse.data.premiaciones || [];
+
+                // Convertir la respuesta de premiación a formato Participante
+          participantesFinales = premiados.map((premio, index) => {
+            const esGrupal = data.tipo === 'grupal';
+            
+            // Buscar datos adicionales del participante original (si existen)
+            const participanteOriginal = participantesIniciales.find(p => 
+              esGrupal 
+                ? p.nombre_equipo === premio.nombre
+                : p.ci === premio.ci
+            );
+
+            return {
+              id_evaluacion: participanteOriginal?.id_evaluacion || index,
+              nombre: esGrupal ? undefined : premio.nombre.split(' ')[0],
+              apellidos: esGrupal ? undefined : premio.nombre.split(' ').slice(1).join(' '),
+              ci: premio.ci || undefined,
+              id_equipo: participanteOriginal?.id_equipo,
+              nombre_equipo: esGrupal ? premio.nombre : undefined,
+              institucion: premio.institucion,
+              nota: premio.nota,
+              falta_etica: premio.falta_etica,
+              observaciones: premio.observaciones,
+              estado_olimpista: premio.estado,
+              medalla: premio.medalla
+            };
+          });
+                showNotification("Premios reasignados/cargados correctamente.", "info");
+
+            } catch (premioError) {
+                // Manejo de error para el medallero (ej: no hay configuración)
+                let errorMsgPremio = "Error al cargar medallas.";
+                if (axios.isAxiosError(premioError) && premioError.response?.status === 400 && 
+                    premioError.response.data?.error.includes('No existe configuración de medallas')) {
+                    errorMsgPremio = "Medallas no asignadas: Falta la **Configuración del Medallero** para esta área.";
+                } else if (axios.isAxiosError(premioError)) {
+                    errorMsgPremio = premioError.response?.data?.error || premioError.response?.data?.message || errorMsgPremio;
+                }
+                // Muestra la alerta de medallas sin interrumpir la carga de la fase
+                showNotification(errorMsgPremio, 'error', undefined, 'Asignación de Medallas');
+                participantesFinales = participantesIniciales;
+            }
+        }
+
+      setParticipantes(participantesFinales);
+
+      
     } catch (error) {
       console.error("Error al cargar participantes:", error);
       let errorMsg = "Error al cargar participantes";
@@ -309,14 +360,54 @@ const GestionFasesAdmin: React.FC = () => {
       if (esUltimaFaseActual) {
         // Lógica para la última fase: solo aprobar
         await api.post(`/nivel-fase/aprobar/${faseSeleccionada.id_nivel_fase}`);
-        showNotification("Fase final aprobada correctamente.", "success");
+        //showNotification("Fase final aprobada correctamente.", "success");
+        // 1. Llamada al endpoint para generar premiaciones (medallero)
+          try {
+            const premiacionesResponse = await api.get(`/premiacion/asignar/${nivelId}`);
+
+            // 3. Actualizar tabla con los premiados
+    const premiados = premiacionesResponse.data.premiaciones || [];
+    setParticipantes(prev =>
+        prev.map(p => {
+          const premio = premiados.find((x: ParticipantePremiacion) => {
+            if (infoNivel!.esGrupal) { // Usamos ! ya que infoNivel es verificado al inicio
+              return x.nombre === p.nombre_equipo;
+            } else {
+              return x.ci === p.ci;
+            }
+          });
+          if (premio) {
+            console.log(`Match encontrado para ${infoNivel!.esGrupal ? p.nombre_equipo : p.ci}:`, premio.medalla);
+            return { ...p, medalla: premio.medalla };
+          }
+          return p;
+        })
+      );
+    showNotification("Fase final aprobada. Premios asignados correctamente.", "success");
+          } catch (premioError) {
+            // Manejo de errores específico para la asignación de premios
+            console.error("Error al asignar premios:", premioError);
+            let errorMsgPremio = "Error al asignar premios. Verifique la configuración del Medallero.";
+
+            if (axios.isAxiosError(premioError)) {
+            errorMsgPremio = premioError.response?.data?.error || 
+            premioError.response?.data?.message || 
+            errorMsgPremio;
+          }
+          showNotification(
+            `La fase fue **APROBADA**, pero hubo un problema al asignar los premios. ${errorMsgPremio}`, 
+                  'error', 
+                  undefined, 
+                'Advertencia de Premiación'
+              );
+        }
       } else {
         // Lógica para fases no finales: generar siguiente fase
         const response = await api.post(`/fase-nivel/siguiente/${nivelId}`);
         showNotification(response.data.message || "Siguiente fase generada correctamente.", 'success');
       }
 
-      cargarFases(); // Recargar para ver el nuevo estado y la nueva fase si se generó
+      await cargarFases(); // Recargar para ver el nuevo estado y la nueva fase si se generó
     } catch (error) {
       console.error("Error al aprobar:", error);
       let errorMsg = "Error al procesar la aprobación.";
