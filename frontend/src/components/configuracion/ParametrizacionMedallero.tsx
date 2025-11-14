@@ -73,7 +73,7 @@ const ParametrizacionMedallero: React.FC = () => {
 
       // Hacemos ambas llamadas a la API en paralelo para mayor eficiencia
       const [areasResponse, configResponse] = await Promise.all([
-        api.get<string[]>('/areas/nombres'),
+        api.get<{ id_area: number; nombre: string }[]>('/areas/nombres'),
         api.get<MedalConfigGet[]>('/medallero-config')
       ]);
 
@@ -85,9 +85,9 @@ const ParametrizacionMedallero: React.FC = () => {
 
       // Combinamos la lista completa de áreas con las configuraciones existentes
       const fullConfig: MedalConfigInternal[] = allAreas.map(area => {
-        const existing = configMap.get(area);
+        const existing = configMap.get(area.nombre);
         return {
-          area,
+          area: area.nombre,
           oro: existing?.oro || 0,
           plata: existing?.plata || 0,
           bronce: existing?.bronce || 0,
