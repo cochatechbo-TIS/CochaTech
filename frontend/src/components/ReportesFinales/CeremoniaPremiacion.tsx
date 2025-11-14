@@ -88,20 +88,6 @@ function CeremoniaPremiacion() {
     return resultado;
   }, [participantes, selectedArea, selectedNivel, busqueda]);
 
-// ========== UTILIDADES ==========
-const getPosicionClass = (posicion?: string | number): string => {
-  if (!posicion) return '';
-
-  const str = posicion.toString().toLowerCase();
-
-  if (str === '1' || str.includes('oro')) return 'posicion-oro';
-  if (str === '2' || str.includes('plata')) return 'posicion-plata';
-  if (str === '3' || str.includes('bronce')) return 'posicion-bronce';
-  if (str.includes('mención')) return 'posicion-mencion';
-
-  return '';
-};
-
 // Función para exportar a Excel
 const exportarExcel = (participantes: ParticipantePremiacion[], area: string, nivel: string) => {
   const tabla = `
@@ -137,7 +123,7 @@ const exportarExcel = (participantes: ParticipantePremiacion[], area: string, ni
                 <td>${p.unidadEducativa}</td>
                 <td>${p.area}</td>
                 <td>${p.nivel}</td>
-                <td class="${getPosicionClass(p.posicion)}">${p.posicion}</td>
+                <td class="lugar-cell">${p.posicion}° Lugar</td>
               </tr>
             `).join('')}
           </tbody>
@@ -209,7 +195,7 @@ const exportarPDF = (participantes: ParticipantePremiacion[], area: string, nive
               <td>${p.unidadEducativa}</td>
               <td>${p.area}</td>
               <td>${p.nivel}</td>
-              <td><span class="${getPosicionClass(p.posicion)}">${p.posicion}</span></td>
+              <td><span class="lugar-cell">${p.posicion}° Lugar</span></td>
             </tr>
           `).join('')}
         </tbody>
@@ -315,8 +301,8 @@ const exportarPDF = (participantes: ParticipantePremiacion[], area: string, nive
                   <td>{participante.area}</td>
                   <td>{participante.nivel}</td>
                   <td>
-                    <span className={`badge-posicion-ceremonia ${getPosicionClass(participante.posicion)}`}>
-                      {participante.posicion}
+                    <span className="lugar-cell">
+                      {participante.posicion}° Lugar
                     </span>
                   </td>
                 </tr>

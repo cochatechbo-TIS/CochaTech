@@ -96,20 +96,8 @@
   text-align: left;
   font-size: 14px;
   font-weight: 600;
-  color: #e5e7eb;
+  color: white;
   border-bottom: 2px solid #1d4ed8;
-}
-
-.publicacion-table th:first-child {
-  width: 50%;
-}
-
-.publicacion-table th:nth-child(2) {
-  width: 30%;
-}
-
-.publicacion-table th:last-child {
-  width: 20%;
 }
 
 .publicacion-table tbody tr {

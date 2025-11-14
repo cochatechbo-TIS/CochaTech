@@ -1,65 +1,91 @@
 // src/components/reportes/PublicacionOficial.tsx
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import './PublicacionOficial.css';
+import api from '../../services/api';
+import { useFiltrosAreaNivel } from '../../hooks/useFiltrosAreaNivel';
+import FiltrosAreaNivel from '../../components/filtrosAreaNivel/FiltrosAreaNivel'
 
-// ========== INTERFACES ==========
-interface ParticipantePublicacion {
-  id: number;
+interface PublicacionIndividual {
   nombre: string;
+  apellido: string;
   area: string;
-  lugarObtenido: string;
+  posicion: number;
 }
 
-interface PublicacionOficialProps {
-  area?: string;
-  nivel?: string;
+interface PublicacionGrupal {
+  nombre: string;
+  institucion: string;
+  area: string;
+  nivel: string;
+  posicion: number;
 }
-
-// ========== DATOS DE PRUEBA ==========
-const PARTICIPANTES_PUBLICACION: ParticipantePublicacion[] = [
-  {
-    id: 1,
-    nombre: 'Juan Pérez',
-    area: 'Matemática',
-    lugarObtenido: '1° Lugar'
-  },
-  {
-    id: 2,
-    nombre: 'Carlos Mamani',
-    area: 'Matemática',
-    lugarObtenido: '2° Lugar'
-  },
-  {
-    id: 3,
-    nombre: 'María López',
-    area: 'Matemática',
-    lugarObtenido: '2° Lugar'
-  },
-  {
-    id: 4,
-    nombre: 'Pedro Flores',
-    area: 'Matemática',
-    lugarObtenido: '3° Lugar'
-  },
-  {
-    id: 5,
-    nombre: 'Laura Torrez',
-    area: 'Matemática',
-    lugarObtenido: '3° Lugar'
-  }
-];
+type ParticipantePublicacion = PublicacionIndividual | PublicacionGrupal;
 
 // ========== COMPONENTE ==========
-function PublicacionOficial({ area, nivel }: PublicacionOficialProps) {
-  const [participantes] = useState<ParticipantePublicacion[]>(PARTICIPANTES_PUBLICACION);
 
+function PublicacionOficial() {
+  const [participantes, setParticipantes] = useState<ParticipantePublicacion[]>([]);
+  const [tipo, setTipo] = useState<'grupal' | 'individual' | null>(null);
+  const [busqueda, setBusqueda] = useState('');
+
+  // ========== USUARIO ACTUAL ==========
+  const storedUser = localStorage.getItem('user');
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  const isAdmin = user?.rol?.nombre_rol === 'administrador';
+
+  // ========== HOOK DE FILTROS ==========
+  const {
+    areas,
+    niveles,
+    selectedArea,
+    selectedAreaId,
+    selectedNivel,
+    selectedNivelId,
+    handleAreaChange,
+    handleNivelChange
+  } = useFiltrosAreaNivel(isAdmin);
+
+  useEffect(() => {
+    const cargar = async () => {
+      // Validaciones
+      if (!selectedAreaId || !selectedNivelId) return;
+
+      try {
+        const resp = await api.get(`/reporte-oficial/${selectedAreaId}/${selectedNivelId}`);
+
+        setTipo(resp.data.tipo);
+        setParticipantes(resp.data.premiados || []);
+
+      } catch (err) {
+        console.error("Error cargando publicación oficial:", err);
+        setParticipantes([]);
+      }
+    };
+
+    cargar();
+  }, [selectedAreaId, selectedNivelId]);
+
+// ========== FILTRO DE BÚSQUEDA ==========
+  const participantesFiltrados = useMemo(() => {
+    if (!busqueda.trim()) return participantes;
+
+    const search = busqueda.toLowerCase().trim();
+
+    return participantes.filter((p: any) =>
+      (p.nombre?.toLowerCase().includes(search) ||
+       p.apellido?.toLowerCase().includes(search) ||
+       p.institucion?.toLowerCase().includes(search) ||
+       p.area?.toLowerCase().includes(search))
+    );
+  }, [busqueda, participantes]);
+  
   // ========== MANEJADOR DE EXPORTACIÓN ==========
   const handleExportarCSV = useCallback(() => {
-    console.log('Exportando CSV para:', { area, nivel });
+    console.log('Exportando CSV para:', { selectedArea, selectedNivel });
     // TODO: Implementar exportación a CSV
-    alert(`Exportando datos de ${area} - ${nivel}`);
-  }, [area, nivel]);
-
+    alert(`Exportando datos de ${selectedArea} - ${selectedNivel}`);
+  }, [selectedArea, selectedNivel]);
+   
   return (
     <div className="publicacion-oficial-container">
       {/* Header con botón de exportación */}
@@ -86,6 +112,20 @@ function PublicacionOficial({ area, nivel }: PublicacionOficialProps) {
           Formato simplificado para publicación en la web oficial Oh SanSi.
         </p>
       </div>
+      {/* Filtros reutilizables */}
+      <FiltrosAreaNivel
+        areas={areas}
+        niveles={niveles}
+        selectedArea={selectedArea}
+        selectedNivel={selectedNivel}
+        onAreaChange={handleAreaChange}
+        onNivelChange={handleNivelChange}
+        showBusqueda={true}
+        busqueda={busqueda}
+        onBusquedaChange={setBusqueda}
+        placeholderBusqueda="Buscar por nombre o institución"
+        isAdmin={isAdmin}
+      />
 
       {/* Tabla Simple */}
       <div className="publicacion-table-container">
@@ -94,17 +134,31 @@ function PublicacionOficial({ area, nivel }: PublicacionOficialProps) {
             <tr>
               <th>Nombre Completo</th>
               <th>Área</th>
+              <th>Nivel</th>
               <th>Lugar Obtenido</th>
             </tr>
           </thead>
           <tbody>
-            {participantes.map((participante) => (
-              <tr key={participante.id}>
-                <td>{participante.nombre}</td>
-                <td className="area-cell">{participante.area}</td>
-                <td className="lugar-cell">{participante.lugarObtenido}</td>
+            {participantesFiltrados.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="empty-message">
+                  No hay premiados para esta área y nivel
+                </td>
               </tr>
-            ))}
+            ) : (
+              participantesFiltrados.map((p: any, index: number) => (
+                <tr key={index}>
+                  <td>
+                    {tipo === 'grupal'
+                      ? p.nombre             // nombre del equipo
+                      : `${p.nombre} ${p.apellido}`}  {/* individual */}
+                  </td>
+                  <td>{p.area}</td>
+                  <td>{selectedNivel}</td>
+                  <td className="lugar-cell">{p.posicion}° Lugar</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
