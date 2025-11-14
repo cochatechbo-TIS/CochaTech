@@ -12,6 +12,7 @@ interface FiltrosAreaNivelProps {
   busqueda?: string;
   onBusquedaChange?: (value: string) => void;
   placeholderBusqueda?: string;
+  isAdmin: boolean;
 }
 
 const FiltrosAreaNivel: React.FC<FiltrosAreaNivelProps> = ({
@@ -24,8 +25,10 @@ const FiltrosAreaNivel: React.FC<FiltrosAreaNivelProps> = ({
   showBusqueda = false,
   busqueda = '',
   onBusquedaChange,
-  placeholderBusqueda = ' Buscar algo...'
+  placeholderBusqueda = ' Buscar algo...',
+  isAdmin
 }) => {
+  const showAreaSelect = isAdmin; 
   return (
     <div className="filtros-wrapper">
       <div className="filtros-row">
@@ -44,8 +47,8 @@ const FiltrosAreaNivel: React.FC<FiltrosAreaNivelProps> = ({
           />
         </div>
       )}
-      
       <div className="filtro-selects">
+        {isAdmin && (
         <div className="filtro-select-wrapper">
         <select 
           value={selectedArea} 
@@ -61,7 +64,7 @@ const FiltrosAreaNivel: React.FC<FiltrosAreaNivelProps> = ({
         </select>
           <ChevronDown className="filtro-select-icon" size={18} />
         </div>
-
+        )}
         <div className="filtro-select-wrapper">
   <select
     value={selectedNivel}

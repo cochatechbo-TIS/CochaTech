@@ -17,6 +17,10 @@ interface ParticipantePremiacion {
 function CeremoniaPremiacion() {
   const [participantes, setParticipantes] = useState<ParticipantePremiacion[]>([]);
   const [busqueda, setBusqueda] = useState('');
+  // ========== USUARIO ==========
+  const storedUser = localStorage.getItem('user');
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  const isAdmin = user?.rol?.nombre_rol === 'administrador';
 
   const {
     areas,
@@ -27,7 +31,7 @@ function CeremoniaPremiacion() {
     selectedNivelId,
     handleAreaChange,
     handleNivelChange
-  } = useFiltrosAreaNivel(true,"");
+  } = useFiltrosAreaNivel(isAdmin);
 
    // ========== CARGAR DATOS DEL BACKEND ==========
   useEffect(() => {
@@ -281,6 +285,8 @@ const exportarPDF = (participantes: ParticipantePremiacion[], area: string, nive
         showBusqueda={true}
         busqueda={busqueda}
         onBusquedaChange={setBusqueda}
+        placeholderBusqueda="Buscar participante o institución"
+        isAdmin={isAdmin}
       />
       {/* Tabla */}
       <div className="ceremonia-table-container">
