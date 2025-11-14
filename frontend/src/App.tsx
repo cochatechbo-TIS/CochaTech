@@ -47,12 +47,12 @@ const Evaluacion = () => (
   </div>
 );
 
-const Final = () => (
+/*const Final = () => (
   <div className="p-8">
     <h1 className="text-3xl font-bold text-gray-800 mb-4">Final</h1>
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
-);
+);*/
 
 /*const Listas = () => ( // <-- Tu comentario original sobre Listas (aunque se importa arriba)
   <div className="p-8">
@@ -136,7 +136,7 @@ function App() {
         <Route path="/administrador/registro" element={<Layout showNavbar={true}><Registro /></Layout>} />
         <Route path="/administrador/evaluacion" element={<Layout showNavbar={true}><Evaluacion /></Layout>} />
         <Route path="/administrador/listas" element={<Layout showNavbar={true}><Listas /></Layout>} />
-        <Route path="/administrador/final" element={<Layout showNavbar={true}><Final /></Layout>} />
+        {/*<Route path="/administrador/final" element={<Layout showNavbar={true}><Final /></Layout>} />*/}
         <Route path="/administrador/reportes" element={<Layout showNavbar={true}><Reportes /></Layout>} />
         <Route path="/administrador/historial" element={<Layout showNavbar={true}><Historial /></Layout>} />
         <Route path="/administrador/gestionar-fases" element={<Layout showNavbar={true}><GestionFasesAdmin /></Layout>} />

@@ -2,7 +2,7 @@
 // src/pages/GestionCompetidores.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import api from '../services/api'; // Importamos la instancia centralizada de Axios
+import api from '../services/api';
 
 import { CompetitorTable } from '../components/competidores/CompetitorTable';
 import CargarCSV from '../components/carga masiva/CargarCSV';
@@ -23,6 +23,7 @@ const departamentosMapReverse: { [key: number]: string } = {
   9: 'Pando'
 };
 const COMPETIDORES_POR_PAGINA = 20;
+const MAX_PAGINAS_VISIBLES = 5; // <--- NUEVA CONSTANTE
 
 const GestionCompetidores: React.FC = () => {
   const [competidores, setCompetidores] = useState<Competidor[]>([]);
@@ -238,7 +239,7 @@ const GestionCompetidores: React.FC = () => {
     const nombreCompleto = competidor 
         ? `${competidor.nombre} ${competidor.apellidos}` 
         : `con CI: ${ci}`;         
-        // 🛑 NUEVA LÓGICA: Dispara el modal de CONFIRMACIÓN
+        // NUEVA LÓGICA: Dispara el modal de CONFIRMACIÓN
         showNotification(
         `¿Estás seguro de que quieres eliminar a ${nombreCompleto}? Esta acción es irreversible.`,
         'confirm',
@@ -278,6 +279,38 @@ const GestionCompetidores: React.FC = () => {
   };
   const irAnterior = () => irAPagina(paginaActual - 1);
   const irSiguiente = () => irAPagina(paginaActual + 1);
+
+  // LÓGICA DE RANGO DE PÁGINAS VISIBLES
+  const getPaginaRango = () => {
+    const rango = MAX_PAGINAS_VISIBLES;
+    const centro = Math.ceil(rango / 2); // 3 si MAX_PAGINAS_VISIBLES es 5
+    
+    // Determinar la página inicial del rango
+    let startPage = paginaActual - centro + 1;
+    let endPage = paginaActual + centro - 1;
+
+    // Asegurar que el rango no se salga por la izquierda
+    if (startPage < 1) {
+      startPage = 1;
+      endPage = Math.min(totalPaginas, rango);
+    }
+
+    // Asegurar que el rango no se salga por la derecha
+    if (endPage > totalPaginas) {
+      endPage = totalPaginas;
+      startPage = Math.max(1, totalPaginas - rango + 1);
+    }
+    
+    // Crear el array de páginas visibles
+    const pages = [];
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  };
+
+  const paginasVisibles = getPaginaRango(); // Obtener el rango de páginas a mostrar
 
   // Estados de carga y error
   if (loading) {
@@ -364,8 +397,21 @@ const GestionCompetidores: React.FC = () => {
             >
               Anterior
             </button>
-            {/* **Generación de botones de página simplificada** */}
-            {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(page => (
+          {/* INICIO DE LA NUEVA LÓGICA DE PAGINACIÓN DE RANGO */}
+            {totalPaginas > MAX_PAGINAS_VISIBLES && paginasVisibles[0] > 1 && (
+              <>
+                <button
+                  key={1}
+                  onClick={() => irAPagina(1)}
+                  className={`pagination-btn ${1 === paginaActual ? 'pagination-btn-active' : ''}`}
+                >
+                  1
+                </button>
+                <span className="pagination-dots">...</span>
+              </>
+            )}
+
+            {paginasVisibles.map(page => (
               <button
                 key={page}
                 onClick={() => irAPagina(page)}
@@ -375,6 +421,19 @@ const GestionCompetidores: React.FC = () => {
               </button>
             ))}
 
+            {totalPaginas > MAX_PAGINAS_VISIBLES && paginasVisibles[paginasVisibles.length - 1] < totalPaginas && (
+              <>
+                <span className="pagination-dots">...</span>
+                <button
+                  key={totalPaginas}
+                  onClick={() => irAPagina(totalPaginas)}
+                  className={`pagination-btn ${totalPaginas === paginaActual ? 'pagination-btn-active' : ''}`}
+                >
+                  {totalPaginas}
+                </button>
+              </>
+            )}
+            {/* FIN DE LA NUEVA LÓGICA DE PAGINACIÓN DE RANGO */}
             <button
               onClick={irSiguiente}
               disabled={paginaActual === totalPaginas || totalPaginas === 0} // **Deshabilitar en la última página**
