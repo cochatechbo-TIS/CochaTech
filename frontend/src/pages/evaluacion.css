@@ -192,8 +192,14 @@
 .evaluacion-table td {
   padding: 0.75rem;
   border: 1px solid #e5e7eb;
-  text-align: left;
+  text-align: center;
   vertical-align: middle;
+}
+
+/* Primera columna (NOMBRE/EQUIPO) a la izquierda */
+.evaluacion-table th:first-child,
+.evaluacion-table td:first-child {
+  text-align: left;
 }
 
 .evaluacion-table th {

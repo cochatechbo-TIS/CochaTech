@@ -19,6 +19,20 @@ const EvaluacionTable: React.FC<Props> = ({
   esFaseFinal
 }) => {
   
+  // Función para determinar la clase CSS según el tipo de medalla
+  const getMedallaClass = (medalla: string): string => {
+    const medallaNormalizada = medalla.toLowerCase().trim();
+    
+    if (medallaNormalizada === 'oro') return 'medalla-oro';
+    if (medallaNormalizada === 'plata') return 'medalla-plata';
+    if (medallaNormalizada === 'bronce') return 'medalla-bronce';
+    if (medallaNormalizada.includes('mención') || medallaNormalizada.includes('mencion')) {
+      return 'medalla-mencion';
+    }
+    
+    return 'sin-medalla'; // Fallback
+  };
+
   const handleNotaChange = (id: number, value: number) => {
     const updated = participantes.map(p =>
       p.id_evaluacion === id ? { ...p, nota: Math.min(100, Math.max(0, value)) } : p
@@ -57,7 +71,7 @@ const EvaluacionTable: React.FC<Props> = ({
               <th>FALTA ÉTICA</th>
               <th>OBSERVACIONES</th>
               <th>ESTADO</th>
-              {esFaseFinal && <th>MEDALLERO</th>}
+              {esFaseFinal && <th>MEDALLA</th>}
             </tr>
           ) : (
             <tr>
@@ -68,7 +82,7 @@ const EvaluacionTable: React.FC<Props> = ({
               <th>FALTA ÉTICA</th>
               <th>OBSERVACIONES</th>
               <th>ESTADO</th>
-              {esFaseFinal && <th>MEDALLERO</th>}
+              {esFaseFinal && <th>MEDALLA</th>}
             </tr>
           )}
         </thead>
@@ -85,9 +99,7 @@ const EvaluacionTable: React.FC<Props> = ({
               )}
 
               <td>{p.institucion}</td>
-
-              {/* ... (el resto de tus <td> son correctos) ... */}
-              
+             
               <td>
                 <input
                    type="number"
@@ -141,7 +153,13 @@ const EvaluacionTable: React.FC<Props> = ({
               </td>
               {esFaseFinal && (
                 <td className="medallero">
-                  {p.medalla ?? "—"}
+                  {p.medalla ? (
+                    <span className={getMedallaClass(p.medalla)}>
+                      {p.medalla}
+                    </span>
+                  ) : (
+                    <span className="sin-medalla">—</span>
+                  )}
                 </td>
               )}
             </tr>
