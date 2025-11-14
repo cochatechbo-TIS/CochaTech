@@ -27,7 +27,7 @@ function CeremoniaPremiacion() {
     selectedNivelId,
     handleAreaChange,
     handleNivelChange
-  } = useFiltrosAreaNivel();
+  } = useFiltrosAreaNivel(true,"");
 
    // ========== CARGAR DATOS DEL BACKEND ==========
   useEffect(() => {

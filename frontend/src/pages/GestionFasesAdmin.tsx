@@ -78,7 +78,7 @@ const GestionFasesAdmin: React.FC = () => {
       if (isAdmin) {
         // Para admin: obtener todas las áreas y buscar el nivel
         const areasResponse = await api.get('/areas/nombres');
-        const areas: string[] = areasResponse.data;
+        const areas: string[] = areasResponse.data.map((a: any) => a.nombre);
 
         // Buscar en cada área hasta encontrar el nivel
         for (const area of areas) {

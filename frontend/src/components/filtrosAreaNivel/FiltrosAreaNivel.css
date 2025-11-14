@@ -1,22 +1,42 @@
-.filtros-container {
+/* =========================================================
+   ESTILO UNIFICADO DE BUSCADOR + SELECTS PARA TODAS
+   LAS PANTALLAS DEL SISTEMA (LISTAS, PREMIACIÓN, COMPETIDORES)
+   ========================================================= */
+
+/* --- Contenedor principal --- */
+.filtros-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
   margin-bottom: 24px;
 }
 
-.filtros-select-container {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-  flex-wrap: wrap;
-}
-
-/* Reutilizamos los estilos existentes */
-.search-container {
+/* --- Buscador --- */
+.filtro-search-container {
   position: relative;
-  margin-bottom: 16px;
-  max-width: 700px;
+  flex: 1;
+  min-width: 260px;
 }
 
-.search-icon {
+.filtro-search-input {
+  width: 100%;
+  height: 42px;
+  padding: 12px 16px 12px 48px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s;
+  background-color: white;
+  max-width: 500px;
+}
+
+.filtro-search-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+
+.filtro-search-icon {
   position: absolute;
   left: 16px;
   top: 50%;
@@ -25,60 +45,61 @@
   pointer-events: none;
 }
 
-.search-input {
-  width: 100%;
-  padding: 12px 16px 12px 48px;
-  font-size: 14px;
+/* --- Contenedor selects --- */
+.filtro-selects {
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+/* --- Select normal --- */
+.filtro-select {
+  height: 42px;
+  padding: 10px 14px 10px 12px;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  background-color: white;
-  box-sizing: border-box;
-}
-
-.search-input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.search-input::placeholder {
-  color: #9ca3af;
-}
-
-.filter-select {
-  padding: 12px 16px;
+  background: white;
   font-size: 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background-color: white;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
   color: #374151;
-  min-width: 180px;
+  min-width: 150px;
+  appearance: none;
+  -webkit-appearance: none; 
   box-sizing: border-box;
-  cursor: pointer;
 }
 
-.filter-select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
+/* --- Icono del select --- */
+.filtro-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
-.filter-select:disabled {
-  background-color: #f9fafb;
-  color: #9ca3af;
-  cursor: not-allowed;
+.filtro-select-icon {
+  position: absolute;
+  pointer-events: none;
+  right: 4px;
+  color: #6b7280;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .filtros-select-container {
+/* ========== RESPONSIVE ========== */
+@media (max-width: 650px) {
+  .filtros-row {
     flex-direction: column;
+    align-items: stretch;
   }
-  
-  .filter-select {
+
+  .filtro-selects {
     width: 100%;
-    min-width: auto;
+    justify-content: space-between;
+  }
+
+  .filtro-select {
+    flex: 1;
+  }
+}
+
+@media (max-width: 391px) {
+  .filtro-selects {
+    flex-direction: column;
   }
 }

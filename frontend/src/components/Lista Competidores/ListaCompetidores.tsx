@@ -116,7 +116,9 @@ console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
     const fetchAreas = async () => {
       try {
         const response = await api.get('/areas/nombres');
-        setAreas(response.data);
+        const soloNombres = response.data.map((a: any) => a.nombre);
+        
+        setAreas(soloNombres);
       } catch (err: unknown) {
         if (axios.isAxiosError(err)) {
           console.error('Error al cargar áreas:', err.response?.status, err.response?.data);
