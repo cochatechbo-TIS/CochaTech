@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 // Asegúrate que la ruta de importación sea correcta
-import { RegistroNavigation } from '../components/registro/RegistroNavigation'; 
+import { TabNavigation } from '../components/registro/TabNavigation'; 
 import GestionCompetidores from './GestionCompetidores';
 import GestionResponsables from './GestionResponsable';
 import GestionEvaluadores from './GestionEvaluadores';
@@ -12,6 +12,11 @@ type RegistroTab = 'olimpistas' | 'responsables' | 'evaluadores';
 const Registro: React.FC = () => {
   const [activeTab, setActiveTab] = useState<RegistroTab>('olimpistas');
 
+  const registroTabs = [
+    { id: 'olimpistas', label: 'Olimpistas' },
+    { id: 'responsables', label: 'Responsables' },
+    { id: 'evaluadores', label: 'Evaluadores' },
+  ];
   const renderActiveTab = () => {
     switch (activeTab) {
       case 'olimpistas':
@@ -36,9 +41,12 @@ const Registro: React.FC = () => {
           </p>
         </div>
 
-        {/* Componente de Navegación de Pestañas (RegistroNavigation) */}
         {/* Le pasamos la pestaña activa y la función para cambiarla */}
-        <RegistroNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <TabNavigation
+          tabs={registroTabs}
+          activeTab={activeTab}
+          onTabChange={(tab) => setActiveTab(tab as RegistroTab)}
+        />
         
         {/* Contenido Dinámico */}
         <div className="registro-content">
