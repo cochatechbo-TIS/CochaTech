@@ -10,6 +10,7 @@ import Listas from './components/Lista Competidores/ListaCompetidores';
 import { useAuth } from './context/AuthContext'; // <-- Importar useAuth
 import GestionFasesAdmin from './pages/GestionFasesAdmin'; // AÑADIR ESTE IMPORT
 import Reportes from './components/ReportesFinales/ReportesFinales'; //importe de los reportes
+import Historial from './pages/Historial';
 
 // --- ¡IMPORTAR NUEVAS PÁGINAS! ---
 import ForgotPassword from './pages/ForgotPassword';
@@ -68,12 +69,12 @@ const Evaluacion = () => (
   </div>
 );*/
 
-const Historial = () => (
+/*const Historial = () => (
   <div className="p-8">
     <h1 className="text-3xl font-bold text-gray-800 mb-4">Historial</h1>
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
-);
+);*/
 // --- Fin de Componentes Placeholder ---
 
 

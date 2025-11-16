@@ -1,0 +1,285 @@
+/* src/components/historial/ParametrizacionMedallero.css */
+
+.parametrizacion-medallero {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.parametrizacion-loading {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.1);
+  padding: 60px 24px;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* Banner informativo */
+.info-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  margin: 24px;
+  border-radius: 4px;
+}
+
+.info-icon {
+  flex-shrink: 0;
+}
+
+.info-banner span {
+  color: #1565c0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Contenedor de botones de edición */
+.edit-button-container {
+  display: flex;
+  justify-content: flex-end;  /* 👈 Alinea todo a la derecha */
+  margin-bottom: 16px;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Reutilizando el estilo primary-button existente con ajustes */
+.parametrizacion-medallero .btn-primary {
+  background-color: #2563eb;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  position: static; /* Sobrescribe el top: -12px del estilo general */
+}
+
+.parametrizacion-medallero .btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+.parametrizacion-medallero .btn-primary:active {
+  background-color: #1e40af;
+}
+
+/* Botón secundario (Cancelar) */
+.parametrizacion-medallero .btn-secondary {
+  background-color: white;
+  color: #374151;
+  padding: 10px 20px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: 1px solid #d1d5db;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.parametrizacion-medallero .btn-secondary:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+}
+
+/* Contenedor de tabla - reutilizando estilos existentes */
+.parametrizacion-medallero .table-container {
+  padding: 0 24px 24px;
+  overflow-x: auto;
+  width: 100%;
+}
+
+/* Tabla - similar a competitor-table */
+.medal-config-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.medal-config-table thead {
+  background-color: #1d4ed8;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.medal-config-table th {
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  vertical-align: center;
+}
+
+.medal-config-table th.area-col {
+  text-align: left;
+}
+
+.medal-config-table tbody {
+  background-color: white;
+}
+
+.medal-config-table tbody tr {
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.medal-config-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+/* Filas alternadas - zebra striping */
+.medal-config-table tbody tr.row-even {
+  background-color: #fafafa;
+}
+
+.medal-config-table tbody tr:hover {
+  background-color: #f0f7ff;
+}
+
+.medal-config-table td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+  vertical-align: center;
+  text-align: center;
+}
+
+.area-name {
+  font-weight: 500;
+  color: #111827;
+  text-align: left !important;
+}
+
+/* Inputs de medallas */
+.medal-input {
+  width: 60px;
+  padding: 6px 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 14px;
+  background-color: #f5f5f5;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.medal-input:disabled {
+  cursor: not-allowed;
+}
+
+.medal-input.editing {
+  background-color: white;
+  border-color: #d1d5db;
+  color: #333;
+  cursor: text;
+}
+
+.medal-input.editing:focus {
+  outline: none;
+  border-color: #2563eb;
+  border-width: 2px;
+}
+
+.medal-input.editing:hover {
+  border-color: #9ca3af;
+}
+
+/* Remover las flechas de los inputs number */
+.medal-input::-webkit-outer-spin-button,
+.medal-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.medal-input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Columna de total */
+.total-value {
+  font-weight: 600;
+  color: #2563eb;
+  font-size: 15px;
+}
+
+/* Footer con información de modificación */
+.footer-info {
+  padding: 16px 24px;
+  background-color: #fafafa;
+  border-top: 1px solid #e0e0e0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.footer-info p {
+  margin: 4px 0;
+}
+
+.footer-info strong {
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .info-banner {
+    margin: 16px;
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .edit-button-container {
+    padding: 0 16px 2px;
+  }
+
+  .table-container {
+    padding: 0 16px 16px;
+  }
+
+  .medal-config-table th,
+  .medal-config-table td {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .medal-input {
+    width: 50px;
+    padding: 5px 6px;
+    font-size: 13px;
+  }
+
+  .parametrizacion-medallero .btn-primary,
+  .parametrizacion-medallero .btn-secondary {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .edit-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .parametrizacion-medallero .btn-secondary,
+  .parametrizacion-medallero .btn-primary {
+    flex: 1;
+  }
+}

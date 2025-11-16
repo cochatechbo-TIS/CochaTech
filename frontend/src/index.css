@@ -729,6 +729,13 @@ font-size: 1rem; /* Reducir el tamaño del logo */
 .registro-navigation {
     display: flex;
     border-bottom: 2px solid #e5e7eb; /* Línea gris de base */
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+/* Ocultar scrollbar en Chrome, Safari y Edge */
+.registro-navigation::-webkit-scrollbar {
+    display: none;
 }
 
 .tab-button {
@@ -744,12 +751,16 @@ font-size: 1rem; /* Reducir el tamaño del logo */
     white-space: nowrap; 
     text-transform: uppercase; 
     letter-spacing: 0.05em; 
+    flex-shrink: 0;
 }
 
 /* Ajustes para móvil */
 @media (max-width: 640px) {
     .tab-button {
         padding: 10px 6px; /* Reducir padding horizontal significativamente */
+    }
+    .registro-navigation {
+        padding-bottom: 4px; /* Espacio extra para el scroll invisible */
     }
 }
 
