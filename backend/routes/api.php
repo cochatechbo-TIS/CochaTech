@@ -17,7 +17,7 @@ use App\Http\Controllers\Fase_Consulta_Controller;
 
 use App\Http\Controllers\Evaluacion_Controller; // <-- AÑADIR EL NUEVO CONTROLLER
 use App\Http\Controllers\Nivel_Fase_Controller;
-
+use App\Http\Controllers\Nivel_Evaluador;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -53,8 +53,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:responsable')->group(function () {
         Route::get('/niveles/auth', [Generar_Lista_Controller::class, 'listarPorAuth']);
         Route::post('/nivel-fase/rechazar/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'rechazar']);//
-        Route::post('/nivel-fase/aprobar/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'aprobar']);//
-
+        Route::post('/nivel-fase/aprobar/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'aprobar']);// 
+        Route::get('/evaluadores-por-area/{id_area}', [Nivel_Evaluador::class, 'evaluadoresPorArea']);
+        Route::post('/niveles/asignar-evaluador', [Nivel_Evaluador::class, 'asignarEvaluador']);
     });    
 
     Route::middleware('role:evaluador')->group(function () {
@@ -81,11 +82,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/nivel-fase/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'mostrar']);//ver el estado y el comentario de la fase (no se si deberia ir a responsable y evaluador ... )
 
-    Route::get('/primera/fase/{idNivel}', [Primera_Fase_Controller::class, 'generarYObtenerPrimeraFase']);//1
+    Route::get('/primera/fase/{idNivel}', [Primera_Fase_Controller::class, 'generarYObtenerPrimeraFase']);
 
     Route::post('/clasificacion/{id_nivel_fase}', [Clasificacion_Controller::class, 'registrarEvaluaciones']);
     Route::post('/fase-nivel/siguiente/{idNivel}', [Fase_Dinamico_Controller::class, 'crearSiguienteFase']);
     Route::get('/cantidad/fases/{idNivel}', [Fase_Lista_Controller::class, 'listarFasesPorNivel']);//2
     Route::get('/fase/{idNivelFase}', [Fase_Consulta_Controller::class, 'mostrarFase']);//3
-
-});   
+});  

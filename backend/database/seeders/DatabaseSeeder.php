@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             EvaluadorSeeder::class, 
             ResponsableSeeder::class,
+            EvaluadorPorArea::class,
             
         ]);
     }
