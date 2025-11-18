@@ -23,7 +23,6 @@ class Importar_Olimpista_Controller extends Controller
             if ($file->getClientOriginalExtension() !== 'csv') {
                 return response()->json(['message' => 'El archivo debe ser CSV'], 400);
             }
-
             $handle = fopen($file->getRealPath(), 'r');
             $firstLine = fgets($handle);
             rewind($handle);

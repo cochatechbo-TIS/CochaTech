@@ -6,30 +6,27 @@ use App\Models\Nivel;
 use App\Models\Fase;
 use App\Models\Nivel_Fase;
 use App\Models\Evaluacion;
-use App\Models\Olimpista;
-use App\Models\Equipo_Olimpista;
 use App\Models\Equipo;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class Primera_Fase_Controller extends Controller
 {
-    public function crearPrimeraFase($idNivelSeleccionado)
+    public function generarYObtenerPrimeraFase($idNivel)
     {
         DB::beginTransaction();
 
         try {
-            // Obtener la primera fase (orden = 1)
-            $fase = Fase::where('orden', 1)->first();
+            // Obtener fase orden 1
+            $fase = Fase::where('orden', 1)->firstOrFail();
 
-            if (!$fase) {
-                return response()->json(['error' => 'No existe una fase con orden 1.'], 404);
-            }
+            // Obtener todos los niveles (para crear toda la fase)
+            $niveles = Nivel::with('olimpistas')->get();
 
-            // Crear registros en nivel_fase si no existen
-            $niveles = Nivel::all();
+            // 1. CREAR TODA LA FASE (si no existe)
             foreach ($niveles as $nivel) {
-                Nivel_Fase::firstOrCreate(
+
+                // Crear nivel_fase
+                $nivelFase = Nivel_Fase::firstOrCreate(
                     [
                         'id_fase' => $fase->id_fase,
                         'id_nivel' => $nivel->id_nivel
@@ -38,137 +35,123 @@ class Primera_Fase_Controller extends Controller
                         'id_estado_fase' => 1
                     ]
                 );
-            }
 
-            // Crear evaluaciones
-            $nivelesConOlimpistas = Nivel::with('olimpistas')->get();
-
-            foreach ($nivelesConOlimpistas as $nivel) {
-                $nivelFase = Nivel_Fase::where('id_fase', $fase->id_fase)
-                    ->where('id_nivel', $nivel->id_nivel)
-                    ->first();
-
+                // Crear evaluaciones dependiendo del tipo
                 if ($nivel->es_grupal) {
-                    //  Si es grupal una evaluación por equipo
                     $equipos = Equipo::where('id_nivel', $nivel->id_nivel)->get();
+
                     foreach ($equipos as $equipo) {
                         Evaluacion::firstOrCreate(
                             [
                                 'id_equipo' => $equipo->id_equipo,
-                                'id_nivel_fase' => $nivelFase->id_nivel_fase,
+                                'id_nivel_fase' => $nivelFase->id_nivel_fase
                             ],
                             [
                                 'nota' => null,
                                 'comentario' => null,
                                 'falta_etica' => false,
+                                'id_olimpista' => null
                             ]
                         );
                     }
                 } else {
-                    // Si es individual una evaluación por olimpista
                     foreach ($nivel->olimpistas as $olimpista) {
                         Evaluacion::firstOrCreate(
                             [
                                 'id_olimpista' => $olimpista->id_olimpista,
-                                'id_nivel_fase' => $nivelFase->id_nivel_fase,
+                                'id_nivel_fase' => $nivelFase->id_nivel_fase
                             ],
                             [
                                 'nota' => null,
                                 'comentario' => null,
                                 'falta_etica' => false,
-                                'id_equipo' => null,
+                                'id_equipo' => null
                             ]
                         );
                     }
                 }
             }
 
-            //  Obtener nivel y nivel_fase seleccionados
-            $nivelSeleccionado = Nivel::with('area')->find($idNivelSeleccionado);
-            if (!$nivelSeleccionado) {
-                return response()->json(['error' => 'No se encontró el nivel indicado.'], 404);
-            }
-
-            $nivelFaseSeleccionado = Nivel_Fase::where('id_fase', $fase->id_fase)
-                ->where('id_nivel', $idNivelSeleccionado)
-                ->first();
-
-            if (!$nivelFaseSeleccionado) {
-                return response()->json(['error' => 'No se encontró la fase para el nivel indicado.'], 404);
-            }
-
-            // Armar respuesta dinámica
-            if ($nivelSeleccionado->es_grupal) {
-                // ------------------ GRUPAL ------------------
-                $equipos = Equipo::where('id_nivel', $idNivelSeleccionado)
-                    ->get()
-                    ->map(function ($equipo) use ($nivelFaseSeleccionado) {
-                        $evaluacion = Evaluacion::where('id_equipo', $equipo->id_equipo)
-                            ->where('id_nivel_fase', $nivelFaseSeleccionado->id_nivel_fase)
-                            ->first();
-
-                        return [
-                            'id_evaluacion' => $evaluacion->id_evaluacion ?? null,
-                            'id_equipo' => $equipo->id_equipo,
-                            'nombre_equipo' => $equipo->nombre_equipo,
-                            'institucion' => $equipo->institucion,
-                            'nota' => $evaluacion->nota ?? null,
-                            'falta_etica' => $evaluacion->falta_etica ?? false,
-                            'observaciones' => $evaluacion->comentario ?? null,
-                            'estado_olimpista' => $evaluacion->estadoOlimpista->nombre ?? null
-                        ];
-                    });
-
-                $respuesta = [
-                    'fase' => $fase->nombre,
-                    'id_nivel_fase' => $nivelFaseSeleccionado->id_nivel_fase,
-                    'nivel' => $nivelSeleccionado->nombre,
-                    'area' => $nivelSeleccionado->area->nombre,
-                    'tipo' => 'grupal',
-                    'equipos' => $equipos
-                ];
-            } else {
-                // ------------------ INDIVIDUAL ------------------
-                $evaluaciones = Evaluacion::with('olimpista')
-                    ->where('id_nivel_fase', $nivelFaseSeleccionado->id_nivel_fase)
-                    ->get()
-                    ->map(function ($evaluacion) {
-                        $o = $evaluacion->olimpista;
-                        return [
-                            'id_evaluacion' => $evaluacion->id_evaluacion ?? null, 
-                            'nombre' => $o->nombre,
-                            'apellidos' => $o->apellidos,
-                            'ci' => $o->ci,
-                            'institucion' => $o->institucion,
-                            'nota' => $evaluacion->nota ?? null,
-                            'falta_etica' => $evaluacion->falta_etica ?? false,
-                            'observaciones' => $evaluacion->comentario ?? null,
-                            'estado_olimpista' => $evaluacion->estadoOlimpista->nombre ?? null
-
-                        ];
-                    });
-
-                $respuesta = [
-                    'fase' => $fase->nombre,
-                    'id_nivel_fase' => $nivelFaseSeleccionado->id_nivel_fase,
-                    'nivel' => $nivelSeleccionado->nombre,
-                    'area' => $nivelSeleccionado->area->nombre,
-                    'tipo' => 'individual',
-                    'resultados' => $evaluaciones
-                ];
-            }
-
+            // Hasta aquí se creó TODA la fase correctamente
             DB::commit();
-            //return response()->json($respuesta, 201);
-            return response()->json([
-                "message" => "Primera fase creada correctamente"
-            ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'error' => 'Error al generar la primera fase',
-                'detalle' => $e->getMessage()
+                "error" => "Error al generar la fase",
+                "detalle" => $e->getMessage()
+            ], 500);
+        }
+
+        // 2. AHORA SOLO DEVUELVE EL NIVEL SELECCIONADO
+        try {
+
+            $nivel = Nivel::with('area', 'olimpistas')->findOrFail($idNivel);
+
+            $nivelFase = Nivel_Fase::where('id_fase', $fase->id_fase)
+                ->where('id_nivel', $idNivel)
+                ->firstOrFail();
+
+            if ($nivel->es_grupal) {
+
+                $equipos = Equipo::where('id_nivel', $idNivel)
+                    ->get()
+                    ->map(function ($equipo) use ($nivelFase) {
+
+                        $ev = Evaluacion::where('id_equipo', $equipo->id_equipo)
+                            ->where('id_nivel_fase', $nivelFase->id_nivel_fase)
+                            ->first();
+
+                        return [
+                            'id_equipo'    => $equipo->id_equipo,
+                            'nombre_equipo'=> $equipo->nombre_equipo,
+                            'institucion'  => $equipo->institucion,
+                            'nota'         => $ev->nota,
+                            'falta_etica'  => $ev->falta_etica,
+                            'observaciones'=> $ev->comentario
+                        ];
+                    });
+
+                return response()->json([
+                    'fase'          => $fase->nombre,
+                    'tipo'          => 'grupal',
+                    'nivel'         => $nivel->nombre,
+                    'area'          => $nivel->area->nombre,
+                    'resultados'    => $equipos
+                ], 200);
+
+            } else {
+
+                $evaluaciones = Evaluacion::with('olimpista')
+                    ->where('id_nivel_fase', $nivelFase->id_nivel_fase)
+                    ->get()
+                    ->map(function ($ev) {
+                        $o = $ev->olimpista;
+
+                        return [
+                            'nombre'       => $o->nombre,
+                            'apellidos'    => $o->apellidos,
+                            'ci'           => $o->ci,
+                            'institucion'  => $o->institucion,
+                            'nota'         => $ev->nota,
+                            'falta_etica'  => $ev->falta_etica,
+                            'observaciones'=> $ev->comentario
+                        ];
+                    });
+
+                return response()->json([
+                    'fase'       => $fase->nombre,
+                    'tipo'       => 'individual',
+                    'nivel'      => $nivel->nombre,
+                    'area'       => $nivel->area->nombre,
+                    'resultados' => $evaluaciones
+                ], 200);
+            }
+
+        } catch (\Exception $e) {
+            return response()->json([
+                "error" => "Error al obtener datos del nivel",
+                "detalle" => $e->getMessage()
             ], 500);
         }
     }

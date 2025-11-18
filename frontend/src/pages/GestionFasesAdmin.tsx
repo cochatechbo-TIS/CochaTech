@@ -189,7 +189,7 @@ const GestionFasesAdmin: React.FC = () => {
     
     try {
       console.log("Intentando crear primera fase para nivel:", nivelId);
-      await api.post(`/primera/fase/${nivelId}`);
+      await api.get(`/primera/fase/${nivelId}`);
       showNotification("Se ha generado la primera fase para este nivel.", "success");
       
       // Esperar un momento antes de recargar

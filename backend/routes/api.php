@@ -52,14 +52,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Grupo Responsable 
     Route::middleware('role:responsable')->group(function () {
         Route::get('/niveles/auth', [Generar_Lista_Controller::class, 'listarPorAuth']);
-        Route::post('/nivel-fase/rechazar/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'rechazar']);
-        Route::post('/nivel-fase/aprobar/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'aprobar']);
-    });
+        Route::post('/nivel-fase/rechazar/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'rechazar']);//
+        Route::post('/nivel-fase/aprobar/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'aprobar']);//
 
-    
+    });    
 
-    // --- INICIO DE CÓDIGO AÑADIDO ---
-    // Grupo Evaluador
     Route::middleware('role:evaluador')->group(function () {
 
         // Endpoint CERO: Obtener la info del evaluador y sus fases
@@ -67,28 +64,28 @@ Route::middleware('auth:sanctum')->group(function () {
         // Endpoint 1: Obtener fases para las pestañas
         // Nota: Cambiamos la ruta de `/fases/nivel/{id}` a `/evaluador/fases`
         // porque obtenemos el nivel del usuario autenticado, es más seguro.
-        Route::get('/evaluador/fases', [Evaluacion_Controller::class, 'obtenerFases']);
+        Route::get('/evaluador/fases', [Evaluacion_Controller::class, 'obtenerFases']);////
 
         // Endpoint 2: Obtener lista de olimpistas
-        Route::get('/evaluacion/fase/{id_fase}', [Evaluacion_Controller::class, 'obtenerOlimpistasPorFase']);
+        Route::get('/evaluacion/fase/{id_fase}', [Evaluacion_Controller::class, 'obtenerOlimpistasPorFase']);/////
         
         // Endpoint 3: Guardar notas
-        Route::post('/evaluacion/fase/{id_fase}/guardar', [Evaluacion_Controller::class, 'guardarNotas']);
+        Route::post('/evaluacion/fase/{id_fase}/guardar', [Evaluacion_Controller::class, 'guardarNotas']);//////
         
         // Endpoint 4: Generar clasificados
-        Route::post('/evaluacion/fase/{id_fase}/generar-clasificados', [Evaluacion_Controller::class, 'generarClasificados']);
+        Route::post('/evaluacion/fase/{id_fase}/generar-clasificados', [Evaluacion_Controller::class, 'generarClasificados']);////
         
         // Endpoint 5: Enviar lista
-        Route::post('/evaluacion/fase/{id_fase}/enviar-lista', [Evaluacion_Controller::class, 'enviarLista']);
+        Route::post('/evaluacion/fase/{id_fase}/enviar-lista', [Evaluacion_Controller::class, 'enviarLista']);////
     });
-    // --- FIN DE CÓDIGO AÑADIDO ---
 
     Route::get('/nivel-fase/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'mostrar']);//ver el estado y el comentario de la fase (no se si deberia ir a responsable y evaluador ... )
 
-    
-    Route::post('/primera/fase/{id}', [Primera_Fase_Controller::class, 'crearPrimeraFase']);
-    Route::post('/clasificacion/{id}', [Clasificacion_Controller::class, 'registrarEvaluaciones']);
-    Route::post('/fase-nivel/siguiente/{id}', [Fase_Dinamico_Controller::class, 'crearSiguienteFase']);
-    Route::get('/cantidad/fases/{id}', [Fase_Lista_Controller::class, 'listarFasesPorNivel']);
-    Route::get('/fase/{id}', [Fase_Consulta_Controller::class, 'mostrarFase']);
-});
+    Route::get('/primera/fase/{idNivel}', [Primera_Fase_Controller::class, 'generarYObtenerPrimeraFase']);//1
+
+    Route::post('/clasificacion/{id_nivel_fase}', [Clasificacion_Controller::class, 'registrarEvaluaciones']);
+    Route::post('/fase-nivel/siguiente/{idNivel}', [Fase_Dinamico_Controller::class, 'crearSiguienteFase']);
+    Route::get('/cantidad/fases/{idNivel}', [Fase_Lista_Controller::class, 'listarFasesPorNivel']);//2
+    Route::get('/fase/{idNivelFase}', [Fase_Consulta_Controller::class, 'mostrarFase']);//3
+
+});   
