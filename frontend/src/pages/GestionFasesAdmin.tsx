@@ -27,6 +27,7 @@ const GestionFasesAdmin: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [loadingParticipantes, setLoadingParticipantes] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [intentandoCrearPrimeraFase, setIntentandoCrearPrimeraFase] = useState(false);
 
   // ✅ Estado para el modal de notificación
   const [notification, setNotification] = useState({
@@ -155,20 +156,59 @@ const GestionFasesAdmin: React.FC = () => {
       if (fasesData.length > 0) {
         setFaseSeleccionada(fasesData[fasesData.length - 1]); // Seleccionar última fase
       }
-      else {
-        setError("Este nivel aún no tiene fases. El evaluador debe crear la primera fase.");
-      }
-    } catch (error) {
+      } catch (error) {
       console.error("Error al cargar fases:", error);
-      let errorMsg = "Error al cargar las fases";
-      if (axios.isAxiosError(error)) {
-        errorMsg = error.response?.data?.message || error.message;
-      } else if (error instanceof Error) {
-        errorMsg = error.message;
+      
+      // 🔧 CORRECCIÓN: Manejar el caso cuando no hay fases (404)
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        console.log("No hay fases registradas, iniciando creación automática...");
+        setFases([]);
+        setFaseSeleccionada(null);
+        
+        // Solo intentar crear si no lo estamos haciendo ya
+        if (!intentandoCrearPrimeraFase) {
+          crearPrimeraFaseAutomaticamente();
+        }
+      } else {
+        let errorMsg = "Error al cargar las fases";
+        if (axios.isAxiosError(error)) {
+          errorMsg = error.response?.data?.message || error.message;
+        } else if (error instanceof Error) {
+          errorMsg = error.message;
+        }
+        setError(errorMsg);
       }
-      setError(errorMsg);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  // 🔧 NUEVA FUNCIÓN: Separar la lógica de creación de primera fase
+  const crearPrimeraFaseAutomaticamente = async () => {
+    setIntentandoCrearPrimeraFase(true);
+    
+    try {
+      console.log("Intentando crear primera fase para nivel:", nivelId);
+      await api.post(`/primera/fase/${nivelId}`);
+      showNotification("Se ha generado la primera fase para este nivel.", "success");
+      
+      // Esperar un momento antes de recargar
+      setTimeout(() => {
+        cargarFases();
+        setIntentandoCrearPrimeraFase(false);
+      }, 500);
+      
+    } catch (createError) {
+      console.error("Error al crear primera fase:", createError);
+      setIntentandoCrearPrimeraFase(false);
+      
+      let errorMsg = "No se pudo generar la primera fase automáticamente.";
+      if (axios.isAxiosError(createError)) {
+        errorMsg = createError.response?.data?.error || createError.response?.data?.message || errorMsg;
+      }
+      
+      setError(`Este nivel aún no tiene fases. ${errorMsg}`);
+      showNotification(errorMsg, "error");
     }
   };
   
@@ -296,11 +336,11 @@ const GestionFasesAdmin: React.FC = () => {
     );
   };
   // Loading state
-  if (loading) {
+  if (loading || intentandoCrearPrimeraFase) {
     return (
       <div className="gestion-competidores-page">
         <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <p>Cargando información...</p>
+          <p>{intentandoCrearPrimeraFase? 'Generando primera fase...' : 'Cargando información...'}</p>
         </div>
       </div>
     );
