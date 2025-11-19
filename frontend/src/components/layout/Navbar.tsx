@@ -6,7 +6,7 @@ import MenuDesplegable from './MenuDesplegable';
 import { 
   Menu, X, LogOut,
   LayoutDashboard, Users, List, ChartColumn, 
-  FileText, History 
+  FileText, History, Settings 
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext'; // <-- IMPORTAR useAuth
 
@@ -15,10 +15,9 @@ const adminNavItems = [
   {name: 'Inicio', path: '/administrador/inicio', icon: LayoutDashboard },
   {name: 'Registro', path: '/administrador/registro', icon: Users },
   {name: 'Listas', path: '/administrador/listas', icon: List },
-  {name: 'Evaluación', path: '/administrador/evaluacion', icon: ChartColumn },
-  /*{name: 'Final', path: '/administrador/final', icon: Trophy },*/
   {name: 'Reportes', path: '/administrador/reportes', icon: FileText },
-  {name: 'Historial', path: '/administrador/historial', icon: History }
+  {name: 'Historial', path: '/administrador/historial', icon: History },
+  {name: 'Configuración', path: '/administrador/configuracion', icon: Settings }
 ];
 
 const responsableNavItems = [

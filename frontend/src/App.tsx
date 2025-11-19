@@ -10,7 +10,7 @@ import Listas from './components/Lista Competidores/ListaCompetidores';
 import { useAuth } from './context/AuthContext'; // <-- Importar useAuth
 import GestionFasesAdmin from './pages/GestionFasesAdmin'; // AÑADIR ESTE IMPORT
 import Reportes from './components/ReportesFinales/ReportesFinales'; //importe de los reportes
-import Historial from './pages/Historial';
+import Configuracion from './pages/Configuracion';
 
 // --- ¡IMPORTAR NUEVAS PÁGINAS! ---
 import ForgotPassword from './pages/ForgotPassword';
@@ -39,7 +39,7 @@ const Inicio = () => (
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
 
-)*/
+)
 
 const Evaluacion = () => (
   <div className="p-8">
@@ -48,33 +48,26 @@ const Evaluacion = () => (
   </div>
 );
 
-/*const Final = () => (
+const Final = () => (
   <div className="p-8">
     <h1 className="text-3xl font-bold text-gray-800 mb-4">Final</h1>
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
-);*/
+);
 
-/*const Listas = () => ( // <-- Tu comentario original sobre Listas (aunque se importa arriba)
-  <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Listas de Competidores (RF4)</h1>
-    <p className="text-gray-600">Funcionalidad en desarrollo...</p>
-  </div>
-);*/
-
-/*const Reportes = () => ( // 'Reportes' e 'Informes' es lo mismo, usaré 'Reportes'
+const Reportes = () => ( // 'Reportes' e 'Informes' es lo mismo, usaré 'Reportes'
   <div className="p-8">
     <h1 className="text-3xl font-bold text-gray-800 mb-4">Reportes</h1>
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
 );*/
 
-/*const Historial = () => (
+const Historial = () => (
   <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Historial</h1>
+    <h1 className="text-3xl font-bold text-gray-800 mb-4">Log de cambios</h1>
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
-);*/
+);
 // --- Fin de Componentes Placeholder ---
 
 
@@ -135,12 +128,12 @@ function App() {
         {/* Mantenemos la estructura "plana" que pediste */}
         <Route path="/administrador/inicio" element={<Layout showNavbar={true}><Inicio /></Layout>} />
         <Route path="/administrador/registro" element={<Layout showNavbar={true}><Registro /></Layout>} />
-        <Route path="/administrador/evaluacion" element={<Layout showNavbar={true}><Evaluacion /></Layout>} />
         <Route path="/administrador/listas" element={<Layout showNavbar={true}><Listas /></Layout>} />
         {/*<Route path="/administrador/final" element={<Layout showNavbar={true}><Final /></Layout>} />*/}
         <Route path="/administrador/reportes" element={<Layout showNavbar={true}><Reportes /></Layout>} />
-        <Route path="/administrador/historial" element={<Layout showNavbar={true}><Historial /></Layout>} />
+        <Route path="/administrador/configuracion" element={<Layout showNavbar={true}><Configuracion /></Layout>} />
         <Route path="/administrador/gestionar-fases" element={<Layout showNavbar={true}><GestionFasesAdmin /></Layout>} />
+        <Route path="/administrador/historial" element={<Layout showNavbar={true}><Historial /></Layout>} />
       </Route>
 
       {/* --- RUTAS DE RESPONSABLE --- */}

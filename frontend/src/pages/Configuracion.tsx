@@ -1,8 +1,7 @@
-// src/pages/Historial.tsx
+// src/pages/Configuracion.tsx
 
 import React, { useState } from 'react';
 import { TabNavigation } from '../components/registro/TabNavigation';
-//import LogDeCambios from '../components/historial/LogDeCambios';
 import ParametrizacionMedallero from '../components/Historial/ParametrizacionMedallero';
 //import FinalizacionProceso from '../components/historial/FinalizacionProceso';
 
@@ -12,7 +11,7 @@ const Historial: React.FC = () => {
   const [activeTab, setActiveTab] = useState<HistorialTab>('parametrizacion');
 
   const historialTabs = [
-    { id: 'cambios', label: 'Log de cambios' },
+    //{ id: 'cambios', label: 'Log de cambios' },
     { id: 'parametrizacion', label: 'Parametrización del Medallero' },
     { id: 'finalizacion', label: 'Finalización del Proceso' },
   ];
@@ -43,9 +42,9 @@ const Historial: React.FC = () => {
     <div className="gestion-competidores-page">
       <div className="page-content-wrapper"> 
         <div className="page-header">
-          <h1 className="page-title">Historial</h1>
+          <h1 className="page-title">Configuración</h1>
           <p className="page-subtitle">
-            Consulta el historial de cambios y gestiona la configuración del sistema
+            Gestiona la configuración del sistema
           </p>
         </div>
 
