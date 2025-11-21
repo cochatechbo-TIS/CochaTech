@@ -72,6 +72,13 @@
   border: 1px solid #bbf7d0;
 }
 
+/* Estilo específico para el comentario de rechazo */
+.alerta-rechazo {
+  text-align: left;
+  flex-grow: 1;
+  margin: 0 1rem;
+}
+
 /* --- Pestañas de Fases --- */
 .fases-tabs {
   display: flex;

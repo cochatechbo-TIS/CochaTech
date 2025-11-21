@@ -1,5 +1,6 @@
 // src/pages/EvaluacionPorFases.tsx
 import React, { useEffect, useState } from "react";
+import api from "../services/api"; // Importar la instancia de api
 import type { 
   FasePestana, 
   InfoEvaluador, 
@@ -26,6 +27,7 @@ const EvaluacionPorFases: React.FC = () => {
   const [participantes, setParticipantes] = useState<Participante[]>([]);
   const [esGrupal, setEsGrupal] = useState(false);
   const [fechaActual, setFechaActual] = useState<string>('');
+  const [comentarioRechazo, setComentarioRechazo] = useState<string | null>(null); // 1. NUEVO ESTADO
   
   // --- Estados de UI ---
   const [loading, setLoading] = useState(true);
@@ -76,9 +78,18 @@ const EvaluacionPorFases: React.FC = () => {
   const cargarParticipantes = async (idNivelFase: number) => {
     setLoadingParticipantes(true);
     clearMessages();
+    setComentarioRechazo(null); // Limpiar comentario anterior
     try {
       const data = await getParticipantesPorFase(idNivelFase);
       setParticipantes(data.resultados || data.equipos || []);
+
+      // 2. OBTENER COMENTARIO SI LA FASE ESTÁ RECHAZADA
+      if (faseSeleccionada?.estado === 'Rechazada') {
+        const faseDetalleResponse = await api.get(`/nivel-fase/${idNivelFase}`);
+        const comentario = faseDetalleResponse.data?.comentario;
+        if (comentario) setComentarioRechazo(comentario);
+      }
+
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.message || "No se pudieron cargar los participantes.");
@@ -213,6 +224,7 @@ const EvaluacionPorFases: React.FC = () => {
               <Users className="info-icon" />
               <span>{participantes.length} participantes en esta fase</span>
             </div>
+
             <div className="botones-evaluacion">
               
               {/* --- BOTONES ADAPTADOS A LA NUEVA LÓGICA --- */}
@@ -235,10 +247,14 @@ const EvaluacionPorFases: React.FC = () => {
 
               {/* Botón "Generar Clasificados" (el morado) eliminado
                   porque el nuevo backend lo fusionó con "Guardar". */}
-              
             </div>
           </div>
-          
+          {/* 3. RENDERIZAR EL COMENTARIO DE RECHAZO */}
+            {comentarioRechazo && (
+              <div className="alerta alerta-error alerta-rechazo">
+                <strong>Motivo del Rechazo:</strong> {comentarioRechazo}
+              </div>
+            )}
           <EvaluacionTable 
             participantes={participantes} // <-- Nueva prop
             onChange={handleTablaChange} // <-- Nueva prop
