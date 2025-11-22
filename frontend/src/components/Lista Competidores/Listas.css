@@ -226,22 +226,17 @@
   flex-direction: column;
   gap: 4px;
 }
-
+.evaluador-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px; /* Ajusta el espacio entre el nombre y el botón */
+}
 .evaluador-nombre {
   color: #374151;
   font-size: 14px;
+   margin: 0;
 }
 
-.btn-cambiar {
-  background: none;
-  border: none;
-  color: #2563eb;
-  font-size: 13px;
-  cursor: pointer;
-  padding: 0;
-  text-align: center;
-  transition: color 0.2s;
-}
 
 .btn-cambiar:hover {
   color: #1d4ed8;
@@ -274,6 +269,24 @@
 .btn-asignar svg {
   flex-shrink: 0;
 }
+.btn-asignar-cambiar {
+  background: #2563eb; /* azul fuerte */
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5em 1em;
+  font-weight: bold;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em; /* separa el icono del texto */
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px 0 rgba(37, 99, 235, 0.12);
+}
+.btn-asignar-cambiar:hover {
+  background: #1746a2; /* azul más oscuro en hover */
+  box-shadow: 0 4px 12px 0 rgba(37, 99, 235, 0.18);
+}
 
 /* ========== BOTÓN GESTIONAR ========== */
 .btn-gestionar {
@@ -296,7 +309,123 @@
 .btn-gestionar:active {
   transform: scale(0.98);
 }
+/* ========== MODAL ========== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
 
+.modal-content {
+  background: white;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.modal-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-field label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.modal-select {
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background-color: white;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.modal-select:focus {
+  border-color: #2563eb;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btn-cancelar, .btn-guardar {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-cancelar {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.btn-cancelar:hover {
+  background-color: #e5e7eb;
+}
+
+.btn-guardar {
+  background-color: #2563eb;
+  color: #fafbfc;
+}
+.btn-guardar:hover {
+  background-color: #1d4ed8;
+}
+/* ========== ESTILOS PARA ENLACES DE ACCIÓN ========== */
+.btn-cambiar-texto {
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none; /* Sin subrayado por defecto */
+  transition: color 0.2s, text-decoration 0.2s;
+}
+
+.btn-cambiar-texto:hover {
+  color: #1d4ed8;
+  text-decoration: underline; /* Subrayado al pasar el ratón */
+}
+
+.btn-cambiar-texto:active {
+  transform: scale(0.98);
+}
 /* ========== RESPONSIVE ========== */
 @media (max-width: 1024px) {
   .validacion-container {
@@ -354,7 +483,7 @@
 }
 @media (max-width: 480px) {
   .search-container > div {
-    flex-direction: column;
+    flex-direction: row;
     gap: 8px;
   }
   .filter-select {

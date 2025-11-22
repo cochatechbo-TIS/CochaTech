@@ -25,9 +25,10 @@ const GestionFasesAdmin: React.FC = () => {
   const [participantes, setParticipantes] = useState<Participante[]>([]);
   const [infoNivel, setInfoNivel] = useState<InfoNivelAdmin | null>(null);
   const [loading, setLoading] = useState(true);
+  const [comentarioFase, setComentarioFase] = useState<string | null>(null); // <-- 1. NUEVO ESTADO
   const [loadingParticipantes, setLoadingParticipantes] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [intentandoCrearPrimeraFase, setIntentandoCrearPrimeraFase] = useState(false);
+  const [error, setError] = useState<string | null>(null);  
+  const [necesitaCrearFase, setNecesitaCrearFase] = useState(false);
 
   // ✅ Estado para el modal de notificación
   const [notification, setNotification] = useState({
@@ -39,8 +40,8 @@ const GestionFasesAdmin: React.FC = () => {
   });
   // Cargar fases del nivel
   useEffect(() => {
-    if (nivelId) {
-      cargarInfoNivel();
+    if (nivelId) { 
+      cargarInfoNivel();     
       cargarFases();
     } else {
       setError("No se recibió el ID del nivel");
@@ -48,7 +49,7 @@ const GestionFasesAdmin: React.FC = () => {
     }
   }, [nivelId]);
 
-  // ✅ Funciones para manejar notificaciones
+  // Funciones para manejar notificaciones
   const showNotification = (
     message: string,
     type: NotificationType,
@@ -67,14 +68,9 @@ const GestionFasesAdmin: React.FC = () => {
   const closeNotification = () => {
     setNotification(prev => ({ ...prev, isVisible: false }));
   };
-  
-  // ✅ NUEVA FUNCIÓN: Obtener el nombre del evaluador
+  // ✅ FUNCIÓN: Obtener el nombre del evaluador
   const cargarInfoNivel = async () => {
     try {
-      // Primero obtenemos el área del nivel haciendo una petición a /fase/{idNivelFase}
-      // pero como no tenemos idNivelFase aún, usamos un truco:
-      // Obtenemos TODAS las áreas y buscamos el nivel
-      
       const storedUser = localStorage.getItem('user');
       const user = storedUser ? JSON.parse(storedUser) : null;
       const isAdmin = user?.rol?.nombre_rol === 'administrador';
@@ -99,10 +95,11 @@ const GestionFasesAdmin: React.FC = () => {
                 evaluador: nivelEncontrado.evaluador || "Sin asignar",
                 nombre: nivelEncontrado.nombre,
                 area: nivelEncontrado.area,
-                esGrupal: prev?.esGrupal || false
+                esGrupal: prev?.esGrupal || false,
+                es_Fase_final: prev?.es_Fase_final || false
               }));
               break; // Salir del bucle
-                       }
+            }
           } catch (err) {
             console.error(`Error al buscar en área ${area}:`, err);
           }
@@ -119,8 +116,8 @@ const GestionFasesAdmin: React.FC = () => {
             evaluador: nivelEncontrado.evaluador || "Sin asignar",
             nombre: nivelEncontrado.nombre,
             area: nivelEncontrado.area,
-            esGrupal: prev?.esGrupal || false
-
+            esGrupal: prev?.esGrupal || false,
+            es_Fase_final: prev?.es_Fase_final || false
           }));
         }
       }
@@ -128,14 +125,19 @@ const GestionFasesAdmin: React.FC = () => {
       console.error("Error al cargar información del nivel:", error);
     }
   };
-
+  
   const cargarFases = async () => {
     try {
       setLoading(true);
       setError(null);
+      setNecesitaCrearFase(false);
 
       console.log("Cargando fases para nivel:", nivelId);
-      const response = await api.get(`/cantidad/fases/${nivelId}`);
+      const response = await api.get(`/cantidad/fases/${nivelId}`, {
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
       console.log("Respuesta del backend:", response.data);
       
       // Validar estructura
@@ -150,7 +152,7 @@ const GestionFasesAdmin: React.FC = () => {
         estado: f.estado
       }));
 
-      console.log("📋 Fases procesadas:", fasesData);
+      console.log("Fases procesadas:", fasesData);
 
       setFases(fasesData);
       if (fasesData.length > 0) {
@@ -159,16 +161,13 @@ const GestionFasesAdmin: React.FC = () => {
       } catch (error) {
       console.error("Error al cargar fases:", error);
       
-      // 🔧 CORRECCIÓN: Manejar el caso cuando no hay fases (404)
+      // Manejar el caso cuando no hay fases (404)
       if (axios.isAxiosError(error) && error.response?.status === 404) {
         console.log("No hay fases registradas, iniciando creación automática...");
         setFases([]);
         setFaseSeleccionada(null);
-        
-        // Solo intentar crear si no lo estamos haciendo ya
-        if (!intentandoCrearPrimeraFase) {
-          crearPrimeraFaseAutomaticamente();
-        }
+        setNecesitaCrearFase(true);
+        setError("Este nivel aún no tiene fases. Puede generar la primera fase.");
       } else {
         let errorMsg = "Error al cargar las fases";
         if (axios.isAxiosError(error)) {
@@ -183,32 +182,57 @@ const GestionFasesAdmin: React.FC = () => {
     }
   };
   
-  // 🔧 NUEVA FUNCIÓN: Separar la lógica de creación de primera fase
-  const crearPrimeraFaseAutomaticamente = async () => {
-    setIntentandoCrearPrimeraFase(true);
-    
+  // FUNCIÓN: Separar la lógica de creación de primera fase
+  const handleCrearPrimeraFase = async () => {
+    setLoading(true);
     try {
       console.log("Intentando crear primera fase para nivel:", nivelId);
-      await api.get(`/primera/fase/${nivelId}`);
+
+      const response = await api.get(`/primera/fase/${nivelId}`, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      // Verificar si la respuesta es HTML (error de autenticación)
+      const contentType = response.headers['content-type'];
+      if (contentType && contentType.includes('text/html')) {
+        console.error("Backend devolvió HTML en lugar de JSON");
+        throw new Error("Error de autenticación. Por favor, inicie sesión nuevamente.");
+      }
+
+      console.log("Primera fase creada exitosamente:", response.data);
       showNotification("Se ha generado la primera fase para este nivel.", "success");
-      
-      // Esperar un momento antes de recargar
-      setTimeout(() => {
-        cargarFases();
-        setIntentandoCrearPrimeraFase(false);
-      }, 500);
-      
+      await cargarFases();
     } catch (createError) {
       console.error("Error al crear primera fase:", createError);
-      setIntentandoCrearPrimeraFase(false);
-      
       let errorMsg = "No se pudo generar la primera fase automáticamente.";
+
       if (axios.isAxiosError(createError)) {
-        errorMsg = createError.response?.data?.error || createError.response?.data?.message || errorMsg;
+      // Si es error de autenticación, redirigir al login
+        if (createError.response?.status === 401) {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('user');
+          errorMsg = "Sesión expirada. Redirigiendo al login...";
+          showNotification(errorMsg, "error");
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 2000);
+          return;
+        }
+        
+        errorMsg = createError.response?.data?.error ||
+                   createError.response?.data?.detalle ||
+                   createError.response?.data?.message ||
+                   errorMsg;
+      } else if (createError instanceof Error) {
+        errorMsg = createError.message;
       }
       
-      setError(`Este nivel aún no tiene fases. ${errorMsg}`);
       showNotification(errorMsg, "error");
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -223,6 +247,7 @@ const GestionFasesAdmin: React.FC = () => {
     try {
       setLoadingParticipantes(true);
       setError(null);
+      setComentarioFase(null); // <-- 2. Limpiar comentario anterior
 
       console.log("Cargando participantes para fase:", idNivelFase);
 
@@ -243,16 +268,21 @@ const GestionFasesAdmin: React.FC = () => {
       setInfoNivel(prev => {
         const esGrupal = data.tipo === 'grupal';
         // Si 'prev' no existe, inicializamos el objeto.
-        // Si 'prev' existe, lo usamos como base para no perder el evaluador.
         return {
-          ...prev,
           nombre: data.nivel,
           area: data.area,
           esGrupal: esGrupal,
-          evaluador: prev?.evaluador || "Cargando...",
+          evaluador: prev?.evaluador || "Sin Asignar",
           es_Fase_final: data.es_Fase_final
         };
       });
+
+      // --- 3. OBTENER DETALLES DE LA FASE (INCLUYENDO COMENTARIO) ---
+      if (faseSeleccionada?.estado === 'Rechazada') {
+        const faseDetalleResponse = await api.get(`/nivel-fase/${idNivelFase}`);
+        const comentario = faseDetalleResponse.data?.comentario;
+        if (comentario) setComentarioFase(comentario);
+      }
     } catch (error) {
       console.error("Error al cargar participantes:", error);
       let errorMsg = "Error al cargar participantes";
@@ -336,17 +366,26 @@ const GestionFasesAdmin: React.FC = () => {
     );
   };
   // Loading state
-  if (loading || intentandoCrearPrimeraFase) {
+  if (loading) {
     return (
       <div className="gestion-competidores-page">
         <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <p>{intentandoCrearPrimeraFase? 'Generando primera fase...' : 'Cargando información...'}</p>
+          <p>Cargando información...</p>
         </div>
       </div>
     );
   }
 
-  if (error && fases.length === 0) {
+  if (necesitaCrearFase) {
+    return (
+      <div className="evaluacion-container">
+        <div className="alerta alerta-info">{error}</div>
+        <button onClick={handleCrearPrimeraFase} className="btn btn-primary" style={{marginTop: '1rem'}}>
+          Generar Primera Fase
+        </button>
+      </div>
+    );
+  } else if (error && fases.length === 0) {
     return (
       <div className="evaluacion-container">
         <div className="alerta alerta-error">{error}</div>
@@ -406,6 +445,7 @@ const GestionFasesAdmin: React.FC = () => {
           <Users className="info-icon" />
           <span>{participantes.length} participantes en esta fase</span>
         </div>
+        
         {/* Botones de acción movidos aquí */}
         {faseSeleccionada && faseSeleccionada.estado !== 'Aprobada' && (
           <div className="botones-evaluacion">
@@ -424,7 +464,12 @@ const GestionFasesAdmin: React.FC = () => {
           </div>
         )}
       </div>
-
+        {/* 4. RENDERIZAR EL COMENTARIO DE RECHAZO */}
+        {comentarioFase && faseSeleccionada?.estado === 'Rechazada' && (
+          <div className="alerta alerta-error alerta-rechazo">
+            <strong>Motivo del Rechazo:</strong> {comentarioFase}
+          </div>
+        )}
       {/* Tabla de participantes */}
       {loadingParticipantes ? (
         <p>⏳ Cargando participantes...</p>
@@ -437,7 +482,7 @@ const GestionFasesAdmin: React.FC = () => {
         />
       )}
 
-      {/* ✅ Renderizado del modal de notificación */}
+      {/* Renderizado del modal de notificación */}
       <NotificationModal
         isVisible={notification.isVisible}
         message={notification.message}

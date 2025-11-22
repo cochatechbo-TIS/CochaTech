@@ -1,5 +1,6 @@
 // src/pages/EvaluacionPorFases.tsx
 import React, { useEffect, useState } from "react";
+import api from "../services/api"; // Importar la instancia de api
 import type { 
   FasePestana, 
   InfoEvaluador, 
@@ -11,9 +12,6 @@ import {
   getDatosInicialesEvaluador,
   getParticipantesPorFase,
   guardarYClasificar,
-  // --- INICIO DE CORRECCIÓN ---
-  enviarListaYCrearSiguienteFase // <-- Nombre correcto de la función
-  // --- FIN DE CORRECCIÓN ---
 } from "../services/evaluacionService";
 import { User, CalendarDays, Users } from 'lucide-react';
 import "./evaluacion.css";
@@ -26,6 +24,7 @@ const EvaluacionPorFases: React.FC = () => {
   const [participantes, setParticipantes] = useState<Participante[]>([]);
   const [esGrupal, setEsGrupal] = useState(false);
   const [fechaActual, setFechaActual] = useState<string>('');
+  const [comentarioRechazo, setComentarioRechazo] = useState<string | null>(null); // 1. NUEVO ESTADO
   
   // --- Estados de UI ---
   const [loading, setLoading] = useState(true);
@@ -76,9 +75,18 @@ const EvaluacionPorFases: React.FC = () => {
   const cargarParticipantes = async (idNivelFase: number) => {
     setLoadingParticipantes(true);
     clearMessages();
+    setComentarioRechazo(null); // Limpiar comentario anterior
     try {
       const data = await getParticipantesPorFase(idNivelFase);
       setParticipantes(data.resultados || data.equipos || []);
+
+      // 2. OBTENER COMENTARIO SI LA FASE ESTÁ RECHAZADA
+      if (faseSeleccionada?.estado === 'Rechazada') {
+        const faseDetalleResponse = await api.get(`/nivel-fase/${idNivelFase}`);
+        const comentario = faseDetalleResponse.data?.comentario;
+        if (comentario) setComentarioRechazo(comentario);
+      }
+
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.message || "No se pudieron cargar los participantes.");
@@ -124,34 +132,6 @@ const EvaluacionPorFases: React.FC = () => {
       setError(err.response?.data?.error || "Error al guardar y clasificar.");
     }
     setLoadingParticipantes(false);
-  };
-
-  const handleEnviarLista = async () => {
-    if (!infoEvaluador || !faseSeleccionada) return;
-    
-    // Lógica del nuevo controlador:
-    // El botón "Enviar" ahora se llama "Generar Siguiente Fase"
-    if (!window.confirm("¿Estás seguro de finalizar esta fase y generar la siguiente? Esta acción es final.")) return;
-
-    clearMessages();
-    setLoading(true); // Bloqueo general
-    try {
-      const res = await enviarListaYCrearSiguienteFase(infoEvaluador.id_nivel);
-      setSuccess(res.message); // Ej: "Fase 2 generada correctamente."
-
-      // Recargar TODO para ver la nueva pestaña
-      const data = await getDatosInicialesEvaluador();
-      setInfoEvaluador(data.infoEvaluador);
-      setFases(data.fases);
-      if (data.fases.length > 0) {
-        setFaseSeleccionada(data.fases[data.fases.length - 1]);
-      }
-
-    } catch (err: any) {
-      console.error(err);
-      setError(err.response?.data?.error || "Error al generar la siguiente fase.");
-    }
-    setLoading(false);
   };
   
   // Lógica de UI para deshabilitar
@@ -213,6 +193,7 @@ const EvaluacionPorFases: React.FC = () => {
               <Users className="info-icon" />
               <span>{participantes.length} participantes en esta fase</span>
             </div>
+
             <div className="botones-evaluacion">
               
               {/* --- BOTONES ADAPTADOS A LA NUEVA LÓGICA --- */}
@@ -225,20 +206,16 @@ const EvaluacionPorFases: React.FC = () => {
                 {loadingParticipantes ? 'Guardando...' : 'Guardar y Clasificar'}
               </button>
 
-              <button 
-                onClick={handleEnviarLista}
-                className="btn btn-blue" // Botón secundario
-                disabled={loadingParticipantes || loading || !isEditable}
-              >
-                Finalizar y Generar Siguiente Fase
-              </button>
-
               {/* Botón "Generar Clasificados" (el morado) eliminado
                   porque el nuevo backend lo fusionó con "Guardar". */}
-              
             </div>
           </div>
-          
+          {/* 3. RENDERIZAR EL COMENTARIO DE RECHAZO */}
+            {comentarioRechazo && (
+              <div className="alerta alerta-error alerta-rechazo">
+                <strong>Motivo del Rechazo:</strong> {comentarioRechazo}
+              </div>
+            )}
           <EvaluacionTable 
             participantes={participantes} // <-- Nueva prop
             onChange={handleTablaChange} // <-- Nueva prop

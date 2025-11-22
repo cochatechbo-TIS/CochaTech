@@ -6,6 +6,7 @@ export interface Nivel {
   fasesAprobadas: number;
   faseTotal: number;
   evaluador: string;
+  id_evaluador?: number;
 }
 
 export interface ValidacionListasProps {
