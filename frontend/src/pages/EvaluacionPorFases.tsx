@@ -12,9 +12,6 @@ import {
   getDatosInicialesEvaluador,
   getParticipantesPorFase,
   guardarYClasificar,
-  // --- INICIO DE CORRECCIÓN ---
-  enviarListaYCrearSiguienteFase // <-- Nombre correcto de la función
-  // --- FIN DE CORRECCIÓN ---
 } from "../services/evaluacionService";
 import { User, CalendarDays, Users } from 'lucide-react';
 import "./evaluacion.css";
@@ -136,34 +133,6 @@ const EvaluacionPorFases: React.FC = () => {
     }
     setLoadingParticipantes(false);
   };
-
-  const handleEnviarLista = async () => {
-    if (!infoEvaluador || !faseSeleccionada) return;
-    
-    // Lógica del nuevo controlador:
-    // El botón "Enviar" ahora se llama "Generar Siguiente Fase"
-    if (!window.confirm("¿Estás seguro de finalizar esta fase y generar la siguiente? Esta acción es final.")) return;
-
-    clearMessages();
-    setLoading(true); // Bloqueo general
-    try {
-      const res = await enviarListaYCrearSiguienteFase(infoEvaluador.id_nivel);
-      setSuccess(res.message); // Ej: "Fase 2 generada correctamente."
-
-      // Recargar TODO para ver la nueva pestaña
-      const data = await getDatosInicialesEvaluador();
-      setInfoEvaluador(data.infoEvaluador);
-      setFases(data.fases);
-      if (data.fases.length > 0) {
-        setFaseSeleccionada(data.fases[data.fases.length - 1]);
-      }
-
-    } catch (err: any) {
-      console.error(err);
-      setError(err.response?.data?.error || "Error al generar la siguiente fase.");
-    }
-    setLoading(false);
-  };
   
   // Lógica de UI para deshabilitar
   const isEditable = faseSeleccionada?.estado === 'En Proceso';
@@ -235,14 +204,6 @@ const EvaluacionPorFases: React.FC = () => {
                 disabled={loadingParticipantes || loading || !isEditable}
               >
                 {loadingParticipantes ? 'Guardando...' : 'Guardar y Clasificar'}
-              </button>
-
-              <button 
-                onClick={handleEnviarLista}
-                className="btn btn-blue" // Botón secundario
-                disabled={loadingParticipantes || loading || !isEditable}
-              >
-                Finalizar y Generar Siguiente Fase
               </button>
 
               {/* Botón "Generar Clasificados" (el morado) eliminado
