@@ -483,7 +483,7 @@
 }
 @media (max-width: 480px) {
   .search-container > div {
-    flex-direction: column;
+    flex-direction: row;
     gap: 8px;
   }
   .filter-select {

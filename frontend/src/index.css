@@ -301,6 +301,18 @@ font-size: 1rem; /* Reducir el tamaño del logo */
     max-width: 100%; /* Elimina cualquier limitación de ancho */
   }
 
+@media (max-width: 1024px) {
+  .page-content-wrapper {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-content-wrapper {
+    padding: 0 12px;
+  }
+}
+
 .page-header {
   margin-bottom: 24px;
   text-align: left;
