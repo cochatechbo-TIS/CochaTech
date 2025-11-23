@@ -32,6 +32,8 @@ function CargarCSV({ onVerLista }: CargarCSVProps) {
   file?: File;
 }>({ isVisible: false });
 
+  const [isUploading, setIsUploading] = useState(false);
+
   // Función para mostrar una notificación
   const showNotification = useCallback((
     message: string,
@@ -175,9 +177,12 @@ function CargarCSV({ onVerLista }: CargarCSVProps) {
           title="Confirmar Carga"
           message={`¿Deseas cargar el archivo ${confirmDialog.file?.name}? Esta acción guardará los datos en la base de datos.`}
           onClose={() => setConfirmDialog({ isVisible: false })}
+          isConfirmDisabled={isUploading}
           onConfirm={async () => {
             if (confirmDialog.file) {
+              setIsUploading(true);
               await uploadFile(confirmDialog.file);
+              setIsUploading(false);
             }
             setConfirmDialog({ isVisible: false });
           }}

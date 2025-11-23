@@ -13,6 +13,7 @@ interface NotificationModalProps {
   title?: string;
   onClose: () => void;
   onConfirm?: (value?: string) => void; // Acepta un valor opcional (para el input)
+  isConfirmDisabled?: boolean;
 }
 
 // Mapa de configuración para cada tipo de notificación
@@ -31,6 +32,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
   title,
   onClose,
   onConfirm,
+  isConfirmDisabled = false, // Valor por defecto
 }) => {
   const DURATION = 5000; // 5 segundos para Toast
   const [inputValue, setInputValue] = React.useState('');
@@ -109,8 +111,9 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
                 Cancelar
               </button>
               <button 
-                onClick={() => onConfirm?.(inputValue)} 
-                className="modal-btn modal-btn-primary"
+                onClick={() => onConfirm?.(inputValue)}
+                className={`modal-btn modal-btn-primary ${isConfirmDisabled ? 'modal-btn-disabled' : ''}`}
+                disabled={isConfirmDisabled}
               >
                 {type === 'confirm' ? 'Sí, Confirmar' : 'Rechazar lista'}
               </button>

@@ -169,3 +169,9 @@
 .toast-info .toast-icon {
     color: #17a2b8; /* Azul claro */
 }
+
+.modal-btn:disabled,
+.modal-btn.modal-btn-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
