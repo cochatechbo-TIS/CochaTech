@@ -76,7 +76,7 @@ class Premiacion_Controller extends Controller
                     'id_equipo'      => $esGrupal ? $evaluado->id_equipo : null,
                     'id_nivel'       => $id_nivel,
                     'id_tipo_premio' => $premio->id_tipo_premio,
-                    'posicion'       => $premio->orden,
+                    'posicion' => $index + 1,
                 ]);
 
                 $evaluaciones[$index]->medalla = $premio->nombre;

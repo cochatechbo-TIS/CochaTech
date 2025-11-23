@@ -46,7 +46,7 @@ class EvaluadorPorArea extends Seeder
             ],
         ];
 
-        $idRolEvaluador = 2; // Cambia si tu rol evaluador tiene otro ID
+        $idRolEvaluador = 3; //id rol
 
         foreach ($evaluadores as $idArea => $lista) {
 
