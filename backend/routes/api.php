@@ -43,7 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/responsable', [Responsable_Area_Controller::class, 'store']);
         Route::put('/responsable/{id}', [Responsable_Area_Controller::class, 'update']);
         Route::delete('/responsable/{id}', [Responsable_Area_Controller::class, 'destroy']);
-
+        
         Route::get('/evaluador', [Evaluador_Controller::class, 'index']);
         Route::post('/evaluador', [Evaluador_Controller::class, 'store']);
         Route::put('/evaluador/{id}', [Evaluador_Controller::class, 'update']);
