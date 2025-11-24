@@ -95,8 +95,28 @@ class Premiacion_Controller extends Controller
         return response()->json([
             'nivel' => $nivel->nombre,
             'fase' => $ultimaFase->id_fase,
-            'premiaciones' => $evaluaciones->map(function ($item) {
+
+            'premiaciones' => $evaluaciones->map(function ($item) use ($esGrupal) {
+
+                if ($esGrupal) {
+
+                    $equipo = $item->equipo;
+
+                    return [
+                        'nombre'        => $equipo->nombre_equipo,
+                        'ci'            => null,
+                        'institucion'   => $equipo->institucion,
+                        'nota'          => $item->nota,
+                        'falta_etica'   => $item->falta_etica,
+                        'observaciones' => $item->comentario,
+                        'estado'        => $item->estadoOlimpista->nombre ?? null,
+                        'medalla'       => $item->medalla,
+                    ];
+                }
+
+                // ===== INDIVIDUAL =====
                 $olimpista = $item->olimpista;
+
                 return [
                     'nombre'        => $olimpista->nombre . ' ' . $olimpista->apellidos,
                     'ci'            => $olimpista->ci,
@@ -108,6 +128,8 @@ class Premiacion_Controller extends Controller
                     'medalla'       => $item->medalla,
                 ];
             }),
+
         ]);
+
     }
 }
