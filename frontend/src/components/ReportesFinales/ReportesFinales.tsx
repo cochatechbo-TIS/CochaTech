@@ -129,6 +129,281 @@ const getPosicionClass = (posicion: string): string => {
   return '';
 };
 
+// Función para exportar a CSV
+const exportarCSV = (participantes: Participante[], area: string, nivel: string) => {
+  const headers = [
+    'Nombre',
+    'CI',
+    'Unidad Educativa',
+    'Departamento',
+    'Área',
+    'Nivel',
+    'Nota Final',
+    'Posición',
+    'Tutor',
+    'Responsable de Área'
+  ];
+
+  const rows = participantes.map(p => [
+    p.nombre,
+    p.ci,
+    p.unidadEducativa,
+    p.departamento,
+    p.area,
+    p.nivel,
+    p.notaFinal.toString(),
+    p.posicion,
+    p.profesor,
+    p.responsableArea
+  ]);
+
+  let csvContent = '\uFEFF'; // BOM para UTF-8
+  csvContent += headers.join(',') + '\n';
+  
+  rows.forEach(row => {
+    const escapedRow = row.map(cell => {
+      // Escapar comillas y comas
+      const cellStr = String(cell);
+      if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+        return `"${cellStr.replace(/"/g, '""')}"`;
+      }
+      return cellStr;
+    });
+    csvContent += escapedRow.join(',') + '\n';
+  });
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', `Certificados_${area}_${nivel}_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+// Función para exportar a Excel (HTML con formato)
+const exportarExcel = (participantes: Participante[], area: string, nivel: string) => {
+  const tabla = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta charset="utf-8">
+        <!--[if gte mso 9]>
+        <xml>
+          <x:ExcelWorkbook>
+            <x:ExcelWorksheets>
+              <x:ExcelWorksheet>
+                <x:Name>Certificados</x:Name>
+                <x:WorksheetOptions>
+                  <x:DisplayGridlines/>
+                </x:WorksheetOptions>
+              </x:ExcelWorksheet>
+            </x:ExcelWorksheets>
+          </x:ExcelWorkbook>
+        </xml>
+        <![endif]-->
+        <style>
+          table { border-collapse: collapse; width: 100%; }
+          th { background-color: #1e40af; color: white; font-weight: bold; padding: 10px; border: 1px solid #ddd; }
+          td { padding: 8px; border: 1px solid #0712a4ff; }
+          .nota-cell { text-align: center; font-weight: bold; }
+          .posicion-oro { background-color: #e7c12dff; color: #c99f17ff; font-weight: bold; padding: 4px 8px; }
+          .posicion-plata { background-color: #e5e7eb; color: #374151; font-weight: bold; padding: 4px 8px; }
+          .posicion-bronce { background-color: #fed7aa; color: #92400e; font-weight: bold; padding: 4px 8px; }
+        </style>
+      </head>
+      <body>
+        <h2>Certificados - ${area} - ${nivel}</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>CI</th>
+              <th>Unidad Educativa</th>
+              <th>Departamento</th>
+              <th>Área</th>
+              <th>Nivel</th>
+              <th>Nota Final</th>
+              <th>Posición</th>
+              <th>Profesor</th>
+              <th>Responsable de Área</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${participantes.map(p => `
+              <tr>
+                <td>${p.nombre}</td>
+                <td>${p.ci}</td>
+                <td>${p.unidadEducativa}</td>
+                <td>${p.departamento}</td>
+                <td>${p.area}</td>
+                <td>${p.nivel}</td>
+                <td class="nota-cell">${p.notaFinal}</td>
+                <td><span class="${getPosicionClass(p.posicion)}">${p.posicion}</span></td>
+                <td>${p.profesor}</td>
+                <td>${p.responsableArea}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </body>
+    </html>
+  `;
+
+  const blob = new Blob(['\ufeff', tabla], { type: 'application/vnd.ms-excel' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', `Certificados_${area}_${nivel}_${new Date().toISOString().split('T')[0]}.xls`);
+  link.style.visibility = 'hidden';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+// Función para exportar a PDF
+const exportarPDF = (participantes: Participante[], area: string, nivel: string) => {
+  const ventana = window.open('', '', 'height=800,width=1000');
+  
+  if (!ventana) {
+    alert('Por favor, permite las ventanas emergentes para exportar a PDF');
+    return;
+  }
+
+  const contenido = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Certificados - ${area} - ${nivel}</title>
+      <style>
+        body { 
+          font-family: Arial, sans-serif; 
+          padding: 20px;
+          font-size: 12px;
+        }
+        h1 { 
+          text-align: center; 
+          color: #1a1a1a;
+          margin-bottom: 10px;
+        }
+        h2 {
+          text-align: center;
+          color: #666;
+          font-weight: normal;
+          margin-bottom: 20px;
+        }
+        table { 
+          width: 100%; 
+          border-collapse: collapse; 
+          margin-top: 20px;
+        }
+        th { 
+          background-color: #3b82f6; 
+          color: white; 
+          padding: 10px; 
+          text-align: left;
+          font-size: 11px;
+        }
+        td { 
+          padding: 8px; 
+          border-bottom: 1px solid #ddd;
+          font-size: 10px;
+        }
+        tr:hover { 
+          background-color: #f9fafb; 
+        }
+        .nota-cell { 
+          text-align: center; 
+          font-weight: bold; 
+        }
+        .posicion-oro { 
+          background-color: #fef3c7; 
+          color: #92400e; 
+          padding: 4px 8px; 
+          border-radius: 8px;
+          display: inline-block;
+          font-weight: bold;
+        }
+        .posicion-plata { 
+          background-color: #e5e7eb; 
+          color: #374151; 
+          padding: 4px 8px; 
+          border-radius: 8px;
+          display: inline-block;
+          font-weight: bold;
+        }
+        .posicion-bronce { 
+          background-color: #fed7aa; 
+          color: #92400e; 
+          padding: 4px 8px; 
+          border-radius: 8px;
+          display: inline-block;
+          font-weight: bold;
+        }
+        .fecha {
+          text-align: right;
+          color: #666;
+          margin-bottom: 20px;
+          font-size: 11px;
+        }
+        @media print {
+          body { padding: 10px; }
+          button { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <h1>Certificados</h1>
+      <h2>${area} - ${nivel}</h2>
+      <div class="fecha">Fecha: ${new Date().toLocaleDateString('es-ES', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      })}</div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>CI</th>
+            <th>Unidad Educativa</th>
+            <th>Departamento</th>
+            <th>Nota</th>
+            <th>Posición</th>
+            <th>Profesor</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${participantes.map(p => `
+            <tr>
+              <td>${p.nombre}</td>
+              <td>${p.ci}</td>
+              <td>${p.unidadEducativa}</td>
+              <td>${p.departamento}</td>
+              <td class="nota-cell">${p.notaFinal}</td>
+              <td><span class="${getPosicionClass(p.posicion)}">${p.posicion}</span></td>
+              <td>${p.profesor}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
+
+  ventana.document.write(contenido);
+  ventana.document.close();
+  
+  setTimeout(() => {
+    ventana.print();
+  }, 250);
+};
 // ========== COMPONENTE PRINCIPAL ==========
 function ReportesFinales({ 
   areaInicial = 'Matemática', 
@@ -148,18 +423,22 @@ function ReportesFinales({
     setTabActivo(tab);
   }, []);
 
-  // ========== MANEJADORES DE EXPORTACIÓN ==========
-  const handleExportarExcel = useCallback(() => {
-    console.log('Exportando a Excel...');
-    // TODO: Implementar exportación a Excel
-    alert('Funcionalidad de exportar a Excel en desarrollo');
-  }, []);
+  // ========== MANEJADORES DE EXPORTACIÓN ==========`
+  const handleExportarCSV = useCallback(() => {
+    console.log('Exportando a CSV...');
+    exportarCSV(participantes, areaInicial, nivelInicial);
+  }, [participantes, areaInicial, nivelInicial]);
 
-  const handleExportarPDF = useCallback(() => {
-    console.log('Exportando a PDF...');
-    // TODO: Implementar exportación a PDF
-    alert('Funcionalidad de exportar a PDF en desarrollo');
-  }, []);
+  const handleExportarExcel = useCallback(() => {
+  console.log('Exportando a Excel...');
+  exportarExcel(participantes, areaInicial, nivelInicial); // <-- Ejecuta la función real
+}, [participantes, areaInicial, nivelInicial]);
+
+const handleExportarPDF = useCallback(() => {
+  console.log('Exportando a PDF...');
+  exportarPDF(participantes, areaInicial, nivelInicial); // <-- Ejecuta la función real
+}, [participantes, areaInicial, nivelInicial]);
+
 
   // ========== RENDER ==========
   return (
@@ -203,6 +482,16 @@ function ReportesFinales({
             <div className="content-header">
               <h3 className="content-title">Certificados</h3>
               <div className="export-buttons">
+                <button className="btn-export btn-csv" onClick={handleExportarCSV}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                  </svg>
+                  EXPORTAR CSV
+                </button>
                 <button className="btn-export btn-excel" onClick={handleExportarExcel}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
