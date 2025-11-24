@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/areas/nombres', [Area_Controller::class, 'listarNombres']);
+    
     // Grupo solo para ADMIN
     Route::middleware('role:administrador')->group(function () {
         Route::get('/olimpistas', [Gestion_Olimpista_Controller::class, 'index']);
