@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { TabNavigation } from '../components/registro/TabNavigation';
-import ParametrizacionMedallero from '../components/Historial/ParametrizacionMedallero';
+import ParametrizacionMedallero from '../components/configuracion/ParametrizacionMedallero';
 //import FinalizacionProceso from '../components/historial/FinalizacionProceso';
 
 type HistorialTab = 'cambios' | 'parametrizacion' | 'finalizacion';

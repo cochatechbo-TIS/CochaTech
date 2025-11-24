@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/areas/nombres', [Area_Controller::class, 'listarNombres']);
+    
     // Grupo solo para ADMIN
     Route::middleware('role:administrador')->group(function () {
         Route::get('/olimpistas', [Gestion_Olimpista_Controller::class, 'index']);
@@ -49,6 +50,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/evaluador/{id}', [Evaluador_Controller::class, 'destroy']);
 
         Route::get('/niveles/area/{nombre_area}', [Generar_Lista_Controller::class, 'listarPorArea']);
+
+        Route::get('/medallero-config', [Medallero_Configuracion_Controller::class, 'index']);
+        Route::post('/medallero-config', [Medallero_Configuracion_Controller::class, 'store']);
     });
     // Grupo Responsable 
     Route::middleware('role:responsable')->group(function () {
@@ -90,9 +94,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/fase-nivel/siguiente/{idNivel}', [Fase_Dinamico_Controller::class, 'crearSiguienteFase']);
     Route::get('/cantidad/fases/{idNivel}', [Fase_Lista_Controller::class, 'listarFasesPorNivel']);//2
     Route::get('/fase/{idNivelFase}', [Fase_Consulta_Controller::class, 'mostrarFase']);//3
-});  
-
-
-
-Route::get('/medallero-config', [Medallero_Configuracion_Controller::class, 'index']);
-Route::post('/medallero-config', [Medallero_Configuracion_Controller::class, 'store']);
+});
