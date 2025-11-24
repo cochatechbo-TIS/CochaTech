@@ -220,16 +220,16 @@ const exportarExcel = (participantes: Participante[], area: string, nivel: strin
         <table>
           <thead>
             <tr>
-              <th>Nombre</th>
+              <th>NOMBRE</th>
               <th>CI</th>
-              <th>Unidad Educativa</th>
-              <th>Departamento</th>
-              <th>Área</th>
-              <th>Nivel</th>
-              <th>Nota Final</th>
-              <th>Posición</th>
-              <th>Profesor</th>
-              <th>Responsable de Área</th>
+              <th>UNIDAD EDUCATIVA</th>
+              <th>DEPARTAMENTO</th>
+              <th>ÁREA</th>
+              <th>NIVEL</th>
+              <th>NOTA FINAL</th>
+              <th>POSICION</th>
+              <th>TUTOR</th>
+              <th>RESPONSANBLE DE ÁREA</th>
             </tr>
           </thead>
           <tbody>
@@ -307,7 +307,7 @@ const exportarPDF = (participantes: Participante[], area: string, nivel: string)
           background-color: #3b82f6; 
           color: white; 
           padding: 10px; 
-          text-align: left;
+          text-align: center;
           font-size: 11px;
         }
         td { 
@@ -370,13 +370,13 @@ const exportarPDF = (participantes: Participante[], area: string, nivel: string)
       <table>
         <thead>
           <tr>
-            <th>Nombre</th>
+            <th>NOMBRE</th>
             <th>CI</th>
-            <th>Unidad Educativa</th>
-            <th>Departamento</th>
-            <th>Nota</th>
-            <th>Posición</th>
-            <th>Profesor</th>
+            <th>UNIDAD EDUCATIVA</th>
+            <th>DEPARTAMENTO</th>
+            <th>CALIFICACION FINAL</th>
+            <th>MEDALLERO</th>
+            <th>TUTOR</th>
           </tr>
         </thead>
         <tbody>
@@ -532,16 +532,16 @@ const handleExportarPDF = useCallback(() => {
               <table className="participantes-table">
                 <thead>
                   <tr>
-                    <th>Nombre</th>
+                    <th>NOMBRE</th>
                     <th>CI</th>
-                    <th>Unidad Educativa</th>
-                    <th>Departamento</th>
-                    <th>Área</th>
-                    <th>Nivel</th>
-                    <th>Nota Final</th>
-                    <th>Posición</th>
-                    <th>Profesor</th>
-                    <th>Responsable de Área</th>
+                    <th>UNIDAD EDUCATIVA</th>
+                    <th>DEPARTAMENTO</th>
+                    <th>ÁREA</th>
+                    <th>NIVEL</th>
+                    <th>NOTA FINAL</th>
+                    <th>MEDALLA</th>
+                    <th>TUTOR</th>
+                    <th>RESPONSABLE DE ÁREA</th>
                   </tr>
                 </thead>
                 <tbody>
