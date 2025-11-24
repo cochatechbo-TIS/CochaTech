@@ -83,16 +83,33 @@ const EvaluacionTable: React.FC<Props> = ({
               <td>{p.institucion}</td>
 
               {/* ... (el resto de tus <td> son correctos) ... */}
+              
               <td>
                 <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={p.nota ?? ""}
-                  onChange={evt => handleNotaChange(p.id_evaluacion, Number(evt.target.value))}
-                  disabled={!isEditable}
-                />
+                   type="number"
+                   min={0}
+                   max={100}
+                   value={p.nota === null || p.nota === undefined ? "" : p.nota}
+                   onChange={(e) => {
+                     const valor = e.target.value;
+
+                      // Si borran la nota → dejar vacío
+                     if (valor === "") {
+                       handleNotaChange(p.id_evaluacion, NaN); // NaN = sin nota
+                      return;
+                     }
+
+                     const numero = Number(valor);
+
+                      // Validar que sea número entre 0 y 100
+                      if (!isNaN(numero) && numero >= 0 && numero <= 100) {
+                        handleNotaChange(p.id_evaluacion, numero);
+                     }
+                  }}
+                 disabled={!isEditable}
+               />
               </td>
+
               <td className="text-center">
                 <input
                   type="checkbox"

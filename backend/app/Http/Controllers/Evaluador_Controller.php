@@ -240,12 +240,6 @@ class Evaluador_Controller extends Controller
         for ($i=0; $i<$length; $i++) $password .= $chars[rand(0, strlen($chars)-1)];
         return $password;
     }
-
-    /**
-     * ¡NUEVA FUNCIÓN!
-     * Obtiene los datos iniciales para el panel del evaluador.
-     * Reemplaza a Fase_Lista_Controller y getEvaluadorData.
-     */
     public function obtenerDatosIniciales(Request $request)
     {
         /** @var \App\Models\Usuario $user */
