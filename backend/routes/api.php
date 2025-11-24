@@ -62,8 +62,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/nivel-fase/aprobar/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'aprobar']);
         Route::get('/evaluadores-por-area/{id_area}', [Nivel_Evaluador::class, 'evaluadoresPorArea']);
         Route::post('/niveles/asignar-evaluador', [Nivel_Evaluador::class, 'asignarEvaluador']);
-        Route::get('/medallero-config', [Medallero_Configuracion_Controller::class, 'index']);
-        Route::post('/medallero-config', [Medallero_Configuracion_Controller::class, 'store']);
         Route::get('/premiacion/asignar/{id_nivel}', [Premiacion_Controller::class, 'asignarPremios']);
         
     });    
