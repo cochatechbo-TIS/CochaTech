@@ -14,6 +14,7 @@ export interface Olimpista {
   falta_etica: boolean;
   observaciones: string;
   estado: string; // "Aprobado" | "Reprobado" | "-"
+
 }
 
 export interface EvaluacionResponse {
@@ -78,6 +79,7 @@ export interface Participante {
   falta_etica: boolean;
   observaciones: string | null;
   estado_olimpista: string | null; // "Clasificado", "No Clasificado", etc.
+  medalla?: string | null;
 }
 
 export interface FaseConsultaData {

@@ -31,6 +31,8 @@ const EvaluacionPorFases: React.FC = () => {
   const [loadingParticipantes, setLoadingParticipantes] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [esFaseFinal, setEsFaseFinal] = useState(false);
+
 
   // Efecto para cargar datos iniciales (Panel y Pestañas)
   useEffect(() => {
@@ -79,6 +81,7 @@ const EvaluacionPorFases: React.FC = () => {
     try {
       const data = await getParticipantesPorFase(idNivelFase);
       setParticipantes(data.resultados || data.equipos || []);
+      setEsFaseFinal(data.es_Fase_final);
 
       // 2. OBTENER COMENTARIO SI LA FASE ESTÁ RECHAZADA
       if (faseSeleccionada?.estado === 'Rechazada') {
@@ -221,6 +224,7 @@ const EvaluacionPorFases: React.FC = () => {
             onChange={handleTablaChange} // <-- Nueva prop
             isEditable={isEditable}
             esGrupal={esGrupal} // <-- Nueva prop
+            esFaseFinal={esFaseFinal}
           />
         </>
       )}
