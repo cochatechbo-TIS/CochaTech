@@ -8,13 +8,15 @@ interface Props {
   onChange: (updated: Participante[]) => void;
   isEditable: boolean;
   esGrupal: boolean; // <-- Recibimos si es grupal
+  esFaseFinal: boolean;
 }
 
 const EvaluacionTable: React.FC<Props> = ({ 
   participantes, 
   onChange, 
   isEditable, 
-  esGrupal // <-- Usamos la prop
+  esGrupal, // <-- Usamos la prop
+  esFaseFinal
 }) => {
   
   const handleNotaChange = (id: number, value: number) => {
@@ -55,6 +57,7 @@ const EvaluacionTable: React.FC<Props> = ({
               <th>FALTA ÉTICA</th>
               <th>OBSERVACIONES</th>
               <th>ESTADO</th>
+              {esFaseFinal && <th>MEDALLERO</th>}
             </tr>
           ) : (
             <tr>
@@ -65,6 +68,7 @@ const EvaluacionTable: React.FC<Props> = ({
               <th>FALTA ÉTICA</th>
               <th>OBSERVACIONES</th>
               <th>ESTADO</th>
+              {esFaseFinal && <th>MEDALLERO</th>}
             </tr>
           )}
         </thead>
@@ -135,6 +139,12 @@ const EvaluacionTable: React.FC<Props> = ({
                   {p.estado_olimpista ?? "-"}
                 </span>
               </td>
+              {esFaseFinal && (
+                <td className="medallero">
+                  {p.medalla ?? "—"}
+                </td>
+              )}
+
             </tr>
           ))}
         </tbody>

@@ -1,3 +1,5 @@
+
+/*=======
 /* ========== CONTENEDOR PRINCIPAL ========== */
 .reportes-container {
   padding: 24px;
@@ -60,7 +62,7 @@
 }
 
 .tab-button.tab-active {
-  color: #1d4ed8;
+  color: #2563eb;
 }
 
 .tab-button.tab-active::after {
@@ -70,7 +72,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background-color: #1d4ed8;
+  background-color: #2563eb;
 }
 
 /* ========== CONTENIDO DE TABS ========== */
@@ -119,6 +121,14 @@
 
 .btn-export:active {
   transform: translateY(0);
+}
+
+.btn-csv {
+  background-color: #AAA9AD;
+}
+
+.btn-csv:hover {
+  background-color: #374151;
 }
 
 .btn-excel {
@@ -180,7 +190,7 @@
 }
 
 .participantes-table thead {
-  background-color: #1d4ed8;
+  background-color: #3b82f6;
 }
 
 .participantes-table th {
@@ -210,7 +220,6 @@
   font-size: 14px;
   color: #374151;
   vertical-align: middle;
- /*text-align: left;*/
 }
 
 .nota-cell {
@@ -231,18 +240,18 @@
 }
 
 .posicion-oro {
-  background-color: #FFD700;
-  color: #000000;
+  background-color: #fef3c7;
+  color: #92400e;
 }
 
 .posicion-plata {
-  background-color: #C0C0C0;
-  color: #1E1E1E;
+  background-color: #e5e7eb;
+  color: #374151;
 }
 
 .posicion-bronce {
-  background-color: #CD7F32;
-  color: #FFFFFF;
+  background-color: #fed7aa;
+  color: #92400e;
 }
 
 /* ========== ESTADO VACÍO ========== */

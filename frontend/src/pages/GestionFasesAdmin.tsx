@@ -479,6 +479,7 @@ const GestionFasesAdmin: React.FC = () => {
           onChange={() => {}}
           isEditable={false}
           esGrupal={infoNivel?.esGrupal || false}
+          esFaseFinal={infoNivel?.es_Fase_final || false}
         />
       )}
 
