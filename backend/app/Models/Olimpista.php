@@ -11,6 +11,8 @@ class Olimpista extends Model
     protected $table = 'olimpista';
     protected $primaryKey = 'id_olimpista';
     public $timestamps = false; // La migración no define timestamps de Eloquent
+    protected $appends = ['tutor', 'nota_final', 'unidad_educativa', 'responsable_area'];
+
 
     protected $fillable = [
         'nombre', 'apellidos', 'ci', 'institucion', 
@@ -39,5 +41,36 @@ class Olimpista extends Model
     {
         return $this->belongsTo(NivelFase::class, 'id_nivel_fase');
     }
+
+    public function departamento()
+    {
+        return $this->belongsTo(Departamento::class, 'id_departamento', 'id_departamento');
+    }
+
+    public function getTutorAttribute()
+    {
+        return [
+            'nombre' => $this->nombre_tutor,
+            'contacto' => $this->contacto_tutor,
+        ];
+    }
+
+    public function getNotaFinalAttribute()
+    {
+        // Obtener todas las evaluaciones con su fase
+        $evaluaciones = $this->evaluaciones()->with('nivelFase.fase')->get();
+
+        if ($evaluaciones->isEmpty()) {
+            return null;
+        }
+
+        // Buscar la evaluación cuya fase tiene el mayor ORDEN
+        $ultimaEvaluacion = $evaluaciones->sortByDesc(function ($e) {
+            return $e->nivelFase->fase->orden; // orden de la fase
+        })->first();
+
+        return $ultimaEvaluacion->nota;
+    }
+   
 
 }

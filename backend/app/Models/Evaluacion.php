@@ -44,4 +44,5 @@ class Evaluacion extends Model
     {
         return $this->belongsTo(Equipo::class, 'id_equipo', 'id_equipo');
     }
+    
 }
