@@ -963,3 +963,19 @@ font-size: 1rem; /* Reducir el tamaño del logo */
 .custom-modal-content.modal-wide {
   max-width: 40rem; /* Ancho mayor para el modal de input */
 }
+
+.btn-back {
+  background: transparent;
+  border: none;
+  color: blue;
+  cursor: pointer;
+  padding: 0.5rem; /* Ajusta el padding si es necesario */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.btn-back:hover {
+  background-color: rgba(0, 0, 255, 0.1); /* Un ligero fondo azul al pasar el mouse */
+}

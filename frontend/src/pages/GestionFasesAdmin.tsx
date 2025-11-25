@@ -1,11 +1,11 @@
 // src/pages/GestionFasesAdmin.tsx
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import EvaluacionTable from "../components/evaluadores/EvaluacionTable";
 import { NotificationModal } from "../components/common/NotificationModal";
 import api from "../services/api";
 import type { FaseConsultaData, FasePestana, InfoNivelAdmin, Participante } from "../interfaces/Evaluacion";
-import { User, Users } from 'lucide-react';
+import { User, Users, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 
 // ✅ Tipado para el estado de la notificación
@@ -18,6 +18,7 @@ interface LocationState {
 
 const GestionFasesAdmin: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { nivelId } = (location.state as LocationState) || {};
   
   const [fases, setFases] = useState<FasePestana[]>([]);
@@ -28,7 +29,6 @@ const GestionFasesAdmin: React.FC = () => {
   const [comentarioFase, setComentarioFase] = useState<string | null>(null); // <-- 1. NUEVO ESTADO
   const [loadingParticipantes, setLoadingParticipantes] = useState(false);
   const [error, setError] = useState<string | null>(null);  
-  const [necesitaCrearFase, setNecesitaCrearFase] = useState(false);
 
   // ✅ Estado para el modal de notificación
   const [notification, setNotification] = useState({
@@ -130,7 +130,6 @@ const GestionFasesAdmin: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      setNecesitaCrearFase(false);
 
       console.log("Cargando fases para nivel:", nivelId);
       const response = await api.get(`/cantidad/fases/${nivelId}`, {
@@ -164,10 +163,9 @@ const GestionFasesAdmin: React.FC = () => {
       // Manejar el caso cuando no hay fases (404)
       if (axios.isAxiosError(error) && error.response?.status === 404) {
         console.log("No hay fases registradas, iniciando creación automática...");
-        setFases([]);
-        setFaseSeleccionada(null);
-        setNecesitaCrearFase(true);
-        setError("Este nivel aún no tiene fases. Puede generar la primera fase.");
+        setError("Este nivel aún no tiene fases. Generando la primera fase automáticamente...");
+        // Llamamos directamente a la función para crear la fase
+        await handleCrearPrimeraFase();
       } else {
         let errorMsg = "Error al cargar las fases";
         if (axios.isAxiosError(error)) {
@@ -376,16 +374,7 @@ const GestionFasesAdmin: React.FC = () => {
     );
   }
 
-  if (necesitaCrearFase) {
-    return (
-      <div className="evaluacion-container">
-        <div className="alerta alerta-info">{error}</div>
-        <button onClick={handleCrearPrimeraFase} className="btn btn-primary" style={{marginTop: '1rem'}}>
-          Generar Primera Fase
-        </button>
-      </div>
-    );
-  } else if (error && fases.length === 0) {
+  if (error && fases.length === 0) {
     return (
       <div className="evaluacion-container">
         <div className="alerta alerta-error">{error}</div>
@@ -395,7 +384,14 @@ const GestionFasesAdmin: React.FC = () => {
   return (
     <div className="gestion-competidores-page">
       <div className="page-content-wrapper">
-      <h1 className="titulo">Gestión de Fases</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+          <button onClick={() => navigate(-1)} className="btn-back">
+            <ArrowLeft size={20} />
+          </button>
+          <h1 className="titulo" style={{ marginBottom: 0 }}>
+            Gestión de Fases
+          </h1>
+        </div>
 
     {infoNivel && (
       <div className="evaluador-info-header">

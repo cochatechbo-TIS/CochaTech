@@ -112,7 +112,7 @@ const ParametrizacionMedallero: React.FC = () => {
     const newConfig = [...medalConfig];
     
     if (value === '') {
-      newConfig[index] = { ...newConfig[index], [field]: 0 };
+      newConfig[index] = { ...newConfig[index], [field]: '' };
     } else {
       const numValue = parseInt(value, 10);
       // Permitimos el valor si es un número válido y no es negativo
