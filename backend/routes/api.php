@@ -67,7 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/evaluadores-por-area/{id_area}', [Nivel_Evaluador::class, 'evaluadoresPorArea']);
         Route::post('/niveles/asignar-evaluador', [Nivel_Evaluador::class, 'asignarEvaluador']);
 
-        Route::get('/premiacion/asignar/{id_nivel}', [Premiacion_Controller::class, 'asignarPremios']);
+        //Route::get('/premiacion/asignar/{id_nivel}', [Premiacion_Controller::class, 'asignarPremios']);
         
     });    
 
@@ -88,10 +88,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/fase/{idNivelFase}', [Fase_Consulta_Controller::class, 'mostrarFase']);//3 si
 
     //infromes -reportes
-    Route::get('/reporte-premiacion/{id_area}/{id_nivel}', 
+   /* Route::get('/reporte-premiacion/{id_area}/{id_nivel}', 
+    [Reporte_Premiacion_Controller::class, 'generarReporte']);
+    Route::get('/reporte-oficial/{id_area}/{id_nivel}', 
+    [Reporte_PagOficial_Controller::class, 'obtenerPremiados']);
+    Route::get('/reporte-ceremonia/{id_area}/{id_nivel}', 
+    [Reporte_Ceremonia_Controller::class, 'obtenerPremiados']);*/
+}); 
+
+ Route::get('/reporte-premiacion/{id_area}/{id_nivel}', 
     [Reporte_Premiacion_Controller::class, 'generarReporte']);
     Route::get('/reporte-oficial/{id_area}/{id_nivel}', 
     [Reporte_PagOficial_Controller::class, 'obtenerPremiados']);
     Route::get('/reporte-ceremonia/{id_area}/{id_nivel}', 
     [Reporte_Ceremonia_Controller::class, 'obtenerPremiados']);
-}); 
+    Route::get('/premiacion/asignar/{id_nivel}', [Premiacion_Controller::class, 'asignarPremios']);

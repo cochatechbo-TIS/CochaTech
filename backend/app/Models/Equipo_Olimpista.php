@@ -17,4 +17,10 @@ class Equipo_Olimpista extends Model
         'id_equipo',
         'id_olimpista',
     ];
+    public function olimpista()
+    {
+        return $this->belongsTo(Olimpista::class, 'id_olimpista', 'id_olimpista');
+    }
+
 }
+

@@ -32,6 +32,12 @@ class Equipo extends Model
 
     public function olimpistas()
     {
-        return $this->belongsToMany(Importar_Olimpista::class, 'equipo_olimpista', 'id_equipo', 'id_olimpista');
+        return $this->belongsToMany(Olimpista::class, 'equipo_olimpista', 'id_equipo', 'id_olimpista');
     }
+
+    public function integrantes()
+    {
+        return $this->hasMany(Equipo_Olimpista::class, 'id_equipo', 'id_equipo');
+    }
+
 }
