@@ -10,9 +10,14 @@ import type {
 /**
  * 1. OBTENER DATOS INICIALES (Info del Panel y Pestañas)
  * Llama a nuestro nuevo endpoint "pegamento".
+ * * MODIFICACIÓN: Ahora acepta un idNivel opcional.
+ * - Si se pasa, carga los datos de ese nivel específico.
+ * - Si no se pasa, el backend carga el primer nivel por defecto.
  */
-export async function getDatosInicialesEvaluador(): Promise<EvaluadorInicioData> {
-  const response = await api.get<EvaluadorInicioData>(`/evaluador/inicio`);
+export async function getDatosInicialesEvaluador(idNivel?: number): Promise<EvaluadorInicioData> {
+  // Construimos la URL dependiendo de si hay un ID seleccionado
+  const url = idNivel ? `/evaluador/inicio?id_nivel=${idNivel}` : `/evaluador/inicio`;
+  const response = await api.get<EvaluadorInicioData>(url);
   return response.data;
 }
 

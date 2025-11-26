@@ -1,11 +1,12 @@
 // src/pages/EvaluacionPorFases.tsx
 import React, { useEffect, useState } from "react";
-import api from "../services/api"; // Importar la instancia de api
+import api from "../services/api"; 
 import type { 
   FasePestana, 
   InfoEvaluador, 
   Participante,
-  EvaluacionPayload
+  EvaluacionPayload,
+  EvaluadorInicioData
 } from "../interfaces/Evaluacion";
 import EvaluacionTable from "../components/evaluadores/EvaluacionTable";
 import {
@@ -24,7 +25,7 @@ const EvaluacionPorFases: React.FC = () => {
   const [participantes, setParticipantes] = useState<Participante[]>([]);
   const [esGrupal, setEsGrupal] = useState(false);
   const [fechaActual, setFechaActual] = useState<string>('');
-  const [comentarioRechazo, setComentarioRechazo] = useState<string | null>(null); // 1. NUEVO ESTADO
+  const [comentarioRechazo, setComentarioRechazo] = useState<string | null>(null);
   
   // --- Estados de UI ---
   const [loading, setLoading] = useState(true);
@@ -32,7 +33,6 @@ const EvaluacionPorFases: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [esFaseFinal, setEsFaseFinal] = useState(false);
-
 
   // Efecto para cargar datos iniciales (Panel y Pestañas)
   useEffect(() => {
@@ -43,27 +43,8 @@ const EvaluacionPorFases: React.FC = () => {
       day: 'numeric',
     }));
 
-    (async () => {
-      try {
-        setLoading(true);
-        const data = await getDatosInicialesEvaluador();
-        
-        setInfoEvaluador(data.infoEvaluador);
-        setFases(data.fases);
-        setEsGrupal(data.infoEvaluador.es_grupal);
-        
-        if (data.fases.length > 0) {
-          // Seleccionar la última fase disponible (la activa)
-          setFaseSeleccionada(data.fases[data.fases.length - 1]);
-        } else {
-          setError("No hay fases asignadas para este nivel.");
-        }
-      } catch (err: any) {
-        console.error(err);
-        setError(err.response?.data?.message || "No se pudieron cargar los datos del evaluador.");
-      }
-      setLoading(false);
-    })();
+    // Carga inicial sin ID (el backend elige el por defecto)
+    cargarDatosIniciales();
   }, []);
 
   // Efecto para cargar la tabla de participantes
@@ -73,17 +54,57 @@ const EvaluacionPorFases: React.FC = () => {
     }
   }, [faseSeleccionada]);
 
-  // --- Funciones de Lógica ---
+  // --- MODIFICACIÓN: Función de carga ahora acepta ID opcional ---
+  const cargarDatosIniciales = async (idNivel?: number) => {
+    try {
+      setLoading(true);
+      clearMessages(); // Limpiamos mensajes previos al cambiar de nivel
+      
+      const data: EvaluadorInicioData = await getDatosInicialesEvaluador(idNivel);
+
+      // ============================================================
+      // 🚧 INICIO CÓDIGO TEMPORAL PARA PROBAR (Bórralo luego) 🚧
+      // Simulamos que el backend nos envió la lista de niveles
+      if (!data.infoEvaluador.niveles_asignados) {
+        data.infoEvaluador.niveles_asignados = [
+          { id_nivel: 1, nombre: "Q-Nivel 1", area: "Química" },
+          { id_nivel: 2, nombre: "Q-Nivel 2", area: "Química" },
+          { id_nivel: 3, nombre: "Q-Grupal 1", area: "Química" }
+        ];
+        // Simulamos propiedades nuevas si faltan
+        data.infoEvaluador.id_nivel_actual = idNivel || data.infoEvaluador.id_nivel; 
+      }
+      // 🚧 FIN CÓDIGO TEMPORAL 🚧
+      // ============================================================
+      
+      setInfoEvaluador(data.infoEvaluador);
+      setFases(data.fases);
+      // Usamos la propiedad del nivel actual (si existe, sino fallback al anterior)
+      setEsGrupal(data.infoEvaluador.es_grupal_actual ?? data.infoEvaluador.es_grupal);
+      
+      if (data.fases.length > 0) {
+        // Seleccionar la última fase disponible (la activa)
+        setFaseSeleccionada(data.fases[data.fases.length - 1]);
+      } else {
+        setFaseSeleccionada(null);
+        setError("No hay fases asignadas para este nivel.");
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.message || "No se pudieron cargar los datos del evaluador.");
+    }
+    setLoading(false);
+  };
+
   const cargarParticipantes = async (idNivelFase: number) => {
     setLoadingParticipantes(true);
     clearMessages();
-    setComentarioRechazo(null); // Limpiar comentario anterior
+    setComentarioRechazo(null); 
     try {
       const data = await getParticipantesPorFase(idNivelFase);
       setParticipantes(data.resultados || data.equipos || []);
       setEsFaseFinal(data.es_Fase_final);
 
-      // 2. OBTENER COMENTARIO SI LA FASE ESTÁ RECHAZADA
       if (faseSeleccionada?.estado === 'Rechazada') {
         const faseDetalleResponse = await api.get(`/nivel-fase/${idNivelFase}`);
         const comentario = faseDetalleResponse.data?.comentario;
@@ -102,33 +123,35 @@ const EvaluacionPorFases: React.FC = () => {
     setSuccess(null);
   };
 
-  // Actualiza el estado local de la tabla
   const handleTablaChange = (participantesActualizados: Participante[]) => {
     setParticipantes(participantesActualizados);
   };
 
-  // --- Manejadores de Botones ---
+  // --- MODIFICACIÓN: Nuevo manejador para el selector ---
+  const handleNivelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const nuevoId = Number(e.target.value);
+    if (nuevoId) {
+      cargarDatosIniciales(nuevoId); // Recarga todo con el nuevo nivel
+    }
+  };
 
   const handleGuardarYClasificar = async () => {
     if (!faseSeleccionada) return;
     
-    // 1. Mapear los datos de la tabla al formato que espera la API
     const payload: EvaluacionPayload[] = participantes.map(p => ({
       id_evaluacion: p.id_evaluacion,
-      nota: p.nota ?? 0, // Enviar 0 si es nulo
+      nota: p.nota ?? 0, 
       comentario: p.observaciones ?? '',
       falta_etica: p.falta_etica ?? false,
     }));
 
-    // 2. Confirmar
     if (!window.confirm("¿Estás seguro de guardar y clasificar? Esta acción calculará los estados.")) return;
     
     clearMessages();
     setLoadingParticipantes(true);
     try {
       const res = await guardarYClasificar(faseSeleccionada.id_nivel_fase, payload);
-      setSuccess(res.message); // Ej: "clasificasion hecha correctamente"
-      // Volver a cargar los participantes para ver los nuevos estados
+      setSuccess(res.message); 
       await cargarParticipantes(faseSeleccionada.id_nivel_fase);
     } catch (err: any) {
       console.error("Error al clasificar:", err);
@@ -137,7 +160,6 @@ const EvaluacionPorFases: React.FC = () => {
     setLoadingParticipantes(false);
   };
   
-  // Lógica de UI para deshabilitar
   const isEditable = faseSeleccionada?.estado === 'En Proceso';
 
   if (loading) {
@@ -150,18 +172,40 @@ const EvaluacionPorFases: React.FC = () => {
       
       {infoEvaluador && (
         <div className="evaluador-info-header">
+          {/* 1. EVALUADOR */}
           <div className="info-item">
             <User className="info-icon" />
             <span>{infoEvaluador.nombre_evaluador}</span>
           </div>
+          
+          {/* 2. ÁREA (Movido antes del Nivel) */}
           <div className="info-item">
             <strong>Área:</strong>
-            <span>{infoEvaluador.nombre_area}</span>
+            <span>{infoEvaluador.nombre_area_actual || infoEvaluador.nombre_area}</span>
           </div>
+
+          {/* 3. NIVEL + SELECTOR (Movido después del Área) */}
           <div className="info-item">
             <strong>Nivel:</strong>
-            <span>{infoEvaluador.nombre_nivel}</span>
+            {infoEvaluador.niveles_asignados && infoEvaluador.niveles_asignados.length > 0 ? (
+              <select 
+                className="nivel-selector" 
+                value={infoEvaluador.id_nivel_actual ?? infoEvaluador.id_nivel}
+                onChange={handleNivelChange}
+                disabled={loadingParticipantes}
+              >
+                {infoEvaluador.niveles_asignados.map((nivel) => (
+                  <option key={nivel.id_nivel} value={nivel.id_nivel}>
+                    {nivel.nombre} ({nivel.area})
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span>{infoEvaluador.nombre_nivel_actual || infoEvaluador.nombre_nivel}</span>
+            )}
           </div>
+          
+          {/* 4. FECHA (Siempre al final a la derecha) */}
           <div className="info-item info-fecha">
             <CalendarDays className="info-icon" />
             <span>{fechaActual}</span>
@@ -199,31 +243,29 @@ const EvaluacionPorFases: React.FC = () => {
 
             <div className="botones-evaluacion">
               
-              {/* --- BOTONES ADAPTADOS A LA NUEVA LÓGICA --- */}
-              
+              {/* --- ÚNICO BOTÓN VERDE (El azul ha sido eliminado) --- */}
               <button 
-                onClick={handleGuardarYClasificar} // Nuevo nombre
-                className="btn btn-green" // Botón principal
+                onClick={handleGuardarYClasificar} 
+                className="btn btn-green" 
                 disabled={loadingParticipantes || loading || !isEditable}
               >
                 {loadingParticipantes ? 'Guardando...' : 'Guardar y Clasificar'}
               </button>
 
-              {/* Botón "Generar Clasificados" (el morado) eliminado
-                  porque el nuevo backend lo fusionó con "Guardar". */}
             </div>
           </div>
-          {/* 3. RENDERIZAR EL COMENTARIO DE RECHAZO */}
-            {comentarioRechazo && (
-              <div className="alerta alerta-error alerta-rechazo">
-                <strong>Motivo del Rechazo:</strong> {comentarioRechazo}
-              </div>
-            )}
+          
+          {comentarioRechazo && (
+            <div className="alerta alerta-error alerta-rechazo">
+              <strong>Motivo del Rechazo:</strong> {comentarioRechazo}
+            </div>
+          )}
+
           <EvaluacionTable 
-            participantes={participantes} // <-- Nueva prop
-            onChange={handleTablaChange} // <-- Nueva prop
+            participantes={participantes} 
+            onChange={handleTablaChange} 
             isEditable={isEditable}
-            esGrupal={esGrupal} // <-- Nueva prop
+            esGrupal={esGrupal}
             esFaseFinal={esFaseFinal}
           />
         </>
