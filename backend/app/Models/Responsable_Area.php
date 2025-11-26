@@ -11,7 +11,7 @@ class Responsable_Area extends Model
     public $incrementing = true;
     protected $keyType = 'int';
     public $timestamps = false;
-
+    
     protected $fillable = [
         'id_usuario',
         'id_area'
@@ -28,4 +28,6 @@ class Responsable_Area extends Model
     {
         return $this->belongsTo(Area::class, 'id_area', 'id_area');
     }
+
+    
 }

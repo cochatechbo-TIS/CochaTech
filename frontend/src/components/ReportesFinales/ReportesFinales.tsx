@@ -1,6 +1,7 @@
 // src/components/reportes/ReportesFinales.tsx
 import { useState, useCallback, useMemo } from 'react';
 import PublicacionOficial from './PublicacionOficial';
+import CeremoniaPremiacion from './CeremoniaPremiacion';
 import './ReportesFinales.css';
 
 // ========== INTERFACES ==========
@@ -113,9 +114,21 @@ const PARTICIPANTES_MOCK: Participante[] = [
     departamento: 'Cochabamba',
     area: 'Matemáticas',
     nivel: 'Nivel 2',
-    notaFinal: 73,
+    notaFinal: 74,
     posicion: 'Mencion de Honor',
     profesor: 'Dr. Ismael Gutiérrez',
+    responsableArea: 'Ing. María Rodríguez'
+  },
+  {id: 8,
+    nombre: 'Maria Flores',
+    ci: '56745212',
+    unidadEducativa: 'Colegio San Antonio',
+    departamento: 'Cochabamba',
+    area: 'Matemáticas',
+    nivel: 'Nivel 2',
+    notaFinal: 70,
+    posicion: 'Mencion de Honor',
+    profesor: 'Lic. Ivan Gutiérrez',
     responsableArea: 'Ing. María Rodríguez'
   }
 ];
@@ -480,7 +493,7 @@ const handleExportarPDF = useCallback(() => {
           <div className="tab-content">
             {/* Título y Botones de Exportación */}
             <div className="content-header">
-              <h3 className="content-title">Certificados</h3>
+              <h3 className="content-title">Lista Certificados</h3>
               <div className="export-buttons">
                 <button className="btn-export btn-csv" onClick={handleExportarCSV}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -573,11 +586,7 @@ const handleExportarPDF = useCallback(() => {
         {tabActivo === 'ceremonia' && (
           <div className="tab-content">
             <div className="empty-state">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-              </svg>
-              <h3>Ceremonia de Premiación</h3>
-              <p>Esta sección estará disponible próximamente.</p>
+               <CeremoniaPremiacion area={areaInicial} nivel={nivelInicial} />
             </div>
           </div>
         )}

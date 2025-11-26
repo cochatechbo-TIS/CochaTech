@@ -20,6 +20,11 @@ use App\Http\Controllers\Nivel_Evaluador;
 use App\Http\Controllers\Medallero_Configuracion_Controller;
 use App\Http\Controllers\Premiacion_Controller;
 
+use App\Http\Controllers\Reporte_Premiacion_Controller;
+use App\Http\Controllers\Reporte_PagOficial_Controller;
+use App\Http\Controllers\Reporte_Ceremonia_Controller;
+
+
 Route::post('/login', [AuthController::class, 'login']);
 
 // ¡NUEVAS RUTAS PARA RESETEO DE CONTRASEÑA!
@@ -62,7 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/evaluadores-por-area/{id_area}', [Nivel_Evaluador::class, 'evaluadoresPorArea']);
         Route::post('/niveles/asignar-evaluador', [Nivel_Evaluador::class, 'asignarEvaluador']);
 
-        Route::get('/premiacion/asignar/{id_nivel}', [Premiacion_Controller::class, 'asignarPremios']);
+        //Route::get('/premiacion/asignar/{id_nivel}', [Premiacion_Controller::class, 'asignarPremios']);
         
     });    
 
@@ -81,4 +86,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/fase-nivel/siguiente/{idNivel}', [Fase_Dinamico_Controller::class, 'crearSiguienteFase']);//si
     Route::get('/cantidad/fases/{idNivel}', [Fase_Lista_Controller::class, 'listarFasesPorNivel']);//2 si
     Route::get('/fase/{idNivelFase}', [Fase_Consulta_Controller::class, 'mostrarFase']);//3 si
+
+    //infromes -reportes
+    Route::get('/reporte-premiacion/{id_area}/{id_nivel}', 
+    [Reporte_Premiacion_Controller::class, 'generarReporte']);
+    Route::get('/reporte-oficial/{id_area}/{id_nivel}', 
+    [Reporte_PagOficial_Controller::class, 'obtenerPremiados']);
+    Route::get('/reporte-ceremonia/{id_area}/{id_nivel}', 
+    [Reporte_Ceremonia_Controller::class, 'obtenerPremiados']);
 }); 
