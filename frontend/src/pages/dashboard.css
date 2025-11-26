@@ -1,0 +1,181 @@
+/* src/pages/dashboard.css */
+
+.dashboard-container {
+  padding: 2rem;
+  max-width: 1600px; /* Ancho máximo para pantallas grandes */
+  margin: 0 auto;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Header --- */
+.dashboard-header {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.dashboard-title-group h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
+}
+
+.dashboard-subtitle {
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.dashboard-date {
+  background-color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  color: #4b5563;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* --- Grid de Estadísticas (Arriba) --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon-wrapper {
+  margin-bottom: 1rem;
+  padding: 12px;
+  border-radius: 50%; /* Icono circular */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-label {
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-size: 2.5rem; /* Número grande */
+  font-weight: 700;
+  color: #1d4ed8; /* Azul corporativo */
+}
+
+.stat-subtext {
+  font-size: 0.85rem;
+  color: #16a34a; /* Verde para indicar estado positivo */
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+/* Colores de fondo para iconos */
+.bg-blue { background-color: #eff6ff; color: #2563eb; }
+.bg-green { background-color: #f0fdf4; color: #16a34a; }
+.bg-purple { background-color: #faf5ff; color: #9333ea; }
+.bg-orange { background-color: #fff7ed; color: #ea580c; }
+
+/* --- Sección de Accesos Rápidos (Abajo) --- */
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 1.5rem;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.action-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.action-card:hover {
+  border-color: #2563eb;
+}
+
+.action-icon-large {
+  color: #2563eb;
+  margin-bottom: 1rem;
+}
+
+.action-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.action-desc {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.action-btn {
+  background-color: #2563eb;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+  text-decoration: none;
+}
+
+.action-btn:hover {
+  background-color: #1d4ed8;
+}
