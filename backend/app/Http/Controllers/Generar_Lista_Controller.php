@@ -41,7 +41,7 @@ class Generar_Lista_Controller extends Controller
             ->keyBy('id_nivel');
 
         $resultado = $niveles->filter(fn($n) => isset($conteos[$n->id_nivel]))
-            ->map(function ($n) use ($conteos, $totalFases, $nombre_area) {
+            ->map(function ($n) use ($conteos, $totalFases, $area) {
                 return [
                     'id' => $n->id_nivel,
                     'nombre' => $n->nombre,
@@ -49,7 +49,8 @@ class Generar_Lista_Controller extends Controller
                     'fasesAprobadas' => 0,         // temporal (por ahora en cero)
                     'faseTotales' => $totalFases,
                     'evaluador' => $n->evaluador?->usuario?->nombre . ' ' . $n->evaluador?->usuario?->apellidos ?? '', // <-- MODIFICACIÓN: Usar nombre y apellidos del usuario
-                    'area' => $nombre_area,
+                    'area' => $area->nombre,
+                    'id_area' => $area->id_area,//⚠️agregado para usar en /evaluadores-por-area/
                 ];
             })
             ->values();

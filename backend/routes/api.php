@@ -67,7 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/evaluadores-por-area/{id_area}', [Nivel_Evaluador::class, 'evaluadoresPorArea']);
         Route::post('/niveles/asignar-evaluador', [Nivel_Evaluador::class, 'asignarEvaluador']);
 
-        //Route::get('/premiacion/asignar/{id_nivel}', [Premiacion_Controller::class, 'asignarPremios']);
+        Route::get('/premiacion/asignar/{id_nivel}', [Premiacion_Controller::class, 'asignarPremios']);
         
     });    
 

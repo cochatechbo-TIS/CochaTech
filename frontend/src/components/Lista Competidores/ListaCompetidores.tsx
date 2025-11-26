@@ -42,7 +42,7 @@ console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
   // --- FUNCIÓN PARA LLAMAR AL BACKEND Y TRAER LOS EVALUADORES ---
   const fetchEvaluadoresPorArea = useCallback(async (areaId: number) => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/evaluadores-por-area/${areaId}`);
+      const response = await api.get(`/evaluadores-por-area/${areaId}`);
       return response.data; // Devuelve la lista de evaluadores.
     } catch (error) {
       console.error("Error al cargar evaluadores:", error);
@@ -55,12 +55,18 @@ console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
     setNivelSeleccionado(nivel); // Guardamos en qué nivel hicimos click.
     setIsModalOpen(true); // Hacemos visible el modal.
     // Cargamos los evaluadores del área seleccionada.
-    if (selectedArea) {
-      const evaluadores = await fetchEvaluadoresPorArea(parseInt(selectedArea));
+    if (nivel.id_area) {
+      try {
+      const evaluadores = await fetchEvaluadoresPorArea(nivel.id_area);
       setEvaluadoresDisponibles(evaluadores); // Guardamos la lista de evaluadores.
       setEvaluadorSeleccionado(nivel.id_evaluador?.toString() || '');
+    } catch (error) {
+        console.error("Error al obtener evaluadores para el modal", error);
+      }
+    } else {
+      console.error("El nivel seleccionado no tiene un id_area asociado");
     }
-  }, [selectedArea, fetchEvaluadoresPorArea]); // Depende del área y la función fetch.
+  }, [fetchEvaluadoresPorArea]);
 
   // --- FUNCIÓN PARA CERRAR EL MODAL ---
   const closeModal = useCallback(() => {
@@ -85,7 +91,7 @@ console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
 
     try {
   
-      await axios.post('http://localhost:8000/api/niveles/asignar-evaluador', body);
+      await api.post('/niveles/asignar-evaluador', body);
 
       // --- ACTUALIZACIÓN EN TIEMPO REAL ---
       const evaluadorElegido = evaluadoresDisponibles.find(ev => ev.id_evaluador === parseInt(evaluadorSeleccionado));
@@ -93,7 +99,7 @@ console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
       setNiveles(currentNiveles =>
         currentNiveles.map(nivel =>
           nivel.id === nivelSeleccionado.id
-            ? { ...nivel, evaluador: nombreCompletoEvaluador, evaluador_id: parseInt(evaluadorSeleccionado) }
+            ? { ...nivel, evaluador: nombreCompletoEvaluador, id_evaluador: parseInt(evaluadorSeleccionado) }
             : nivel
         )
       );
@@ -168,6 +174,9 @@ console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
           fasesAprobadas: item.fasesAprobadas,
           faseTotal: item.faseTotales,
           evaluador: item.evaluador || '',
+          id_evaluador: item.id_evaluador,
+          area: item.area || '',
+          id_area: item.id_area,
         }));
 
         // --- INICIO DE LA MODIFICACIÓN ---
@@ -360,23 +369,9 @@ console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
                     </div>
                   </td>
             <td className="centrado">
-                      {nivel.evaluador ? 
+                      {nivel.evaluador && nivel.evaluador.trim() !== '' ?
                         (
-                        // ✅ NO hay evaluador → Mostrar botón de asignar
-                        <button
-                          className="btn-asignar-cambiar"
-                          onClick={() => handleOpenModalEvaluador(nivel)}
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
-                            <line x1="20" y1="8" x2="20" y2="14" />
-                            <line x1="23" y1="11" x2="17" y2="11" />
-                          </svg>
-                          Asignar Evaluador
-                        </button>
-                      ):(
-                        // ✅ SI hay evaluador → Mostrar nombre y opción de cambiar
+                          // ✅ SI hay evaluador → Mostrar nombre y opción de cambiar
                         <div className="evaluador-cell">
                           <span className="evaluador-nombre">{nivel.evaluador}</span>
                           <a 
@@ -390,6 +385,20 @@ console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
                             Cambiar evaluador
                           </a>
                         </div>
+                      ):(
+                        // ✅ NO hay evaluador → Mostrar botón de asignar
+                        <button
+                          className="btn-asignar-cambiar"
+                          onClick={() => handleOpenModalEvaluador(nivel)}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <line x1="20" y1="8" x2="20" y2="14" />
+                            <line x1="23" y1="11" x2="17" y2="11" />
+                          </svg>
+                          Asignar Evaluador
+                        </button>
                       )
                     }
                     </td>
