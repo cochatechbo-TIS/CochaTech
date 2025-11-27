@@ -360,48 +360,8 @@ const GestionFasesAdmin: React.FC = () => {
       if (esUltimaFaseActual) {
         // Lógica para la última fase: solo aprobar
         await api.post(`/nivel-fase/aprobar/${faseSeleccionada.id_nivel_fase}`);
-        //showNotification("Fase final aprobada correctamente.", "success");
-        // 1. Llamada al endpoint para generar premiaciones (medallero)
-          try {
-            const premiacionesResponse = await api.get(`/premiacion/asignar/${nivelId}`);
-
-            // 3. Actualizar tabla con los premiados
-    const premiados = premiacionesResponse.data.premiaciones || [];
-    setParticipantes(prev =>
-        prev.map(p => {
-          const premio = premiados.find((x: ParticipantePremiacion) => {
-            if (infoNivel!.esGrupal) { // Usamos ! ya que infoNivel es verificado al inicio
-              return x.nombre === p.nombre_equipo;
-            } else {
-              return x.ci === p.ci;
-            }
-          });
-          if (premio) {
-            console.log(`Match encontrado para ${infoNivel!.esGrupal ? p.nombre_equipo : p.ci}:`, premio.medalla);
-            return { ...p, medalla: premio.medalla };
-          }
-          return p;
-        })
-      );
-    showNotification("Fase final aprobada. Premios asignados correctamente.", "success");
-          } catch (premioError) {
-            // Manejo de errores específico para la asignación de premios
-            console.error("Error al asignar premios:", premioError);
-            let errorMsgPremio = "Error al asignar premios. Verifique la configuración del Medallero.";
-
-            if (axios.isAxiosError(premioError)) {
-            errorMsgPremio = premioError.response?.data?.error || 
-            premioError.response?.data?.message || 
-            errorMsgPremio;
-          }
-          showNotification(
-            `La fase fue **APROBADA**, pero hubo un problema al asignar los premios. ${errorMsgPremio}`, 
-                  'error', 
-                  undefined, 
-                'Advertencia de Premiación'
-              );
-        }
-      } else {
+        showNotification("Fase final aprobada correctamente.", "success");
+        } else {
         // Lógica para fases no finales: generar siguiente fase
         const response = await api.post(`/fase-nivel/siguiente/${nivelId}`);
         showNotification(response.data.message || "Siguiente fase generada correctamente.", 'success');
