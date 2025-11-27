@@ -11,6 +11,7 @@ import { useAuth } from './context/AuthContext'; // <-- Importar useAuth
 import GestionFasesAdmin from './pages/GestionFasesAdmin'; // AÑADIR ESTE IMPORT
 import Reportes from './components/ReportesFinales/ReportesFinales'; //importe de los reportes
 import Configuracion from './pages/Configuracion';
+import Dashboard from './pages/Dashboard';
 
 // --- ¡IMPORTAR NUEVAS PÁGINAS! ---
 import ForgotPassword from './pages/ForgotPassword';
@@ -126,7 +127,7 @@ function App() {
       {/* Grupo de rutas protegidas para 'administrador' */}
       <Route element={<ProtectedRoute allowedRoles={['administrador']} />}>
         {/* Mantenemos la estructura "plana" que pediste */}
-        <Route path="/administrador/inicio" element={<Layout showNavbar={true}><Inicio /></Layout>} />
+        <Route path="/administrador/inicio" element={<Layout showNavbar={true}><Dashboard /></Layout>} />
         <Route path="/administrador/registro" element={<Layout showNavbar={true}><Registro /></Layout>} />
         <Route path="/administrador/listas" element={<Layout showNavbar={true}><Listas /></Layout>} />
         {/*<Route path="/administrador/final" element={<Layout showNavbar={true}><Final /></Layout>} />*/}
@@ -139,7 +140,7 @@ function App() {
       {/* --- RUTAS DE RESPONSABLE --- */}
       {/* Grupo de rutas protegidas para 'responsable' */}
       <Route element={<ProtectedRoute allowedRoles={['responsable']} />}>
-        <Route path="/responsable/inicio" element={<Layout showNavbar={true}><Inicio /></Layout>} />
+        <Route path="/responsable/inicio" element={<Layout showNavbar={true}><Dashboard /></Layout>} />
         <Route path="/responsable/listas" element={<Layout showNavbar={true}><Listas /></Layout>} />
         <Route path="/responsable/informes" element={<Layout showNavbar={true}><Reportes /></Layout>} />
       </Route>
@@ -153,7 +154,7 @@ function App() {
       {/* --- RUTAS DE EVALUADOR --- */}
       {/* Grupo de rutas protegidas para 'evaluador' */}
       <Route element={<ProtectedRoute allowedRoles={['evaluador']} />}>
-        <Route path="/evaluador/inicio" element={<Layout showNavbar={true}><Inicio /></Layout>} />
+        <Route path="/evaluador/inicio" element={<Layout showNavbar={true}><Dashboard /></Layout>} />
         <Route path="/evaluador/evaluacion" element={<Layout showNavbar={true}><EvaluacionPorFases /></Layout>} />
         <Route path="/evaluador/informes" element={<Layout showNavbar={true}><Reportes /></Layout>} />
       </Route>

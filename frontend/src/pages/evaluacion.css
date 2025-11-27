@@ -44,6 +44,32 @@
   margin-right: 4px;
 }
 
+/* --- NUEVO: Estilo para el Selector de Nivel --- */
+.nivel-selector {
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #1f2937;
+  background-color: white;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-width: 150px; /* Ancho mínimo para que se vea bien */
+}
+
+.nivel-selector:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.nivel-selector:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+/* ------------------------------------------------ */
+
 .info-item.info-fecha {
   margin-left: auto; /* Empuja la fecha a la derecha */
   color: #6b7280;
@@ -77,7 +103,7 @@
   text-align: left;
   flex-grow: 1;
   margin: 0 1rem;
-  margin-bottom: 1rem; /* ✅ AÑADIDO: Espacio debajo de la alerta */
+  margin-bottom: 1rem;
 }
 
 /* --- Pestañas de Fases --- */

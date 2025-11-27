@@ -1,4 +1,5 @@
 // src/interfaces/Evaluacion.ts
+
 export interface Fase {
   id: number;
   nombre: string; // Ej: "Fase 1 - Clasificatoria"
@@ -14,7 +15,6 @@ export interface Olimpista {
   falta_etica: boolean;
   observaciones: string;
   estado: string; // "Aprobado" | "Reprobado" | "-"
-
 }
 
 export interface EvaluacionResponse {
@@ -36,23 +36,44 @@ export interface Evaluable {
   observaciones: string;
   estado: string;
 }
+
+// --- NUEVA INTERFAZ PARA LA LISTA DEL SELECTOR ---
+export interface NivelAsignado {
+  id_nivel: number;
+  nombre: string;
+  area: string;
+}
+
 export interface InfoEvaluador {
   nombre_evaluador: string;
+  
+  // Campos originales (Mantener para compatibilidad)
   nombre_nivel: string;
   nombre_area: string;
-  id_nivel: number; // ID del Nivel (para "Enviar Lista")
+  id_nivel: number; 
   es_grupal: boolean;
+
+  // --- CAMPOS AÑADIDOS PARA EL SELECTOR DE NIVELES ---
+  // Son opcionales (?) por si el backend aún no envía la estructura nueva
+  nombre_nivel_actual?: string;
+  nombre_area_actual?: string;
+  id_nivel_actual?: number;
+  es_grupal_actual?: boolean;
+  niveles_asignados?: NivelAsignado[]; 
 }
+
 export interface EvaluacionData {
   infoEvaluador: InfoEvaluador;
   fases: Fase[];
 }
+
 export interface FasePestana {
   id_nivel_fase: number; // ID Clave (para "Guardar" y "Cargar Tabla")
   nombre_fase: string;
   orden: number;
   estado: string;
 }
+
 export interface EvaluadorInicioData {
   infoEvaluador: InfoEvaluador;
   fases: FasePestana[];
@@ -108,7 +129,7 @@ export interface InfoNivelAdmin {
   nombre: string;
   area: string;
   esGrupal: boolean;
-  evaluador?: string | null; // <- AGREGADO
+  evaluador?: string | null; 
   es_Fase_final?: boolean;
 }
 // --- 4. Estructura de la respuesta del endpoint /premiacion/asignar/{id} ---
