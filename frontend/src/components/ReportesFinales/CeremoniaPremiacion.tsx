@@ -1,6 +1,8 @@
 // src/components/reportes/CeremoniaPremiacion.tsx
 import { useState, useCallback, useMemo } from 'react';
 import './CeremoniaPremiacion.css';
+import { useFiltrosAreaNivel } from '../../hooks/useFiltrosAreaNivel';
+import FiltrosAreaNivel from '../../components/filtrosAreaNivel/FiltrosAreaNivel';
 
 // ========== INTERFACES ==========
 interface ParticipantePremiacion {
@@ -68,14 +70,6 @@ const PARTICIPANTES_PREMIACION: ParticipantePremiacion[] = [
     posicion: 'Mencion Honor'
   }
 ];
-
-const AREAS_DISPONIBLES = ['Matemática', 'Física', 'Química', 'Biología'];
-const NIVELES_POR_AREA: Record<string, string[]> = {
-  'Matemática': ['Básico', 'Intermedio', 'Avanzado'],
-  'Física': ['Básico', 'Intermedio', 'Avanzado'],
-  'Química': ['Básico', 'Avanzado'],
-  'Biología': ['Básico', 'Intermedio']
-};
 
 // ========== UTILIDADES ==========
 const getPosicionClass = (posicion: string): string => {
@@ -214,27 +208,28 @@ const exportarPDF = (participantes: ParticipantePremiacion[], area: string, nive
 function CeremoniaPremiacion({ area, nivel }: CeremoniaPremiacionProps) {
   const [participantes] = useState<ParticipantePremiacion[]>(PARTICIPANTES_PREMIACION);
   const [busqueda, setBusqueda] = useState('');
-  const [areaFiltro, setAreaFiltro] = useState('');
-  const [nivelFiltro, setNivelFiltro] = useState('');
-
-  // ========== NIVELES DISPONIBLES SEGÚN ÁREA ==========
-  const nivelesDisponibles = useMemo(() => {
-    if (!areaFiltro) return [];
-    return NIVELES_POR_AREA[areaFiltro] || [];
-  }, [areaFiltro]);
+  // Usar el hook personalizado para filtros
+  const {
+    areas,
+    niveles: nivelesDisponibles,
+    selectedArea,
+    selectedNivel,
+    handleAreaChange,
+    handleNivelChange
+  } = useFiltrosAreaNivel();
 
   // ========== FILTRADO DE PARTICIPANTES ==========
   const participantesFiltrados = useMemo(() => {
     let resultado = participantes;
 
     // Filtrar por área
-    if (areaFiltro) {
-      resultado = resultado.filter(p => p.area === areaFiltro);
+    if (selectedArea) {
+      resultado = resultado.filter(p => p.area === selectedArea);
     }
 
     // Filtrar por nivel
-    if (nivelFiltro) {
-      resultado = resultado.filter(p => p.nivel === nivelFiltro);
+    if (selectedNivel) {
+      resultado = resultado.filter(p => p.nivel === selectedNivel);
     }
 
     // Filtrar por búsqueda
@@ -247,30 +242,16 @@ function CeremoniaPremiacion({ area, nivel }: CeremoniaPremiacionProps) {
     }
 
     return resultado;
-  }, [participantes, areaFiltro, nivelFiltro, busqueda]);
+  }, [participantes, selectedArea, selectedNivel, busqueda]);
 
   // ========== MANEJADORES ==========
-  const handleBusquedaChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setBusqueda(e.target.value);
-  }, []);
-
-  const handleAreaChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setAreaFiltro(e.target.value);
-    setNivelFiltro(''); // Resetear nivel al cambiar área
-  }, []);
-
-  const handleNivelChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setNivelFiltro(e.target.value);
-  }, []);
-
   const handleExportarExcel = useCallback(() => {
-    exportarExcel(participantesFiltrados, areaFiltro || area || 'Todos', nivelFiltro || nivel || 'Todos');
-  }, [participantesFiltrados, areaFiltro, nivelFiltro, area, nivel]);
+    exportarExcel(participantesFiltrados, selectedArea || area || 'Todos', selectedNivel || nivel || 'Todos');
+  }, [participantesFiltrados, selectedArea, selectedNivel, area, nivel]);
 
   const handleExportarPDF = useCallback(() => {
-    exportarPDF(participantesFiltrados, areaFiltro || area || 'Todos', nivelFiltro || nivel || 'Todos');
-  }, [participantesFiltrados, areaFiltro, nivelFiltro, area, nivel]);
-
+    exportarPDF(participantesFiltrados, selectedArea || area || 'Todos', selectedNivel || nivel || 'Todos');
+  }, [participantesFiltrados, selectedArea, selectedNivel, area, nivel]);
   return (
     <div className="ceremonia-container">
       {/* Header con botones de exportación */}
@@ -311,43 +292,19 @@ function CeremoniaPremiacion({ area, nivel }: CeremoniaPremiacionProps) {
           Esta lista incluye solo a los participantes que obtuvieron medallas o menciones de honor, ordenados por área y nivel.
         </p>
       </div>
-
-      {/* Filtros */}
-      <div className="ceremonia-filtros">
-        <div className="filtro-busqueda">
-          <svg className="filtro-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Buscar por nombre o unidad educativa..."
-            value={busqueda}
-            onChange={handleBusquedaChange}
-            className="filtro-input"
-          />
-        </div>
-        
-        <select value={areaFiltro} onChange={handleAreaChange} className="filtro-select">
-          <option value="">Todas las áreas</option>
-          {AREAS_DISPONIBLES.map((a) => (
-            <option key={a} value={a}>{a}</option>
-          ))}
-        </select>
-
-        <select 
-          value={nivelFiltro} 
-          onChange={handleNivelChange} 
-          className="filtro-select"
-          disabled={!areaFiltro}
-        >
-          <option value="">Todos los niveles</option>
-          {nivelesDisponibles.map((n) => (
-            <option key={n} value={n}>{n}</option>
-          ))}
-        </select>
-      </div>
-
+      {/* Filtros usando el componente reutilizable */}
+      <FiltrosAreaNivel
+        areas={areas}
+        niveles={nivelesDisponibles}
+        selectedArea={selectedArea}
+        selectedNivel={selectedNivel}
+        onAreaChange={handleAreaChange}
+        onNivelChange={handleNivelChange}
+        showBusqueda={true}
+        busqueda={busqueda}
+        onBusquedaChange={setBusqueda}
+        placeholderBusqueda="Buscar por nombre o unidad educativa..."
+      />
       {/* Tabla */}
       <div className="ceremonia-table-container">
         <table className="ceremonia-table">
