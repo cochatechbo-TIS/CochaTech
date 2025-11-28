@@ -87,7 +87,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cantidad/fases/{idNivel}', [Fase_Lista_Controller::class, 'listarFasesPorNivel']);//2 si
     Route::get('/fase/{idNivelFase}', [Fase_Consulta_Controller::class, 'mostrarFase']);//3 si
 
-    //infromes -reportes
+    //informes -reportes
     Route::get('/reporte-premiacion/{id_area}/{id_nivel}', 
     [Reporte_Premiacion_Controller::class, 'generarReporte']);
     Route::get('/reporte-oficial/{id_area}/{id_nivel}', 
