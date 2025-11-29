@@ -9,7 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute'; // <-- Nuestro NUEVO P
 import Listas from './components/Lista Competidores/ListaCompetidores';
 import { useAuth } from './context/AuthContext'; // <-- Importar useAuth
 import GestionFasesAdmin from './pages/GestionFasesAdmin'; // AÑADIR ESTE IMPORT
-import Reportes from './components/ReportesFinales/ReportesFinales'; //importe de los reportes
+import Reportes from './components/ReportesFinales/Reportes'; //importe de los reportes
 import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
 

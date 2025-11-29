@@ -62,7 +62,7 @@ const Certificados = () => {
           id: index + 1,
           nombre: p.nombre,
           ci: p.ci,
-          institucion: p.institucion ?? "SIN REGISTRO",
+          institucion: p.institucion ?? "SIN INFORMACIÓN",
           departamento: p.departamento,
           area: p.area,
           nivel: p.nivel,
