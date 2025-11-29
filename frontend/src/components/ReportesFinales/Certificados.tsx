@@ -16,6 +16,7 @@ interface Participante {
   posicion: string;
   profesor: string;
   responsableArea: string;
+  esGrupal: boolean;
 }
 
 const Certificados = () => {
@@ -27,7 +28,7 @@ const Certificados = () => {
   const user = storedUser ? JSON.parse(storedUser) : null;
   const isAdmin = user?.rol?.nombre_rol === "administrador";
 
-  // Filtros de área y nivel
+  // Filtros
   const {
     areas,
     niveles,
@@ -40,7 +41,7 @@ const Certificados = () => {
   } = useFiltrosAreaNivel(isAdmin);
 
   // ===================================================
-  // 🔄 CARGAR DATOS DESDE EL BACKEND
+  // 🔄 Cargar datos del backend
   // ===================================================
   useEffect(() => {
     const cargar = async () => {
@@ -65,6 +66,7 @@ const Certificados = () => {
           posicion: p.medalla,
           profesor: p.tutor,
           responsableArea: p.responsable_area,
+          esGrupal: Array.isArray(p.integrantes) // <<< NUEVO
         }));
 
         setParticipantes(parsed);
@@ -78,8 +80,9 @@ const Certificados = () => {
   }, [selectedAreaId, selectedNivelId]);
 
   // ===================================================
-  // 🔎 FILTROS + BÚSQUEDA
+  // FILTROS + BÚSQUEDA
   // ===================================================
+
   const participantesFiltrados = useMemo(() => {
     let result = participantes;
 
@@ -95,7 +98,7 @@ const Certificados = () => {
       result = result.filter(
         (p) =>
           p.nombre.toLowerCase().includes(s) ||
-          p.ci.includes(s) ||
+          p.ci?.includes(s) ||
           p.unidadEducativa.toLowerCase().includes(s)
       );
     }
@@ -103,13 +106,16 @@ const Certificados = () => {
     return result;
   }, [participantes, selectedArea, selectedNivel, busqueda]);
 
+  // Detectar si existe algún ganador grupal
+  const hayGrupal = participantesFiltrados.some((p) => p.esGrupal);
+
   // ===================================================
-  // 📄 EXPORTAR CSV
+  // EXPORTAR CSV
   // ===================================================
   const handleExportarCSV = useCallback(() => {
     const encabezado = [
       "Nombre",
-      "CI",
+      ...(!hayGrupal ? ["CI"] : []),
       "Unidad Educativa",
       "Departamento",
       "Área",
@@ -123,7 +129,7 @@ const Certificados = () => {
     const filas = participantesFiltrados.map((p) =>
       [
         p.nombre,
-        p.ci,
+        ...(!hayGrupal ? [p.ci] : []),
         p.unidadEducativa,
         p.departamento,
         p.area,
@@ -145,17 +151,17 @@ const Certificados = () => {
     link.href = URL.createObjectURL(blob);
     link.download = `Certificados_${selectedArea}_${selectedNivel}.csv`;
     link.click();
-  }, [participantesFiltrados, selectedArea, selectedNivel]);
+  }, [participantesFiltrados, selectedArea, selectedNivel, hayGrupal]);
 
   // ===================================================
-  // 📊 EXPORTAR EXCEL
+  // EXPORTAR EXCEL
   // ===================================================
   const handleExportarExcel = useCallback(() => {
     const table = `
       <table border="1">
         <tr>
           <th>NOMBRE</th>
-          <th>CI</th>
+          ${!hayGrupal ? "<th>CI</th>" : ""}
           <th>UNIDAD EDUCATIVA</th>
           <th>DEPARTAMENTO</th>
           <th>ÁREA</th>
@@ -170,7 +176,7 @@ const Certificados = () => {
             (p) => `
           <tr>
             <td>${p.nombre}</td>
-            <td>${p.ci}</td>
+            ${!hayGrupal ? `<td>${p.ci}</td>` : ""}
             <td>${p.unidadEducativa}</td>
             <td>${p.departamento}</td>
             <td>${p.area}</td>
@@ -193,10 +199,10 @@ const Certificados = () => {
     link.href = URL.createObjectURL(blob);
     link.download = `Certificados_${selectedArea}_${selectedNivel}.xls`;
     link.click();
-  }, [participantesFiltrados, selectedArea, selectedNivel]);
+  }, [participantesFiltrados, selectedArea, selectedNivel, hayGrupal]);
 
   // ===================================================
-  // 🖨️ EXPORTAR PDF
+  // EXPORTAR PDF
   // ===================================================
   const handleExportarPDF = useCallback(() => {
     const ventana = window.open("", "", "width=1000,height=800");
@@ -218,7 +224,7 @@ const Certificados = () => {
         <table>
           <tr>
             <th>NOMBRE</th>
-            <th>CI</th>
+            ${!hayGrupal ? "<th>CI</th>" : ""}
             <th>UNIDAD EDUCATIVA</th>
             <th>DEPARTAMENTO</th>
             <th>ÁREA</th>
@@ -233,7 +239,7 @@ const Certificados = () => {
               (p) => `
             <tr>
               <td>${p.nombre}</td>
-              <td>${p.ci}</td>
+              ${!hayGrupal ? `<td>${p.ci}</td>` : ""}
               <td>${p.unidadEducativa}</td>
               <td>${p.departamento}</td>
               <td>${p.area}</td>
@@ -252,7 +258,7 @@ const Certificados = () => {
 
     ventana.document.close();
     setTimeout(() => ventana.print(), 300);
-  }, [participantesFiltrados]);
+  }, [participantesFiltrados, hayGrupal]);
 
   const getPosicionClass = (pos: string) => {
     switch (pos.toLowerCase()) {
@@ -296,7 +302,7 @@ const Certificados = () => {
           <thead>
             <tr>
               <th>NOMBRE</th>
-              <th>CI</th>
+              {!hayGrupal && <th>CI</th>}
               <th>UNIDAD EDUCATIVA</th>
               <th>DEPARTAMENTO</th>
               <th>ÁREA</th>
@@ -319,7 +325,7 @@ const Certificados = () => {
               participantesFiltrados.map((p) => (
                 <tr key={p.id}>
                   <td>{p.nombre}</td>
-                  <td>{p.ci}</td>
+                  {!p.esGrupal && <td>{p.ci}</td>}
                   <td>{p.unidadEducativa}</td>
                   <td>{p.departamento}</td>
                   <td>{p.area}</td>

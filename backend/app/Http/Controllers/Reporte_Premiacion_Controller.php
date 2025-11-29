@@ -57,7 +57,7 @@ class Reporte_Premiacion_Controller extends Controller
         }
 
 
-        // 🔥🔥 NUEVO: Filtrar SOLO los clasificados
+        // NUEVO: Filtrar SOLO los clasificados
         $soloClasificados = $evaluaciones->filter(function ($eva) {
             return strtolower($eva->estadoOlimpista->nombre ?? '') === 'clasificado';
         })->values();
@@ -89,7 +89,7 @@ class Reporte_Premiacion_Controller extends Controller
             $premiados = [];
             $index = 0;
 
-            // 🔥🔥 NUEVO: Asignar medallas solo a clasificados
+            //  NUEVO: Asignar medallas solo a clasificados
             foreach ($premios as $premio) {
 
                 $cupos = $config[$premio->id_tipo_premio]->cantidad_por_nivel ?? 0;
@@ -111,10 +111,7 @@ class Reporte_Premiacion_Controller extends Controller
                     // Guardamos la medalla temporalmente para usar en el reporte
                     $soloClasificados[$index]->medalla = $premio->nombre;
 
-
-                    // ------------------------------
                     //     GENERAR RESPUESTA
-                    // ------------------------------
                     if (!$esGrupal) {
                         $o = $evaluado->olimpista;
 
@@ -133,14 +130,15 @@ class Reporte_Premiacion_Controller extends Controller
                     } else {
 
                         $equipo = $evaluado->equipo;
-
+                        $primerOlimpista = $equipo->olimpistas->first();
+                        $tutorEquipo = $primerOlimpista?->tutor['nombre'] ?? null;
                         $premiados[] = [
                             'nombre'           => $equipo->nombre_equipo,
                             'institucion'      => $equipo->institucion,
-                            'departamento'     => $nivel->area->nombre,
+                            'departamento'     => $primerOlimpista?->departamento?->nombre_departamento,
                             'area'             => $nivel->area->nombre,
                             'nivel'            => $nivel->nombre,
-                            'tutor'            => null,
+                            'tutor'            => $tutorEquipo,
                             'nota'             => $evaluado->nota,
                             'medalla'          => $premio->nombre,
                             'responsable_area' => $responsable->usuario->nombre . ' ' . $responsable->usuario->apellidos,
@@ -156,7 +154,7 @@ class Reporte_Premiacion_Controller extends Controller
             }
 
 
-            // 🔥 Clasificados sin medalla → medalla = null
+            //  Clasificados sin medalla → medalla = null
             for ($j = $index; $j < count($soloClasificados); $j++) {
                 $soloClasificados[$j]->medalla = null;
             }
