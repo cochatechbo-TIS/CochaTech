@@ -11,10 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class Generar_Lista_Controller extends Controller
 {
-    /**
-     * Listar niveles de un área con cantidad de olimpistas
-     * Solo muestra niveles con al menos un inscrito
-     */
+
     public function listarPorArea($nombre_area)
     {
         $area = Area::where('nombre', $nombre_area)->first();
@@ -42,15 +39,20 @@ class Generar_Lista_Controller extends Controller
 
         $resultado = $niveles->filter(fn($n) => isset($conteos[$n->id_nivel]))
             ->map(function ($n) use ($conteos, $totalFases, $area) {
+                $fasesAprobadas = DB::table('nivel_fase as nf')
+                    ->join('estado_fase as ef', 'ef.id_estado_fase', '=', 'nf.id_estado_fase')
+                    ->where('nf.id_nivel', $n->id_nivel)
+                    ->where('ef.nombre_estado', 'Aprobada')  
+                    ->count();
                 return [
                     'id' => $n->id_nivel,
                     'nombre' => $n->nombre,
                     'competidores' => $conteos[$n->id_nivel]->total ?? 0,
-                    'fasesAprobadas' => 0,         // temporal (por ahora en cero)
+                    'fasesAprobadas' => $fasesAprobadas,         // temporal (por ahora en cero)
                     'faseTotales' => $totalFases,
-                    'evaluador' => $n->evaluador?->usuario?->nombre . ' ' . $n->evaluador?->usuario?->apellidos ?? '', // <-- MODIFICACIÓN: Usar nombre y apellidos del usuario
+                    'evaluador' => $n->evaluador?->usuario?->nombre . ' ' . $n->evaluador?->usuario?->apellidos ?? '', //  MODIFICACIÓN: Usar nombre y apellidos del usuario
                     'area' => $area->nombre,
-                    'id_area' => $area->id_area,//⚠️agregado para usar en /evaluadores-por-area/
+                    'id_area' => $area->id_area,//agregado para usar en /evaluadores-por-area/
                 ];
             })
             ->values();
@@ -61,11 +63,6 @@ class Generar_Lista_Controller extends Controller
         ]);
     }
 
-    /**
-     * Listar niveles según el rol del usuario autenticado
-     * - Admin: todos los niveles con olimpistas
-     * - Responsable: solo niveles de su área
-     */
     public function listarPorAuth()
     {
         $user = auth()->user();
