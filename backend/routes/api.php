@@ -24,6 +24,7 @@ use App\Http\Controllers\Reporte_Premiacion_Controller;
 use App\Http\Controllers\Reporte_PagOficial_Controller;
 use App\Http\Controllers\Reporte_Ceremonia_Controller;
 
+use App\Http\Controllers\Evaluador_Nivel_Controller ;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -74,8 +75,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:evaluador')->group(function () {
 
         // Endpoint CERO: Obtener la info del evaluador y sus fases
-        Route::get('/evaluador/inicio', [Evaluador_Controller::class, 'obtenerDatosIniciales']);//si
- 
+        //Route::get('/evaluador/inicio/{idNivel?}', [Evaluador_Controller::class, 'obtenerDatosIniciales']);//si
+        Route::get('/evaluador/datos-iniciales/{idNivel?}', [Evaluador_Controller::class, 'obtenerDatosIniciales']);
+
+        Route::get('/evaluador/niveles', [Evaluador_Nivel_Controller ::class, 'obtenerNivelesEvaluador']);
     });
 
     Route::get('/nivel-fase/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'mostrar']);//ver el estado y el comentario de la fase (no se si deberia ir a responsable y evaluador ... )//si

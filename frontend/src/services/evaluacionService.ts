@@ -4,7 +4,7 @@ import type {
   EvaluadorInicioData,
   FaseConsultaData,
   EvaluacionPayload,
-  Participante // Importa la nueva interfaz
+  NivelAsignado 
 } from "../interfaces/Evaluacion";
 
 /**
@@ -14,12 +14,15 @@ import type {
  * - Si se pasa, carga los datos de ese nivel específico.
  * - Si no se pasa, el backend carga el primer nivel por defecto.
  */
-export async function getDatosInicialesEvaluador(idNivel?: number): Promise<EvaluadorInicioData> {
-  // Construimos la URL dependiendo de si hay un ID seleccionado
-  const url = idNivel ? `/evaluador/inicio?id_nivel=${idNivel}` : `/evaluador/inicio`;
-  const response = await api.get<EvaluadorInicioData>(url);
-  return response.data;
-}
+export const getDatosInicialesEvaluador = async (idNivel?: number): Promise<EvaluadorInicioData> => {
+  const response = idNivel
+    ? await api.get(`/evaluador/datos-iniciales/${idNivel}`)
+    : await api.get(`/evaluador/datos-iniciales`);
+
+  return response.data as EvaluadorInicioData;
+};
+
+
 
 /**
  * 2. OBTENER PARTICIPANTES (Cargar la tabla)
@@ -58,3 +61,12 @@ export async function enviarListaYCrearSiguienteFase(
   const response = await api.post(`/fase-nivel/siguiente/${idNivel}`);
   return response.data;
 }
+
+// Servicio para obtener los niveles del evaluador actual
+// src/services/evaluadorService.ts
+
+
+export const getNivelesEvaluador = async () => {
+  const res = await api.get("/evaluador/niveles"); // GET
+  return res.data;  // ← devolverá { evaluador: 1, niveles: [...] }
+};

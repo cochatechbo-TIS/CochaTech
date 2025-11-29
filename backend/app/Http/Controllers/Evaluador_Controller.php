@@ -240,58 +240,61 @@ class Evaluador_Controller extends Controller
         for ($i=0; $i<$length; $i++) $password .= $chars[rand(0, strlen($chars)-1)];
         return $password;
     }
-    public function obtenerDatosIniciales(Request $request)
+   public function obtenerDatosIniciales(Request $request, $idNivel = null)
     {
-        /** @var \App\Models\Usuario $user */
-        $user = Auth::user();
+        // Si llega un idNivel → lo usamos
+        if ($idNivel) {
+            $nivel = Nivel::with('area')->where('id_nivel', $idNivel)->first();
 
-        // 1. Encontrar el evaluador y su nivel asignado
-        $evaluador = $user->evaluador;
+            if (!$nivel) {
+                return response()->json(['message' => 'Nivel no encontrado.'], 404);
+            }
+        } 
+        else {
+            // Si NO llega idNivel → obtener el primer nivel asignado a algún evaluador
+            $nivel = Nivel::with('area')->whereNotNull('id_evaluador')->first();
+
+            if (!$nivel) {
+                return response()->json(['message' => 'No existe un nivel asignado a ningún evaluador.'], 404);
+            }
+        }
+
+        // Obtener evaluador del nivel
+        $evaluador = Evaluador::with('usuario')
+            ->where('id_evaluador', $nivel->id_evaluador)
+            ->first();
+
         if (!$evaluador) {
-            return response()->json(['message' => 'Usuario no es un evaluador.'], 403);
+            return response()->json(['message' => 'No existe un evaluador asociado a este nivel.'], 404);
         }
 
-        $nivelAsignado = Nivel::with('area')
-                          ->where('id_evaluador', $evaluador->id_evaluador)
-                          ->first();
-
-        if (!$nivelAsignado) {
-            return response()->json(['message' => 'Evaluador no tiene un nivel asignado.'], 404);
-        }
-
-        // 2. Construir el panel de Información
+        // Info evaluador
         $infoEvaluador = [
-            'nombre_evaluador' => $user->nombre . ' ' . $user->apellidos,
-            'nombre_nivel' => $nivelAsignado->nombre,
-            'nombre_area' => $nivelAsignado->area->nombre,
-            'id_nivel' => $nivelAsignado->id_nivel, // <-- ID Clave para futuras llamadas
-            'es_grupal' => $nivelAsignado->es_grupal,
+            'nombre_evaluador' => $evaluador->usuario->nombre . ' ' . $evaluador->usuario->apellidos,
+            'nombre_nivel' => $nivel->nombre,
+            'nombre_area' => $nivel->area->nombre,
+            'id_nivel' => $nivel->id_nivel,
+            'es_grupal' => $nivel->es_grupal,
         ];
 
-        // 3. Obtener la lista de Fases (Pestañas)
-        // (Esto es lo que hace el nuevo Fase_Lista_Controller)
-        try {
-             $fases = Nivel_Fase::with(['fase', 'estado_fase'])
-                ->where('id_nivel', $nivelAsignado->id_nivel)
-                ->orderBy('id_nivel_fase', 'asc') // Asumiendo que el ID sigue el orden
-                ->get()
-                ->map(function ($nf) {
-                    return [
-                        'id_nivel_fase' => $nf->id_nivel_fase, // <-- ID Clave para la tabla
-                        'nombre_fase'   => $nf->fase->nombre,
-                        'orden'         => $nf->fase->orden,
-                        'estado'        => $nf->estado_fase->nombre_estado ?? 'Desconocido',
-                    ];
-                });
+        // Fases
+        $fases = Nivel_Fase::with(['fase', 'estado_fase'])
+            ->where('id_nivel', $nivel->id_nivel)
+            ->orderBy('id_nivel_fase', 'asc')
+            ->get()
+            ->map(function ($nf) {
+                return [
+                    'id_nivel_fase' => $nf->id_nivel_fase,
+                    'nombre_fase'   => $nf->fase->nombre,
+                    'orden'         => $nf->fase->orden,
+                    'estado'        => $nf->estado_fase->nombre_estado ?? 'Desconocido',
+                ];
+            });
 
-             return response()->json([
-                'infoEvaluador' => $infoEvaluador,
-                'fases' => $fases
-            ]);
-
-        } catch (\Throwable $e) {
-            Log::error("Error en obtenerDatosIniciales para evaluador {$user->id_usuario}: ".$e->getMessage());
-            return response()->json(['message' => 'Error al cargar las fases.', 'error' => $e->getMessage()], 500);
-        }
+        return response()->json([
+            'infoEvaluador' => $infoEvaluador,
+            'fases' => $fases
+        ]);
+        \Log::info("LLEGA ID NIVEL: " . json_encode($idNivel));
     }
 }
