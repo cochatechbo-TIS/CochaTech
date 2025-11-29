@@ -3,6 +3,7 @@ import { useState, useCallback, useMemo } from 'react';
 import PublicacionOficial from './PublicacionOficial';
 import CeremoniaPremiacion from './CeremoniaPremiacion';
 import './ReportesFinales.css';
+import Certificados from "./Certificados";
 
 // ========== INTERFACES ==========
 interface Participante {
@@ -488,99 +489,7 @@ const handleExportarPDF = useCallback(() => {
           </button>
         </div>
 
-        {/* Contenido de Certificados */}
-        {tabActivo === 'certificados' && (
-          <div className="tab-content">
-            {/* Título y Botones de Exportación */}
-            <div className="content-header">
-              <h3 className="content-title">Lista Certificados</h3>
-              <div className="export-buttons">
-                <button className="btn-export btn-csv" onClick={handleExportarCSV}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                    <polyline points="10 9 9 9 8 9" />
-                  </svg>
-                  EXPORTAR CSV
-                </button>
-                <button className="btn-export btn-excel" onClick={handleExportarExcel}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                    <polyline points="10 9 9 9 8 9" />
-                  </svg>
-                  EXPORTAR EXCEL
-                </button>
-                <button className="btn-export btn-pdf" onClick={handleExportarPDF}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                    <line x1="12" y1="9" x2="8" y2="9" />
-                  </svg>
-                  EXPORTAR PDF
-                </button>
-              </div>
-            </div>
-
-            {/* Info Box */}
-            <div className="info-box">
-              <svg className="info-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="16" x2="12" y2="12" stroke="white" strokeWidth="2" />
-                <line x1="12" y1="8" x2="12.01" y2="8" stroke="white" strokeWidth="2" />
-              </svg>
-              <p className="info-text">
-                Esta lista incluye a todos los participantes que completaron la evaluación final, con los datos necesarios para generar certificados.
-              </p>
-            </div>
-
-            {/* Tabla de Participantes */}
-            <div className="table-container">
-              <table className="participantes-table">
-                <thead>
-                  <tr>
-                    <th>NOMBRE</th>
-                    <th>CI</th>
-                    <th>UNIDAD EDUCATIVA</th>
-                    <th>DEPARTAMENTO</th>
-                    <th>ÁREA</th>
-                    <th>NIVEL</th>
-                    <th>NOTA FINAL</th>
-                    <th>MEDALLA</th>
-                    <th>TUTOR</th>
-                    <th>RESPONSABLE DE ÁREA</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {participantes.map((participante) => (
-                    <tr key={participante.id}>
-                      <td>{participante.nombre}</td>
-                      <td>{participante.ci}</td>
-                      <td>{participante.unidadEducativa}</td>
-                      <td>{participante.departamento}</td>
-                      <td>{participante.area}</td>
-                      <td>{participante.nivel}</td>
-                      <td className="nota-cell">{participante.notaFinal}</td>
-                      <td>
-                        <span className={`badge-posicion ${getPosicionClass(participante.posicion)}`}>
-                          {participante.posicion}
-                        </span>
-                      </td>
-                      <td>{participante.profesor}</td>
-                      <td>{participante.responsableArea}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+        {tabActivo === 'certificados' && <Certificados />}{/*roma*/}
 
         {/* Contenido de Ceremonia de Premiación */}
         {tabActivo === 'ceremonia' && (

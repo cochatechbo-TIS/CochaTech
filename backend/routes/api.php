@@ -88,10 +88,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/fase/{idNivelFase}', [Fase_Consulta_Controller::class, 'mostrarFase']);//3 si
 
     //informes -reportes
-    Route::get('/reporte-premiacion/{id_area}/{id_nivel}', 
-    [Reporte_Premiacion_Controller::class, 'generarReporte']);
-    Route::get('/reporte-oficial/{id_area}/{id_nivel}', 
-    [Reporte_PagOficial_Controller::class, 'obtenerPremiados']);
-    Route::get('/reporte-ceremonia/{id_area}/{id_nivel}', 
-    [Reporte_Ceremonia_Controller::class, 'obtenerPremiados']);
+    Route::get('/reporte-premiacion/{id_area}/{id_nivel}', [Reporte_Premiacion_Controller::class, 'generarReporte']);
+    Route::get('/reporte-oficial/{id_area}/{id_nivel}', [Reporte_PagOficial_Controller::class, 'obtenerPremiados']);
+    Route::get('/reporte-ceremonia/{id_area}/{id_nivel}', [Reporte_Ceremonia_Controller::class, 'obtenerPremiados']);
 }); 

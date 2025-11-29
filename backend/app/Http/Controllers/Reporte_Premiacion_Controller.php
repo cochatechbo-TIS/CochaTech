@@ -56,6 +56,17 @@ class Reporte_Premiacion_Controller extends Controller
             return response()->json(['error' => 'No hay evaluaciones.'], 400);
         }
 
+
+        // 🔥🔥 NUEVO: Filtrar SOLO los clasificados
+        $soloClasificados = $evaluaciones->filter(function ($eva) {
+            return strtolower($eva->estadoOlimpista->nombre ?? '') === 'clasificado';
+        })->values();
+
+        if ($soloClasificados->isEmpty()) {
+            return response()->json(['error' => 'No hay participantes clasificados.'], 400);
+        }
+
+
         // 5. Configuración del medallero
         $config = Medallero_Configuracion::where('id_area', $id_area)
             ->get()
@@ -71,19 +82,23 @@ class Reporte_Premiacion_Controller extends Controller
         DB::beginTransaction();
 
         try {
+
+            // ELIMINAR PREMIACIÓN PREVIA
             Premiacion_Olimpista::where('id_nivel', $id_nivel)->delete();
 
             $premiados = [];
             $index = 0;
 
+            // 🔥🔥 NUEVO: Asignar medallas solo a clasificados
             foreach ($premios as $premio) {
 
                 $cupos = $config[$premio->id_tipo_premio]->cantidad_por_nivel ?? 0;
 
                 for ($i = 0; $i < $cupos; $i++) {
-                    if (!isset($evaluaciones[$index])) break;
 
-                    $evaluado = $evaluaciones[$index];
+                    if (!isset($soloClasificados[$index])) break;
+
+                    $evaluado = $soloClasificados[$index];
 
                     Premiacion_Olimpista::create([
                         'id_olimpista'   => $esGrupal ? null : $evaluado->id_olimpista,
@@ -93,7 +108,13 @@ class Reporte_Premiacion_Controller extends Controller
                         'posicion'       => $index + 1,
                     ]);
 
-                    // ✅ INDIVIDUAL
+                    // Guardamos la medalla temporalmente para usar en el reporte
+                    $soloClasificados[$index]->medalla = $premio->nombre;
+
+
+                    // ------------------------------
+                    //     GENERAR RESPUESTA
+                    // ------------------------------
                     if (!$esGrupal) {
                         $o = $evaluado->olimpista;
 
@@ -109,10 +130,7 @@ class Reporte_Premiacion_Controller extends Controller
                             'medalla'          => $premio->nombre,
                             'responsable_area' => $responsable->usuario->nombre . ' ' . $responsable->usuario->apellidos,
                         ];
-                    }
-
-                    // ✅ GRUPAL FORMATO SOLICITADO
-                    else {
+                    } else {
 
                         $equipo = $evaluado->equipo;
 
@@ -136,6 +154,13 @@ class Reporte_Premiacion_Controller extends Controller
                     $index++;
                 }
             }
+
+
+            // 🔥 Clasificados sin medalla → medalla = null
+            for ($j = $index; $j < count($soloClasificados); $j++) {
+                $soloClasificados[$j]->medalla = null;
+            }
+
 
             DB::commit();
 
