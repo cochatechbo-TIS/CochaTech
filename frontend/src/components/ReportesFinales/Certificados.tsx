@@ -8,7 +8,7 @@ interface Participante {
   id: number;
   nombre: string;
   ci: string;
-  unidadEducativa: string;
+  institucion: string;
   departamento: string;
   area: string;
   nivel: string;
@@ -54,11 +54,15 @@ const Certificados = () => {
 
         const premiados = resp.data?.premiados || [];
 
-        const parsed = premiados.map((p: any, index: number) => ({
+        const parsed = premiados.map((p: any, index: number) => {
+          const integrantes = p.integrantes
+            ? Object.values(p.integrantes)
+            : [];
+          return {
           id: index + 1,
           nombre: p.nombre,
           ci: p.ci,
-          unidadEducativa: p.institucion,
+          institucion: p.institucion ?? "SIN REGISTRO",
           departamento: p.departamento,
           area: p.area,
           nivel: p.nivel,
@@ -66,8 +70,10 @@ const Certificados = () => {
           posicion: p.medalla,
           profesor: p.tutor,
           responsableArea: p.responsable_area,
-          esGrupal: Array.isArray(p.integrantes) // <<< NUEVO
-        }));
+          esGrupal: integrantes.length > 0, // <<< NUEVO
+          integrantes,
+        };
+      });
 
         setParticipantes(parsed);
       } catch (error) {
@@ -99,7 +105,7 @@ const Certificados = () => {
         (p) =>
           p.nombre.toLowerCase().includes(s) ||
           p.ci?.includes(s) ||
-          p.unidadEducativa.toLowerCase().includes(s)
+          p.institucion.toLowerCase().includes(s)
       );
     }
 
@@ -109,13 +115,59 @@ const Certificados = () => {
   // Detectar si existe algún ganador grupal
   const hayGrupal = participantesFiltrados.some((p) => p.esGrupal);
 
+  // Expande los grupales: una fila por integrante
+const expandirFilas = (lista: any[]) => {
+  const filas: any[] = [];
+
+  lista.forEach((p) => {
+    const integrantes = Array.isArray(p.integrantes) ? p.integrantes : [];
+    if (!p.esGrupal) {
+      // INDIVIDUAL
+      filas.push({
+        grupo: "",
+        nombre: p.nombre,
+        ci: p.ci,
+        institucion: p.institucion,
+        departamento: p.departamento,
+        area: p.area,
+        nivel: p.nivel,
+        nota: p.notaFinal,
+        medalla: p.posicion,
+        tutor: p.profesor,
+        responsable: p.responsableArea
+      });
+    } else {
+      // GRUPAL — UNA FILA POR INTEGRANTE
+      integrantes.forEach((i: any) => {
+        filas.push({
+          grupo: p.nombre,
+          nombre: i.nombre,
+          ci: i.ci,
+          institucion: p.institucion,
+          departamento: p.departamento,
+          area: p.area,
+          nivel: p.nivel,
+          nota: p.notaFinal,
+          medalla: p.posicion,
+          tutor: p.profesor,
+          responsable: p.responsableArea
+        });
+      });
+    }
+  });
+
+  return filas;
+};
+
   // ===================================================
   // EXPORTAR CSV
   // ===================================================
   const handleExportarCSV = useCallback(() => {
+    const filas = expandirFilas(participantesFiltrados);
     const encabezado = [
+      ...(hayGrupal ? ["Nombre Grupo"] : []),
       "Nombre",
-      ...(!hayGrupal ? ["CI"] : []),
+      "CI",
       "Unidad Educativa",
       "Departamento",
       "Área",
@@ -126,22 +178,23 @@ const Certificados = () => {
       "Responsable de Área",
     ];
 
-    const filas = participantesFiltrados.map((p) =>
+    const contenidoFilas = filas.map((f) =>
       [
-        p.nombre,
-        ...(!hayGrupal ? [p.ci] : []),
-        p.unidadEducativa,
-        p.departamento,
-        p.area,
-        p.nivel,
-        p.notaFinal,
-        p.posicion,
-        p.profesor,
-        p.responsableArea,
-      ].join(",")
+        ...(hayGrupal ? [f.grupo] : []),
+      f.nombre,
+      f.ci,
+      f.institucion,
+      f.departamento,
+      f.area,
+      f.nivel,
+      f.nota,
+      f.medalla,
+      f.tutor,
+      f.responsable
+    ].join(",")
     );
 
-    const contenido = [encabezado.join(","), ...filas].join("\n");
+    const contenido = [encabezado.join(","), ...contenidoFilas].join("\n");
 
     const blob = new Blob(["\ufeff", contenido], {
       type: "text/csv;charset=utf-8;",
@@ -157,11 +210,13 @@ const Certificados = () => {
   // EXPORTAR EXCEL
   // ===================================================
   const handleExportarExcel = useCallback(() => {
+    const filas = expandirFilas(participantesFiltrados);
     const table = `
       <table border="1">
         <tr>
+          ${hayGrupal ? "<th>NOMBRE GRUPO</th>" : ""}
           <th>NOMBRE</th>
-          ${!hayGrupal ? "<th>CI</th>" : ""}
+          <th>CI</th>
           <th>UNIDAD EDUCATIVA</th>
           <th>DEPARTAMENTO</th>
           <th>ÁREA</th>
@@ -171,20 +226,21 @@ const Certificados = () => {
           <th>TUTOR</th>
           <th>RESPONSABLE DE ÁREA</th>
         </tr>
-        ${participantesFiltrados
+        ${filas
           .map(
-            (p) => `
+            (f) => `
           <tr>
-            <td>${p.nombre}</td>
-            ${!hayGrupal ? `<td>${p.ci}</td>` : ""}
-            <td>${p.unidadEducativa}</td>
-            <td>${p.departamento}</td>
-            <td>${p.area}</td>
-            <td>${p.nivel}</td>
-            <td>${p.notaFinal}</td>
-            <td>${p.posicion}</td>
-            <td>${p.profesor}</td>
-            <td>${p.responsableArea}</td>
+            ${hayGrupal ? `<td>${f.grupo}</td>` : ""}
+            <td>${f.nombre}</td>
+            <td>${f.ci}</td>
+            <td>${f.institucion}</td>
+            <td>${f.departamento}</td>
+            <td>${f.area}</td>
+            <td>${f.nivel}</td>
+            <td>${f.nota}</td>
+            <td>${f.medalla}</td>
+            <td>${f.tutor}</td>
+            <td>${f.responsable}</td>
           </tr>`
           )
           .join("")}
@@ -199,12 +255,13 @@ const Certificados = () => {
     link.href = URL.createObjectURL(blob);
     link.download = `Certificados_${selectedArea}_${selectedNivel}.xls`;
     link.click();
-  }, [participantesFiltrados, selectedArea, selectedNivel, hayGrupal]);
+  }, [participantesFiltrados, selectedArea, selectedNivel,hayGrupal]);
 
   // ===================================================
   // EXPORTAR PDF
   // ===================================================
   const handleExportarPDF = useCallback(() => {
+    const filas = expandirFilas(participantesFiltrados);
     const ventana = window.open("", "", "width=1000,height=800");
 
     if (!ventana) return;
@@ -223,8 +280,9 @@ const Certificados = () => {
         <h1 style="text-align:center">Lista de Certificados</h1>
         <table>
           <tr>
+            ${hayGrupal ? "<th>NOMBRE GRUPO</th>" : ""}
             <th>NOMBRE</th>
-            ${!hayGrupal ? "<th>CI</th>" : ""}
+            <th>CI</th>
             <th>UNIDAD EDUCATIVA</th>
             <th>DEPARTAMENTO</th>
             <th>ÁREA</th>
@@ -234,20 +292,21 @@ const Certificados = () => {
             <th>TUTOR</th>
             <th>RESPONSABLE</th>
           </tr>
-          ${participantesFiltrados
+          ${filas
             .map(
-              (p) => `
+              (f) => `
             <tr>
-              <td>${p.nombre}</td>
-              ${!hayGrupal ? `<td>${p.ci}</td>` : ""}
-              <td>${p.unidadEducativa}</td>
-              <td>${p.departamento}</td>
-              <td>${p.area}</td>
-              <td>${p.nivel}</td>
-              <td>${p.notaFinal}</td>
-              <td>${p.posicion}</td>
-              <td>${p.profesor}</td>
-              <td>${p.responsableArea}</td>
+              ${hayGrupal ? `<td>${f.grupo}</td>` : ""}
+              <td>${f.nombre}</td>
+              <td>${f.ci}</td>
+              <td>${f.institucion}</td>
+              <td>${f.departamento}</td>
+              <td>${f.area}</td>
+              <td>${f.nivel}</td>
+              <td>${f.nota}</td>
+              <td>${f.medalla}</td>
+              <td>${f.tutor}</td>
+              <td>${f.responsable}</td>
             </tr>`
             )
             .join("")}
@@ -326,7 +385,7 @@ const Certificados = () => {
                 <tr key={p.id}>
                   <td>{p.nombre}</td>
                   {!p.esGrupal && <td>{p.ci}</td>}
-                  <td>{p.unidadEducativa}</td>
+                  <td>{p.institucion}</td>
                   <td>{p.departamento}</td>
                   <td>{p.area}</td>
                   <td>{p.nivel}</td>
