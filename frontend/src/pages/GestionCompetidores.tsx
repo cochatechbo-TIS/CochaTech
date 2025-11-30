@@ -183,7 +183,7 @@ const GestionCompetidores: React.FC = () => {
       }
       
       showNotification(errorMessage, 'error');
-      throw err;
+      throw err;
     }
   };
 
@@ -234,19 +234,19 @@ const GestionCompetidores: React.FC = () => {
 }, [competidores, showNotification, closeNotification]);
 
 // OPTIMIZADO: Eliminar competidor (DISPARA LA CONFIRMACIÓN)
-  const handleDeleteCompetitor = useCallback((ci: string) => {
+  const handleDeleteCompetitor = useCallback((ci: string) => {
   const competidor = competidores.find(c => c.ci === ci);
     const nombreCompleto = competidor 
         ? `${competidor.nombre} ${competidor.apellidos}` 
-        : `con CI: ${ci}`;         
-        // NUEVA LÓGICA: Dispara el modal de CONFIRMACIÓN
-        showNotification(
+        : `con CI: ${ci}`;         
+        // NUEVA LÓGICA: Dispara el modal de CONFIRMACIÓN
+        showNotification(
         `¿Estás seguro de que quieres eliminar a ${nombreCompleto}? Esta acción es irreversible.`,
         'confirm',
         () => executeDeleteCompetitor(ci),
         'Confirmar Eliminación'
-        );
-  }, [competidores,showNotification, executeDeleteCompetitor]); // Dependencias
+        );
+  }, [competidores,showNotification, executeDeleteCompetitor]); // Dependencias
 
   // Funciones para los botones (sin funcionalidad completa)
   const handleVerLista = () => {
@@ -390,7 +390,7 @@ const GestionCompetidores: React.FC = () => {
             Mostrando {rangoInicio} - {rangoFin} de {competidoresFiltrados.length} competidores
           </span>
           <div className="pagination-controls">
-            <button 
+            <button 
               onClick={irAnterior}
               disabled={paginaActual === 1} // **Deshabilitar en la primera página**
               className="pagination-btn pagination-btn-prev"

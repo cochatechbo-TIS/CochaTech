@@ -2973,7 +2973,7 @@ var require_react_dom_client_development = __commonJS({
                   break;
                 }
                 properties.push([
-                  prefix2 + "  ".repeat(indent) + propertyName,
+                  prefix2 + "  ".repeat(indent) + propertyName,
                   "<" + typeName2
                 ]);
                 null !== key && addValueToProperties(
@@ -3006,7 +3006,7 @@ var require_react_dom_client_development = __commonJS({
                   break;
                 } else if (propKey === ENTRIES_ARRAY) {
                   properties.push([
-                    prefix2 + "  ".repeat(indent) + propertyName,
+                    prefix2 + "  ".repeat(indent) + propertyName,
                     ""
                   ]);
                   for (propertyName = 0; propertyName < value.length; propertyName++)
@@ -3045,14 +3045,14 @@ var require_react_dom_client_development = __commonJS({
                   return;
                 }
                 properties.push([
-                  "  ".repeat(indent) + propertyName,
+                  "  ".repeat(indent) + propertyName,
                   "Promise"
                 ]);
                 return;
               }
               "Object" === typeName2 && (propKey = Object.getPrototypeOf(value)) && "function" === typeof propKey.constructor && (typeName2 = propKey.constructor.name);
               properties.push([
-                prefix2 + "  ".repeat(indent) + propertyName,
+                prefix2 + "  ".repeat(indent) + propertyName,
                 "Object" === typeName2 ? 3 > indent ? "" : "…" : typeName2
               ]);
               3 > indent && addObjectToProperties(value, properties, indent + 1, prefix2);
@@ -3074,7 +3074,7 @@ var require_react_dom_client_development = __commonJS({
             value = String(value);
         }
         properties.push([
-          prefix2 + "  ".repeat(indent) + propertyName,
+          prefix2 + "  ".repeat(indent) + propertyName,
           value
         ]);
       }
@@ -3082,7 +3082,7 @@ var require_react_dom_client_development = __commonJS({
         var isDeeplyEqual = true;
         for (key in prev)
           key in next || (properties.push([
-            REMOVED + "  ".repeat(indent) + key,
+            REMOVED + "  ".repeat(indent) + key,
             "…"
           ]), isDeeplyEqual = false);
         for (var _key in next)
@@ -3091,7 +3091,7 @@ var require_react_dom_client_development = __commonJS({
             var nextValue = next[_key];
             if (key !== nextValue) {
               if (0 === indent && "children" === _key)
-                isDeeplyEqual = "  ".repeat(indent) + _key, properties.push(
+                isDeeplyEqual = "  ".repeat(indent) + _key, properties.push(
                   [REMOVED + isDeeplyEqual, "…"],
                   [ADDED + isDeeplyEqual, "…"]
                 );
@@ -3101,7 +3101,7 @@ var require_react_dom_client_development = __commonJS({
                     if (nextValue.$$typeof === REACT_ELEMENT_TYPE) {
                       if (key.type === nextValue.type && key.key === nextValue.key) {
                         key = getComponentNameFromType(nextValue.type) || "…";
-                        isDeeplyEqual = "  ".repeat(indent) + _key;
+                        isDeeplyEqual = "  ".repeat(indent) + _key;
                         key = "<" + key + " … />";
                         properties.push(
                           [REMOVED + isDeeplyEqual, key],
@@ -3114,7 +3114,7 @@ var require_react_dom_client_development = __commonJS({
                       var prevKind = Object.prototype.toString.call(key), nextKind = Object.prototype.toString.call(nextValue);
                       if (prevKind === nextKind && ("[object Object]" === nextKind || "[object Array]" === nextKind)) {
                         prevKind = [
-                          UNCHANGED + "  ".repeat(indent) + _key,
+                          UNCHANGED + "  ".repeat(indent) + _key,
                           "[object Array]" === nextKind ? "Array" : ""
                         ];
                         properties.push(prevKind);
@@ -3131,7 +3131,7 @@ var require_react_dom_client_development = __commonJS({
                   else if ("function" === typeof key && "function" === typeof nextValue && key.name === nextValue.name && key.length === nextValue.length && (prevKind = Function.prototype.toString.call(key), nextKind = Function.prototype.toString.call(nextValue), prevKind === nextKind)) {
                     key = "" === nextValue.name ? "() => {}" : nextValue.name + "() {}";
                     properties.push([
-                      UNCHANGED + "  ".repeat(indent) + _key,
+                      UNCHANGED + "  ".repeat(indent) + _key,
                       key + " Referentially unequal function closure. Consider memoization."
                     ]);
                     continue;
@@ -3144,7 +3144,7 @@ var require_react_dom_client_development = __commonJS({
             }
           } else
             properties.push([
-              ADDED + "  ".repeat(indent) + _key,
+              ADDED + "  ".repeat(indent) + _key,
               "…"
             ]), isDeeplyEqual = false;
         return isDeeplyEqual;
@@ -18304,7 +18304,7 @@ var require_react_dom_client_development = __commonJS({
           return;
         }
         console.error(error);
-      }, OMITTED_PROP_ERROR = "This object has been omitted by React in the console log to avoid sending too much data from the server. Try logging smaller or more specific objects.", EMPTY_ARRAY = 0, COMPLEX_ARRAY = 1, PRIMITIVE_ARRAY = 2, ENTRIES_ARRAY = 3, REMOVED = "– ", ADDED = "+ ", UNCHANGED = "  ", supportsUserTiming = "undefined" !== typeof console && "function" === typeof console.timeStamp && "undefined" !== typeof performance && "function" === typeof performance.measure, COMPONENTS_TRACK = "Components ⚛", LANES_TRACK_GROUP = "Scheduler ⚛", currentTrack = "Blocking", alreadyWarnedForDeepEquality = false, reusableComponentDevToolDetails = {
+      }, OMITTED_PROP_ERROR = "This object has been omitted by React in the console log to avoid sending too much data from the server. Try logging smaller or more specific objects.", EMPTY_ARRAY = 0, COMPLEX_ARRAY = 1, PRIMITIVE_ARRAY = 2, ENTRIES_ARRAY = 3, REMOVED = "– ", ADDED = "+ ", UNCHANGED = "  ", supportsUserTiming = "undefined" !== typeof console && "function" === typeof console.timeStamp && "undefined" !== typeof performance && "function" === typeof performance.measure, COMPONENTS_TRACK = "Components ⚛", LANES_TRACK_GROUP = "Scheduler ⚛", currentTrack = "Blocking", alreadyWarnedForDeepEquality = false, reusableComponentDevToolDetails = {
         color: "primary",
         properties: null,
         tooltipText: "",

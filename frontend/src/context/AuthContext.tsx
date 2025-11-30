@@ -1,6 +1,8 @@
 // src/context/AuthContext.tsx
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import authService from '../services/authService';
+
 
 // Definimos la forma del usuario basada en tu authService y Usuario.ts
 interface User {
@@ -43,9 +45,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (email: string, pass: string): Promise<User> => {
     const data = await authService.login(email, pass);
-    setUser(data.user);
-    return data.user; // Devuelve el usuario para que Login.tsx pueda redirigir
+
+    // Adaptación del formato del backend → frontend
+    const userAdaptado: User = {
+      id_usuario: data.user.id,
+      full_name: `${data.user.nombre} ${data.user.apellidos}`,
+      email: data.user.email,
+      rol: data.user.rol,
+    };
+
+    setUser(userAdaptado);
+    return userAdaptado; // Devuelve el formato correcto
   };
+
 
   const logout = () => {
     authService.logout(); // El servicio ya limpia localStorage

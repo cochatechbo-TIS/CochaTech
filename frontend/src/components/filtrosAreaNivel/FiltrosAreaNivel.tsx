@@ -28,7 +28,7 @@ const FiltrosAreaNivel: React.FC<FiltrosAreaNivelProps> = ({
   placeholderBusqueda = ' Buscar algo...',
   isAdmin
 }) => {
-  const showAreaSelect = isAdmin; 
+  
   return (
     <div className="filtros-wrapper">
       <div className="filtros-row">

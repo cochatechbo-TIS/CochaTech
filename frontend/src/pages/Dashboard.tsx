@@ -1,5 +1,5 @@
 // src/pages/Dashboard.tsx
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -8,10 +8,8 @@ import {
   ClipboardCheck, 
   Calendar, 
   FileText, 
-  Settings, 
   Layers,
   Clock,
-  Play,
   Upload
 } from 'lucide-react';
 import './dashboard.css';
@@ -167,7 +165,7 @@ const Dashboard = () => {
             </div>
             <span className="stat-label">{stat.label}</span>
             <span className="stat-value">{stat.value}</span>
-            <span className="stat-subtext">{stat.subtext}</span>
+            <span className="stat-subtext">{stat.sub}</span>
           </div>
         ))}
       </div>

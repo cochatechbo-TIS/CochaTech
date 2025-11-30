@@ -4,7 +4,6 @@ import type {
   EvaluadorInicioData,
   FaseConsultaData,
   EvaluacionPayload,
-  NivelAsignado 
 } from "../interfaces/Evaluacion";
 
 /**

@@ -165,33 +165,33 @@ const Navbar = () => {
         {navItems.map((item) => (
           <Link
             key={item.name}
-            to={item.path}
-            className={`mobile-nav-item ${
-              isActive(item.path) ? 'active' : ''
-            }`}
-            onClick={closeMobileMenu}
-          >
-            {item.icon && <item.icon size={20} className="navbar-icon" />}
-            {item.name}
-          </Link>
-        ))}
-        </div>
+            to={item.path}
+            className={`mobile-nav-item ${
+              isActive(item.path) ? 'active' : ''
+            }`}
+            onClick={closeMobileMenu}
+          >
+            {item.icon && <item.icon size={20} className="navbar-icon" />}
+            {item.name}
+          </Link>
+        ))}
+        </div>
 
-      {/* Sección de Cerrar Sesión */}
-      <div className="mobile-logout-section">
-        <button 
-          onClick={handleLogout} 
-          className="mobile-logout-btn"
-        >
-          <LogOut size={18} />
-          <span>Cerrar Sesión</span>
-        </button>
-      </div>
-    </div>
-  </div>
+      {/* Sección de Cerrar Sesión */}
+      <div className="mobile-logout-section">
+        <button 
+          onClick={handleLogout} 
+          className="mobile-logout-btn"
+        >
+          <LogOut size={18} />
+          <span>Cerrar Sesión</span>
+        </button>
+      </div>
+    </div>
+  </div>
 )}
   </nav>
-  );
+  );
 };
 
 export default Navbar;
