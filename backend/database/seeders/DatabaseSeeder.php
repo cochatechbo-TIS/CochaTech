@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             ResponsableSeeder::class,
             EvaluadorPorArea::class,
             TipoPremioSeeder::class,
-            
+            ResponsablePorArea::class,
         ]);
     }
 }
