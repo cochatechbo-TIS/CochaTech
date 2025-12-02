@@ -323,7 +323,141 @@ const LOGS_MOCK: Log[] = [
 const AREAS_DISPONIBLES = ['Matemática', 'Física', 'Química', 'Biología'];
 const NIVELES_DISPONIBLES = ['Básico', 'Intermedio', 'Avanzado'];
 
+// ========== FUNCIÓN DE EXPORTACIÓN PDF ==========
+const exportarPDF = (logs: Log[]) => {
+  const ventana = window.open('', '', 'height=800,width=1200');
+  
+  if (!ventana) {
+    alert('Por favor, permite las ventanas emergentes para exportar a PDF');
+    return;
+  }
 
+  const contenido = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Reporte de Logs - Cambios de Notas</title>
+      <style>
+        body { 
+          font-family: Arial, sans-serif; 
+          padding: 20px;
+          font-size: 11px;
+        }
+        h1 { 
+          text-align: center; 
+          color: #1a1a1a;
+          margin-bottom: 10px;
+          font-size: 22px;
+        }
+        h2 {
+          text-align: center;
+          color: #666;
+          font-weight: normal;
+          margin-bottom: 20px;
+          font-size: 14px;
+        }
+        .fecha-reporte {
+          text-align: right;
+          color: #666;
+          margin-bottom: 20px;
+          font-size: 11px;
+        }
+        table { 
+          width: 100%; 
+          border-collapse: collapse; 
+          margin-top: 20px;
+        }
+        th { 
+          background-color: #dc2626; 
+          color: white; 
+          padding: 10px 8px;
+          text-align: left;
+          font-size: 10px;
+          font-weight: 600;
+        }
+        td { 
+          padding: 8px;
+          border-bottom: 1px solid #ddd;
+          font-size: 10px;
+        }
+        tr:hover { 
+          background-color: #f9fafb; 
+        }
+        .nota-anterior {
+          color: #dc2626;
+          font-weight: 600;
+        }
+        .nota-nueva {
+          color: #059669;
+          font-weight: 600;
+        }
+        .motivo-cell {
+          max-width: 200px;
+          font-size: 9px;
+        }
+        @media print {
+          body { padding: 10px; }
+          button { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <h1>Reporte de Logs</h1>
+      <h2>Historial de Cambios de Notas</h2>
+      <div class="fecha-reporte">
+        Fecha de generación: ${new Date().toLocaleDateString('es-ES', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })}
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Nº</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Evaluador</th>
+            <th>Área</th>
+            <th>Nivel</th>
+            <th>Estudiante</th>
+            <th>Nota Ant.</th>
+            <th>Nota Nueva</th>
+            <th>Motivo</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${logs.map((log, index) => `
+            <tr>
+              <td>${index + 1}</td>
+              <td>${new Date(log.fecha).toLocaleDateString('es-ES')}</td>
+              <td>${log.hora}</td>
+              <td>${log.evaluador}</td>
+              <td>${log.area}</td>
+              <td>${log.nivel}</td>
+              <td>${log.nombreEstudiante}</td>
+              <td class="nota-anterior">${log.notaAnterior}</td>
+              <td class="nota-nueva">${log.notaNueva}</td>
+              <td class="motivo-cell">${log.motivo}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
+
+  ventana.document.write(contenido);
+  ventana.document.close();
+  
+  setTimeout(() => {
+    ventana.print();
+  }, 250);
+};
 
 // ========== COMPONENTE PRINCIPAL ==========
 function ReporteLogs() {
@@ -372,6 +506,10 @@ function ReporteLogs() {
     setNivelFiltro(e.target.value);
   }, []);
 
+  const handleExportarPDF = useCallback(() => {
+    exportarPDF(logsFiltrados);
+  }, [logsFiltrados]);
+
   return (
     <div className="logs-container">
       {/* Header */}
@@ -380,7 +518,16 @@ function ReporteLogs() {
           <h1 className="logs-title">Reporte de Logs</h1>
           <p className="logs-subtitle">Historial de cambios de notas</p>
         </div>
-        
+        <button className="btn-export-pdf-logs" onClick={handleExportarPDF}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+            <line x1="12" y1="9" x2="8" y2="9" />
+          </svg>
+          EXPORTAR PDF
+        </button>
       </div>
 
       {/* Info Box */}
