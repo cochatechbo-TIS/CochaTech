@@ -359,8 +359,18 @@ function ReporteLogs() {
     return resultado;
   }, [logs, areaFiltro, nivelFiltro, busqueda]);
 
- 
-  
+  // ========== MANEJADORES ==========
+  const handleBusquedaChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setBusqueda(e.target.value);
+  }, []);
+
+  const handleAreaChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setAreaFiltro(e.target.value);
+  }, []);
+
+  const handleNivelChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setNivelFiltro(e.target.value);
+  }, []);
 
   return (
     <div className="logs-container">
@@ -385,7 +395,40 @@ function ReporteLogs() {
         </p>
       </div>
 
-      
+      {/* Filtros */}
+      <div className="logs-filtros">
+        <div className="filtro-busqueda-logs">
+          <svg className="filtro-icon-logs" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Buscar por estudiante, evaluador o motivo..."
+            value={busqueda}
+            onChange={handleBusquedaChange}
+            className="filtro-input-logs"
+          />
+        </div>
+        
+        <select value={areaFiltro} onChange={handleAreaChange} className="filtro-select-logs">
+          <option value="">Todas las áreas</option>
+          {AREAS_DISPONIBLES.map((a) => (
+            <option key={a} value={a}>{a}</option>
+          ))}
+        </select>
+
+        <select 
+          value={nivelFiltro} 
+          onChange={handleNivelChange} 
+          className="filtro-select-logs"
+        >
+          <option value="">Todos los niveles</option>
+          {NIVELES_DISPONIBLES.map((n) => (
+            <option key={n} value={n}>{n}</option>
+          ))}
+        </select>
+      </div>
 
       {/* Tabla */}
       <div className="logs-table-container">
