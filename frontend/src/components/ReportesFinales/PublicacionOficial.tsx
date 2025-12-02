@@ -80,24 +80,91 @@ function PublicacionOficial() {
   }, [busqueda, participantes]);
   
   // ========== MANEJADOR DE EXPORTACIÓN ==========
-  const handleExportarCSV = useCallback(() => {
-    console.log('Exportando CSV para:', { selectedArea, selectedNivel });
-    // TODO: Implementar exportación a CSV
-    alert(`Exportando datos de ${selectedArea} - ${selectedNivel}`);
-  }, [selectedArea, selectedNivel]);
+  const handleExportarPDF = useCallback(() => {
+    exportarPDF(
+    participantesFiltrados,
+    selectedArea ?? 'Todos',
+    selectedNivel ?? 'Todos'
+  );
+}, [participantesFiltrados, selectedArea, selectedNivel]);
    
+const exportarPDF = (participantes: ParticipantePublicacion[], area: string, nivel: string) => {
+  const ventana = window.open('', '', 'height=800,width=1000');
+
+  if (!ventana) {
+    alert('Por favor, habilita ventanas emergentes para exportar a PDF');
+    return;
+  }
+
+  const contenido = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Publicación Oficial - ${area} - ${nivel}</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 5px; }
+        h2 { text-align: center; color: #555; margin-top: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #3B82F6; color: #fff; padding: 12px; border: 1px solid #ddd; }
+        td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+        @media print { button { display: none; } }
+      </style>
+    </head>
+    <body>
+      <h1>Publicación Oficial - Oh SanSi</h1>
+      <h2>${area} - ${nivel}</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre Completo</th>
+            <th>Área</th>
+            <th>Nivel</th>
+            <th>Lugar Obtenido</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${participantes
+            .map(
+              (p: any) => `
+            <tr>
+              <td>${p.apellido ? `${p.nombre} ${p.apellido}` : p.nombre}</td>
+              <td>${p.area}</td>
+              <td>${nivel}</td>
+              <td>${p.posicion}° Lugar</td>
+            </tr>`
+            )
+            .join('')}
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
+
+  ventana.document.write(contenido);
+  ventana.document.close();
+
+  setTimeout(() => {
+    ventana.print();
+  }, 250);
+};
+
   return (
     <div className="publicacion-oficial-container">
       {/* Header con botón de exportación */}
       <div className="publicacion-header">
         <h3 className="publicacion-title">Publicación Oficial</h3>
-        <button className="btn-export-csv" onClick={handleExportarCSV}>
+        <button className="btn-export btn-pdf" onClick={handleExportarPDF}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <line x1="12" y1="9" x2="8" y2="9" />
           </svg>
-          EXPORTAR CSV
+          EXPORTAR PDF
         </button>
       </div>
 
