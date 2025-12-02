@@ -69,3 +69,8 @@ export const getNivelesEvaluador = async () => {
   const res = await api.get("/evaluador/niveles"); // GET
   return res.data;  // ← devolverá { evaluador: 1, niveles: [...] }
 };
+
+export async function generarPrimeraFase(idNivel: number) {
+  const response = await api.get(`/primera/fase/${idNivel}`);
+  return response.data;
+}

@@ -14,6 +14,7 @@ import {
   getParticipantesPorFase,
   guardarYClasificar,
   getNivelesEvaluador,
+  generarPrimeraFase,
 } from "../services/evaluacionService";
 import { User, CalendarDays, Users } from 'lucide-react';
 import "./evaluacion.css";
@@ -39,6 +40,7 @@ const EvaluacionPorFases: React.FC = () => {
 
   const [comentarioRechazo, setComentarioRechazo] = useState<string | null>(null);
   const [esFaseFinal, setEsFaseFinal] = useState(false);
+  const [faseCreada, setFaseCreada] = useState(false);
 
   const fechaActual = new Date().toLocaleString("es-ES", {
     year: "numeric",
@@ -61,8 +63,10 @@ const EvaluacionPorFases: React.FC = () => {
 
   // Cargar datos iniciales (nivel por defecto)
   useEffect(() => {
+    if (nivelesEvaluador.length > 0) {
     cargarDatosIniciales();
-  }, []);
+  }
+}, [nivelesEvaluador]);
 
   useEffect(() => {
     if (faseSeleccionada) {
@@ -80,27 +84,58 @@ const EvaluacionPorFases: React.FC = () => {
     try {
       setLoading(true);
       clearMessages();
+      
+          // Esperar a que los niveles estén cargados
+    if (nivelesEvaluador.length === 0) {
+      console.log("Niveles aún no listos, esperando...");
+      return;
+    }
 
-      const data: EvaluadorInicioData = await getDatosInicialesEvaluador(idNivel);
+      const nivelUsar =
+        idNivel ??
+        idNivelSeleccionado ??
+        nivelesEvaluador[0]?.id_nivel;
 
-      if (!data.infoEvaluador) throw new Error("No se recibió información del evaluador.");
+      if (!nivelUsar) {
+        throw new Error("No se pudo determinar el nivel del evaluador.");
+      }
+      console.log("Cargando datos para nivel:", nivelUsar);
+    // 1️⃣ Obtener datos iniciales normales
+    let data = await getDatosInicialesEvaluador(nivelUsar);
+
+    // 2️⃣ SI NO EXISTEN FASES → CREAR AUTOMÁTICAMENTE
+    if (!data.fases || data.fases.length === 0) {
+      console.warn("➡ No hay fases. Generando PRIMERA FASE automáticamente...");
+
+       // evitar doble creación
+  if (faseCreada) {
+    console.log("Fase ya creada previamente, evitando doble ejecución");
+  } else {
+    console.warn("➡ No hay fases. Generando PRIMERA FASE automáticamente...");
+    await generarPrimeraFase(nivelUsar);
+    setFaseCreada(true);
+  }
+
+  // recargar datos
+  data = await getDatosInicialesEvaluador(nivelUsar);
+}
+    
+     if (!data.infoEvaluador) {
+      throw new Error("No se recibió información del evaluador.");
+     }
 
       // SIEMPRE actualizar el nivel seleccionado
-      setIdNivelSeleccionado(idNivel ?? data.infoEvaluador.id_nivel);
+      setIdNivelSeleccionado(nivelUsar);
 
       setInfoEvaluador(data.infoEvaluador);
       setEsGrupal(data.infoEvaluador.es_grupal ?? false);
-      setFases(data.fases || []);
 
-      if (data.fases?.length > 0) {
-        setFaseSeleccionada(data.fases[0]);
-      } else {
-        setFaseSeleccionada(null);
-        setParticipantes([]);
-        setError("No hay fases asignadas para este nivel.");
-      }
+      setFases(data.fases);
 
+        setFaseSeleccionada(data.fases[0] ?? null);
+      
     } catch (err: any) {
+      console.error("Error al cargar datos iniciales:", err);
       setError(err.response?.data?.message || err.message);
     } finally {
       setLoading(false);

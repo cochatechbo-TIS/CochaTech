@@ -1,4 +1,3 @@
-/* eslint-disable no-irregular-whitespace */
 // src/App.tsx
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
@@ -20,43 +19,14 @@ import EvaluacionPorFases from './pages/EvaluacionPorFases';
 
 // --- Componentes Placeholder (Originales) ---
 
-
-
-//const CargaMasiva = () => (
- // <div className="p-8">
-  //  <h1 className="text-3xl font-bold text-gray-800 mb-4">Carga Masiva</h1>
-  //  <p className="text-gray-600">Funcionalidad en desarrollo...</p>
-  //</div>
-//)
-
-/*const Responsables = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Gestión de Responsables (RF3)</h1>
-    <p className="text-gray-600">Funcionalidad en desarrollo...</p>
-  </div>
-
-)
-
+/*
 const Evaluacion = () => (
   <div className="p-8">
     <h1 className="text-3xl font-bold text-gray-800 mb-4">Evaluación</h1>
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
 );
-
-const Final = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Final</h1>
-    <p className="text-gray-600">Funcionalidad en desarrollo...</p>
-  </div>
-);
-
-const Reportes = () => ( // 'Reportes' e 'Informes' es lo mismo, usaré 'Reportes'
-  <div className="p-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Reportes</h1>
-    <p className="text-gray-600">Funcionalidad en desarrollo...</p>
-  </div>
-);*/
+*/
 
 const Historial = () => (
   <div className="p-8">
