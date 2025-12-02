@@ -10,11 +10,9 @@ import { NotificationModal } from '../common/NotificationModal'; // Importamos e
 type NotificationType = 'success' | 'error' | 'info' | 'confirm';
 
 interface CargarCSVProps {
-  onVerLista?: () => void;
-  onGenerarListas?: () => void;
 }
 
-function CargarCSV({ onVerLista }: CargarCSVProps) {
+function CargarCSV({}: CargarCSVProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -121,16 +119,9 @@ function CargarCSV({ onVerLista }: CargarCSVProps) {
   const handleSelectCSV = () => inputRef.current?.click();
 
   const handleVerLista = () => {
-  if (onVerLista) {
-    onVerLista();
-  } else {
-    showNotification('Esta función te permitirá ver la lista completa de olimpistas registrados.', 'info', 'Función "Ver Lista"');
-  }
+  navigate("/administrador/listas");
 };
-
- const handleGenerarListas = () => {
-    navigate("/listas");
-  };
+ 
 
   return (
     <div className="management-container">
@@ -138,7 +129,7 @@ function CargarCSV({ onVerLista }: CargarCSVProps) {
         <h1 className="csv-title">Carga de Olimpistas</h1>
         <p className="csv-description">
           Sube un archivo CSV con los datos de los olimpistas. El archivo debe contener las siguientes columnas:
-          Nombre, Apellidos, CI, Tutor legal, Contacto del tutor, Unidad educativa, Departamento, Grado, Área de competencia, Nivel, Tutor académico (opcional).
+          Nombre, Apellidos, Documento, Institucion,  Área, Nivel, Grado, Nombre Tutor, Contacto Tutor, Departamento.
         </p>
       </div>
 
@@ -148,9 +139,6 @@ function CargarCSV({ onVerLista }: CargarCSVProps) {
         </button>
         <button className="btn-secondary" onClick={handleVerLista}>
           VER LISTA
-        </button>
-        <button className="btn-secondary" onClick={handleGenerarListas}>
-          GENERAR LISTAS POR ÁREA Y NIVEL
         </button>
 
         <input
