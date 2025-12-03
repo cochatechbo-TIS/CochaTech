@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 // Asegúrate que la ruta de importación sea correcta
-import { TabNavigation } from '../components/registro/TabNavigation'; 
+import { TabNavigation } from '../components/tabNavegacion/TabNavigation'; 
 import GestionCompetidores from './GestionCompetidores';
 import GestionResponsables from './GestionResponsable';
 import GestionEvaluadores from './GestionEvaluadores';

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import "./ReportesFinales.css";
-import { TabNavigation } from "../registro/TabNavigation";
+import { TabNavigation } from "../tabNavegacion/TabNavigation";
 
 import Certificados from "./Certificados";
 import CeremoniaPremiacion from "./CeremoniaPremiacion";
