@@ -106,13 +106,6 @@ const Dashboard = () => {
           btnText: 'IR A EVALUACIÓN',
           path: '/evaluador/evaluacion'
         },
-      { 
-          title: 'Informes', 
-          desc: 'Consulta reportes detallados y estadísticas sobre tus evaluaciones realizadas.', 
-          icon: <FileText size={40} />, // Icono de reporte (FileText o FileBarChart)
-          btnText: 'VER INFORMES',
-          path: '/evaluador/informes' // Redirige a la ruta de informes
-        },
       ];
     }
 

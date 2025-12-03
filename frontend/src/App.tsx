@@ -156,7 +156,6 @@ function App() {
       <Route element={<ProtectedRoute allowedRoles={['evaluador']} />}>
         <Route path="/evaluador/inicio" element={<Layout showNavbar={true}><Dashboard /></Layout>} />
         <Route path="/evaluador/evaluacion" element={<Layout showNavbar={true}><EvaluacionPorFases /></Layout>} />
-        <Route path="/evaluador/informes" element={<Layout showNavbar={true}><Reportes /></Layout>} />
       </Route>
 
       {/* --- Mantenemos tus rutas originales comentadas --- */}
