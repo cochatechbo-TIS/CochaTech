@@ -11,6 +11,7 @@ import GestionFasesAdmin from './pages/GestionFasesAdmin'; // AÑADIR ESTE IMPOR
 import Reportes from './components/ReportesFinales/Reportes'; //importe de los reportes
 import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
+import Historial from './components/ReporteLogs/ReporteLogs';
 
 // --- ¡IMPORTAR NUEVAS PÁGINAS! ---
 import ForgotPassword from './pages/ForgotPassword';
@@ -28,12 +29,12 @@ const Evaluacion = () => (
 );
 */
 
-const Historial = () => (
+/*const Historial = () => (
   <div className="p-8">
     <h1 className="text-3xl font-bold text-gray-800 mb-4">Log de cambios</h1>
     <p className="text-gray-600">Funcionalidad en desarrollo...</p>
   </div>
-);
+);*/
 // --- Fin de Componentes Placeholder ---
 
 
