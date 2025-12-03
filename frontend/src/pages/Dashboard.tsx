@@ -42,7 +42,6 @@ const Dashboard = () => {
         { label: 'Evaluadores', value: '28', icon: <ClipboardCheck size={32} />, color: 'bg-blue', sub: 'Asignados' },
         { label: 'Áreas', value: '8', icon: <Layers size={32} />, color: 'bg-blue', sub: 'Habilitadas' },
         { label: 'Fases Activas', value: '3', icon: <Calendar size={32} />, color: 'bg-blue', sub: 'En curso' },
-        { label: 'Estado', value: 'En Proceso', icon: <Clock size={32} />, color: 'bg-blue', sub: 'Olimpiada 2025' },
       ];
     } 
     
@@ -107,12 +106,12 @@ const Dashboard = () => {
           btnText: 'IR A EVALUACIÓN',
           path: '/evaluador/evaluacion'
         },
-        { 
-          title: 'Mis Asignaciones', 
-          desc: 'Revisa los niveles y áreas que tienes asignados para esta gestión.', 
-          icon: <Layers size={40} />, 
-          btnText: 'VER ASIGNACIONES',
-          path: '/evaluador/inicio'
+      { 
+          title: 'Informes', 
+          desc: 'Consulta reportes detallados y estadísticas sobre tus evaluaciones realizadas.', 
+          icon: <FileText size={40} />, // Icono de reporte (FileText o FileBarChart)
+          btnText: 'VER INFORMES',
+          path: '/evaluador/informes' // Redirige a la ruta de informes
         },
       ];
     }
