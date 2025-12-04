@@ -20,6 +20,19 @@ const areas = [
     'Informática'
 ];
 
+// Form vacío estándar
+const emptyForm: Usuario = {
+    id_usuario: 0,
+    nombre: "",
+    apellidos: "",
+    ci: "",
+    email: "",
+    telefono: null,
+    area: "",
+    id_rol: 2, // Responsable
+    documento: "",
+};
+
 export function EditResponsableModal({ 
     usuario, 
     onSave, 
@@ -29,48 +42,158 @@ export function EditResponsableModal({
     
     // Inicialización del estado
     const [editedResponsable, setEditedResponsable] = useState<Usuario>(
-        usuario || {
-            id_usuario: 0, // Valor por defecto
-            nombre: '',
-            apellidos: '', // <-- Inicializado
-            ci: '',        // <-- Usamos CI
-            email: '',
-            telefono: null, // Debe ser null para nulo
-            area: '',
-            id_rol: 2,     // Rol por defecto
-            documento: '', // Alias para inicialización, usaremos 'ci' en la lógica
-        }
+        usuario || emptyForm
     );
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     // Sincronizar estado cuando se abre el modal o cambia el responsable
     React.useEffect(() => {
-        if (usuario) {
-            setEditedResponsable(usuario);
-        } else {
-            setEditedResponsable({
-                id_usuario: 0,
-                nombre: '',
-                apellidos: '', // <-- Inicializado
-                ci: '',        // <-- Usamos CI
-                email: '',
-                telefono: null,
-                area: '',
-                id_rol: 2,
-                documento: '', // Alias
-            });
-        }
-    }, [usuario]);
+        setEditedResponsable(usuario || emptyForm);
+        }, [usuario]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        // Manejamos null para telefono si el campo se deja vacío
-        const finalValue = name === 'telefono' && value === '' ? null : value;
-        setEditedResponsable(prev => ({ ...prev, [name]: finalValue }));
+    const resetForm = () => {
+        setEditedResponsable(emptyForm);
+        setErrors({});
     };
+
+// ========================= VALIDACIÓN GENERAL =========================
+    const validate = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!editedResponsable.nombre.trim()) {
+        newErrors.nombre = "El nombre es obligatorio.";
+    }
+
+    if (!editedResponsable.apellidos.trim()) {
+        newErrors.apellidos = "Los apellidos son obligatorios.";
+    }
+
+    if (!editedResponsable.ci.trim()) {
+        newErrors.ci = "El CI es obligatorio.";
+    } else if (editedResponsable.ci.length < 7 || editedResponsable.ci.length > 8) {
+        newErrors.ci = "El CI debe tener entre 7 y 8 dígitos.";
+    }
+
+    if (!editedResponsable.email.trim()) {
+        newErrors.email = "El email es obligatorio.";
+    } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/.test(editedResponsable.email)) {
+        newErrors.email = "Formato de correo inválido. Ej: usuario@dominio.com";
+    }
+
+    if (editedResponsable.telefono && editedResponsable.telefono.length !== 8) {
+        newErrors.telefono = "El teléfono debe tener exactamente 8 dígitos.";
+    }
+
+    if (!editedResponsable.area.trim()) {
+        newErrors.area = "Debe seleccionar un área.";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+};
+
+// ========================= VALIDACIÓN INDIVIDUAL =========================
+    
+// Validar un campo individual
+const validateField = (name: string, value: string) => {
+    const newErrors = { ...errors };
+
+    switch (name) {
+        case "nombre":
+            if (!value.trim()) newErrors.nombre = "El nombre es obligatorio.";
+            else delete newErrors.nombre;
+            break;
+
+        case "apellidos":
+            if (!value.trim()) newErrors.apellidos = "Los apellidos son obligatorios.";
+            else delete newErrors.apellidos;
+            break;
+
+        case "ci":
+            if (!value.trim()) newErrors.ci = "El CI es obligatorio.";
+            else if (value.length < 7 || value.length > 8)
+                newErrors.ci = "El CI debe tener entre 7 y 8 dígitos.";
+            else delete newErrors.ci;
+            break;
+
+        case "email":
+            if (!value.trim()) newErrors.email = "El email es obligatorio.";
+            else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/.test(value))
+                newErrors.email = "Formato de correo inválido. Ej: usuario@dominio.com";
+            else delete newErrors.email;
+            break;
+
+        case "telefono":
+            if (value && value.length !== 8)
+                newErrors.telefono = "El teléfono debe tener exactamente 8 dígitos.";
+            else delete newErrors.telefono;
+            break;
+
+        case "area":
+            if (!value.trim()) newErrors.area = "Debe seleccionar un área.";
+            else delete newErrors.area;
+            break;
+    }
+
+    setErrors(newErrors);
+};
+
+// ========================= MANEJO DE INPUTS =========================
+const limits: Record<string, number> = {
+    nombre: 50,
+    apellidos: 50,
+    email: 50
+};  
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+
+    // 1. Quitar emojis
+    let cleaned = value.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "");
+
+    // 2. CI → solo números máx 8
+    if (name === "ci") {
+        cleaned = cleaned.replace(/[^0-9]/g, "").slice(0, 8);
+        setEditedResponsable(prev => ({ ...prev, ci: cleaned }));
+        validateField(name, cleaned);
+        return;
+    }
+
+    // 3. Teléfono → solo números máx 8
+    if (name === "telefono") {
+        cleaned = cleaned.replace(/[^0-9]/g, "").slice(0, 8);
+        setEditedResponsable(prev => ({
+            ...prev,
+            telefono: cleaned === "" ? null : cleaned
+        }));
+        validateField(name, cleaned);
+        return;
+    }
+
+    // 4. Nombre y apellidos → solo letras + límite
+    if (name === "nombre" || name === "apellidos") {
+        cleaned = cleaned
+            .replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "") // solo letras
+            .slice(0, limits[name]);                // límite
+    }
+
+    if (limits[name]) {
+            cleaned = cleaned.slice(0, limits[name]);
+        }
+
+    // Guardar valor limpio
+    setEditedResponsable(prev => ({ ...prev, [name]: cleaned }));
+
+    // Validar en tiempo real!!
+    validateField(name, cleaned);
+};
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSave(editedResponsable);
+  if (!validate()) {
+        return; // No enviar al backend
+    }
+    onSave(editedResponsable);
     };
 
     if (!isOpen) return null;
@@ -83,7 +206,7 @@ export function EditResponsableModal({
                         {usuario ? 'Editar Responsable' : 'Nuevo Responsable'}
                     </h3>
                     <button
-                        onClick={onCancel}
+                        onClick={() => { resetForm(); onCancel(); }}
                         className="modal-close-btn"
                         type="button"
                     >
@@ -91,7 +214,7 @@ export function EditResponsableModal({
                     </button>
                 </div>
                 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} noValidate>
                     <div className="modal-form-grid">
                         <div className="modal-form-group">
                             <label className="modal-label">
@@ -102,10 +225,11 @@ export function EditResponsableModal({
                                 name="nombre"
                                 value={editedResponsable.nombre}
                                 onChange={handleChange}
-                                className="modal-input"
+                                className={`modal-input ${errors.nombre ? 'input-error' : ''}`}
                                 placeholder="Ingrese nombre de pila"
                                 required
                             />
+                            {errors.nombre && <p className="input-error-message">{errors.nombre}</p>}
                         </div>
 
                         {/* AGREGADO: Campo Apellidos */}
@@ -118,10 +242,11 @@ export function EditResponsableModal({
                                 name="apellidos"
                                 value={editedResponsable.apellidos}
                                 onChange={handleChange}
-                                className="modal-input"
+                                className={`modal-input ${errors.apellidos ? 'input-error' : ''}`}
                                 placeholder="Ingrese apellidos"
                                 required
                             />
+                            {errors.apellidos && <p className="input-error-message">{errors.apellidos}</p>}
                         </div>
                         
                         <div className="modal-form-group">
@@ -133,10 +258,11 @@ export function EditResponsableModal({
                                 name="ci" 
                                 value={editedResponsable.ci}
                                 onChange={handleChange}
-                                className="modal-input"
+                                className={`modal-input ${errors.ci ? 'input-error' : ''}`}
                                 placeholder="Número de documento"
                                 required
                             />
+                            {errors.ci && <p className="input-error-message">{errors.ci}</p>}
                         </div>
                         
                         <div className="modal-form-group">
@@ -148,10 +274,11 @@ export function EditResponsableModal({
                                 name="email"
                                 value={editedResponsable.email}
                                 onChange={handleChange}
-                                className="modal-input"
+                                className={`modal-input ${errors.email ? 'input-error' : ''}`}
                                 placeholder="correo@ejemplo.com"
                                 required
                             />
+                            {errors.email && <p className="input-error-message">{errors.email}</p>}
                         </div>
                         
                         <div className="modal-form-group">
@@ -164,9 +291,10 @@ export function EditResponsableModal({
                                 name="telefono"
                                 value={editedResponsable.telefono || ''}
                                 onChange={handleChange}
-                                className="modal-input"
-                                placeholder="555-1234"
+                                className={`modal-input ${errors.telefono ? 'input-error' : ''}`}
+                                placeholder="Ej: 77788999"
                             />
+                            {errors.telefono && <p className="input-error-message">{errors.telefono}</p>}
                         </div>
                         
                         <div className="modal-form-group">
@@ -177,7 +305,7 @@ export function EditResponsableModal({
                                 name="area"
                                 value={editedResponsable.area}
                                 onChange={handleChange}
-                                className="modal-input"
+                                className={`modal-input ${errors.area ? 'input-error' : ''}`}
                                 required
                             >
                                 <option value="">Seleccione un área</option>
@@ -185,6 +313,7 @@ export function EditResponsableModal({
                                     <option key={area} value={area}>{area}</option>
                                 ))}
                             </select>
+                            {errors.area && <p className="input-error-message">{errors.area}</p>}
                         </div>
                         
                         {/* ELIMINADO: Se quita el campo Cargo */}
@@ -193,7 +322,7 @@ export function EditResponsableModal({
                     <div className="modal-footer">
                         <button
                             type="button"
-                            onClick={onCancel}
+                            onClick={() => { resetForm(); onCancel(); }}
                             className="modal-btn modal-btn-cancel"
                         >
                             Cancelar

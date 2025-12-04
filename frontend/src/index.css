@@ -1057,3 +1057,14 @@ td.medallero {
   transform: scale(1.05);
   transition: transform 0.2s ease;
 }
+
+.input-error {
+    border-color: #dc2626 !important;
+    background-color: #fef2f2;
+}
+
+.input-error-message {
+    color: #dc2626;
+    font-size: 12px;
+    margin-top: 4px;
+}
