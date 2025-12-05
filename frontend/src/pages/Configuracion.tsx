@@ -13,7 +13,7 @@ const Historial: React.FC = () => {
   const historialTabs = [
     //{ id: 'cambios', label: 'Log de cambios' },
     { id: 'parametrizacion', label: 'Parametrización del Medallero' },
-    { id: 'finalizacion', label: 'Finalización del Proceso' },
+    { id: 'cronograma', label: 'Cronograma' },
   ];
 
   // Cada página tiene su propia lógica de qué mostrar según la pestaña activa
@@ -27,7 +27,7 @@ const Historial: React.FC = () => {
       );
       case 'parametrizacion':
         return <ParametrizacionMedallero />;
-      case 'finalizacion':
+      case 'cronograma':
         return (
         <div className="en-desarrollo">
           <p>En desarrollo</p>

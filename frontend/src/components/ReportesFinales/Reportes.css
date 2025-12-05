@@ -178,9 +178,11 @@
 
 /* ========== TABLA ========== */
 .table-container {
-  overflow-x: auto;
+  overflow-x: auto; /* permite scroll horizontal */
+  overflow-y: hidden;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
+  background-color: white;
 }
 
 .participantes-table {
@@ -190,7 +192,7 @@
 }
 
 .participantes-table thead {
-  background-color: #3b82f6;
+  background-color: #1d4ed8;
 }
 
 .participantes-table th {

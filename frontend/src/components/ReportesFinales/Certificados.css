@@ -1,12 +1,5 @@
 /* Certificados.css */
 
-/* Contenedor de tabla */
-.table-container {
-  overflow-x: auto;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-}
-
 .participantes-table {
   width: 100%;
   border-collapse: collapse;

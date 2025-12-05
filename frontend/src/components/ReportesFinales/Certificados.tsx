@@ -392,8 +392,8 @@ const expandirFilas = (lista: any[]) => {
       />
 
       {/* TABLA */}
-      <div className="table-container">
-        <table className="participantes-table">
+      <div className="ceremonia-table-container">
+        <table className="ceremonia-table">
           <thead>
             <tr>
               <th>NOMBRE</th>
