@@ -16,16 +16,12 @@ class Primera_Fase_Controller extends Controller
         DB::beginTransaction();
 
         try {
-            // Obtener fase orden 1
             $fase = Fase::where('orden', 1)->firstOrFail();
 
-            // Obtener todos los niveles (para crear toda la fase)
             $niveles = Nivel::with('olimpistas')->get();
 
-            // 1. CREAR TODA LA FASE (si no existe)
             foreach ($niveles as $nivel) {
 
-                // Crear nivel_fase
                 $nivelFase = Nivel_Fase::firstOrCreate(
                     [
                         'id_fase' => $fase->id_fase,
@@ -72,7 +68,6 @@ class Primera_Fase_Controller extends Controller
                 }
             }
 
-            // Hasta aquí se creó TODA la fase correctamente
             DB::commit();
 
         } catch (\Exception $e) {
@@ -83,7 +78,6 @@ class Primera_Fase_Controller extends Controller
             ], 500);
         }
 
-        // 2. AHORA SOLO DEVUELVE EL NIVEL SELECCIONADO
         try {
 
             $nivel = Nivel::with('area', 'olimpistas')->findOrFail($idNivel);
