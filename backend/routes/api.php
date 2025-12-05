@@ -24,11 +24,13 @@ use App\Http\Controllers\Reporte_Premiacion_Controller;
 use App\Http\Controllers\Reporte_PagOficial_Controller;
 use App\Http\Controllers\Reporte_Ceremonia_Controller;
 
+use App\Http\Controllers\Log_Controller;
+
 use App\Http\Controllers\Evaluador_Nivel_Controller ;
 
 Route::post('/login', [AuthController::class, 'login']);
 
-// ¡NUEVAS RUTAS PARA RESETEO DE CONTRASEÑA!
+
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
@@ -74,24 +76,27 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:evaluador')->group(function () {
 
-        // Endpoint CERO: Obtener la info del evaluador y sus fases
-        //Route::get('/evaluador/inicio/{idNivel?}', [Evaluador_Controller::class, 'obtenerDatosIniciales']);//si
         Route::get('/evaluador/datos-iniciales/{idNivel?}', [Evaluador_Controller::class, 'obtenerDatosIniciales']);
 
         Route::get('/evaluador/niveles', [Evaluador_Nivel_Controller ::class, 'obtenerNivelesEvaluador']);
+
+        Route::put('/log/{id_evaluacion}', [Log_Controller::class, 'updateNota']);
+
     });
 
     Route::get('/nivel-fase/{id_nivel_fase}', [Nivel_Fase_Controller::class, 'mostrar']);//ver el estado y el comentario de la fase (no se si deberia ir a responsable y evaluador ... )//si
 
-    Route::get('/primera/fase/{idNivel}', [Primera_Fase_Controller::class, 'generarYObtenerPrimeraFase']);//si
+    Route::get('/primera/fase/{idNivel}', [Primera_Fase_Controller::class, 'generarYObtenerPrimeraFase']);
 
-    Route::post('/clasificacion/{id_nivel_fase}', [Clasificacion_Controller::class, 'registrarEvaluaciones']);//si
-    Route::post('/fase-nivel/siguiente/{idNivel}', [Fase_Dinamico_Controller::class, 'crearSiguienteFase']);//si
-    Route::get('/cantidad/fases/{idNivel}', [Fase_Lista_Controller::class, 'listarFasesPorNivel']);//2 si
-    Route::get('/fase/{idNivelFase}', [Fase_Consulta_Controller::class, 'mostrarFase']);//3 si
+    Route::post('/clasificacion/{id_nivel_fase}', [Clasificacion_Controller::class, 'registrarEvaluaciones']);
+    Route::post('/fase-nivel/siguiente/{idNivel}', [Fase_Dinamico_Controller::class, 'crearSiguienteFase']);
+    Route::get('/cantidad/fases/{idNivel}', [Fase_Lista_Controller::class, 'listarFasesPorNivel']);
+    Route::get('/fase/{idNivelFase}', [Fase_Consulta_Controller::class, 'mostrarFase']);
 
     //informes -reportes
     Route::get('/reporte-premiacion/{id_area}/{id_nivel}', [Reporte_Premiacion_Controller::class, 'generarReporte']);
     Route::get('/reporte-oficial/{id_area}/{id_nivel}', [Reporte_PagOficial_Controller::class, 'obtenerPremiados']);
     Route::get('/reporte-ceremonia/{id_area}/{id_nivel}', [Reporte_Ceremonia_Controller::class, 'obtenerPremiados']);
 }); 
+
+
