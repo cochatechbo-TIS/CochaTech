@@ -5,13 +5,12 @@ import { TabNavigation } from '../components/tabNavegacion/TabNavigation';
 import ParametrizacionMedallero from '../components/configuracion/ParametrizacionMedallero';
 //import FinalizacionProceso from '../components/historial/FinalizacionProceso';
 
-type HistorialTab = 'cambios' | 'parametrizacion' | 'finalizacion';
+type HistorialTab = 'parametrizacion' | 'cronograma';
 
 const Historial: React.FC = () => {
   const [activeTab, setActiveTab] = useState<HistorialTab>('parametrizacion');
 
   const historialTabs = [
-    //{ id: 'cambios', label: 'Log de cambios' },
     { id: 'parametrizacion', label: 'Parametrización del Medallero' },
     { id: 'cronograma', label: 'Cronograma' },
   ];
@@ -19,12 +18,6 @@ const Historial: React.FC = () => {
   // Cada página tiene su propia lógica de qué mostrar según la pestaña activa
   const renderActiveTab = () => {
     switch (activeTab) {
-      case 'cambios':
-        return (
-        <div className="en-desarrollo">
-          <p>En desarrollo</p>
-        </div>
-      );
       case 'parametrizacion':
         return <ParametrizacionMedallero />;
       case 'cronograma':
