@@ -29,7 +29,6 @@ const responsableNavItems = [
 const evaluadorNavItems = [
   { name: 'Inicio', path: '/evaluador/inicio', icon: LayoutDashboard },
   { name: 'Evaluación', path: '/evaluador/evaluacion', icon: ChartColumn },
-  { name: 'Informes', path: '/evaluador/informes', icon: FileText },
 ];
 
 const Navbar = () => {

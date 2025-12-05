@@ -34,9 +34,6 @@ const MenuDesplegable: React.FC<MenuDesplegableProps> = ({ onLogout, onProfile }
 
       {isOpen && (
         <div className="dropdown-menu">
-          <button onClick={onProfile} className="dropdown-item">
-            Perfil
-          </button>
           <button onClick={onLogout} className="dropdown-item">
             Cerrar Sesión
           </button>

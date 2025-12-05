@@ -1,7 +1,7 @@
 // src/pages/Configuracion.tsx
 
 import React, { useState } from 'react';
-import { TabNavigation } from '../components/registro/TabNavigation';
+import { TabNavigation } from '../components/tabNavegacion/TabNavigation';
 import ParametrizacionMedallero from '../components/configuracion/ParametrizacionMedallero';
 //import FinalizacionProceso from '../components/historial/FinalizacionProceso';
 

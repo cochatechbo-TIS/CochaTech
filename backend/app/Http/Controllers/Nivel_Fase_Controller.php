@@ -55,3 +55,4 @@ class Nivel_Fase_Controller extends Controller
         return response()->json($nivelFase, 200);
     }
 }
+

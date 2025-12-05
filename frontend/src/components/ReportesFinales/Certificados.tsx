@@ -3,6 +3,7 @@ import "./Certificados.css";
 import api from "../../services/api";
 import { useFiltrosAreaNivel } from "../../hooks/useFiltrosAreaNivel";
 import FiltrosAreaNivel from "../../components/filtrosAreaNivel/FiltrosAreaNivel";
+import { ChevronDown } from "lucide-react";
 
 interface Participante {
   id: number;
@@ -22,6 +23,7 @@ interface Participante {
 const Certificados = () => {
   const [participantes, setParticipantes] = useState<Participante[]>([]);
   const [busqueda, setBusqueda] = useState("");
+  const [showMenu, setShowMenu] = useState(false);
 
   // Usuario
   const storedUser = localStorage.getItem("user");
@@ -333,13 +335,30 @@ const expandirFilas = (lista: any[]) => {
       {/* TÍTULO Y BOTONES */}
       <div className="content-header">
         <h3 className="content-title">Lista Certificados</h3>
-        <div className="export-buttons">
-          <button className="btn-export btn-csv" onClick={handleExportarCSV}>EXPORTAR CSV</button>
-          <button className="btn-export btn-excel" onClick={handleExportarExcel}>EXPORTAR EXCEL</button>
-          <button className="btn-export btn-pdf" onClick={handleExportarPDF}>EXPORTAR PDF</button>
-        </div>
-      </div>
+        <div className="export-dropdown">
+  <button
+    className="export-main-button"
+    onClick={() => setShowMenu(!showMenu)}
+  >
+    <span>Exportar</span>
+    <ChevronDown size={16} />
+  </button>
 
+  {showMenu && (
+    <div className="export-menu">
+      <button onClick={handleExportarCSV}>
+        <i className="icon-file"></i> Exportar CSV
+      </button>
+      <button onClick={handleExportarExcel}>
+        <i className="icon-excel"></i> Exportar Excel
+      </button>
+      <button onClick={handleExportarPDF}>
+        <i className="icon-pdf"></i> Exportar PDF
+      </button>
+    </div>
+  )}
+</div>
+      </div>
       {/* FILTROS */}
       <FiltrosAreaNivel
         areas={areas}
