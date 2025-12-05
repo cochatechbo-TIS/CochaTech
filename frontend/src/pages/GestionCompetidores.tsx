@@ -1,4 +1,3 @@
-/* eslint-disable no-irregular-whitespace */
 // src/pages/GestionCompetidores.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
@@ -257,12 +256,28 @@ const GestionCompetidores: React.FC = () => {
     showNotification('Función GENERAR LISTAS POR ÁREA Y NIVEL - En desarrollo', 'info');
   };
 
-  const competidoresFiltrados = competidores.filter(comp =>
-    comp.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
-    comp.ci.includes(filtro) ||
-    comp.institucion.toLowerCase().includes(filtro.toLowerCase()) ||
-    comp.area.toLowerCase().includes(filtro.toLowerCase())
+  const competidoresFiltrados = competidores.filter(comp => {
+  const txt = filtro.toLowerCase();
+
+  // Nombre unido y también invertido (por si escriben "perez juan")
+  const nombreCompleto = `${comp.nombre} ${comp.apellidos}`.toLowerCase();
+  const nombreInverso = `${comp.apellidos} ${comp.nombre}`.toLowerCase();
+
+  return (
+    comp.nombre.toLowerCase().includes(txt) ||
+    comp.apellidos.toLowerCase().includes(txt) ||
+    nombreCompleto.includes(txt) ||
+    nombreInverso.includes(txt) ||
+    comp.ci.includes(filtro) || 
+    comp.institucion.toLowerCase().includes(txt) ||
+    comp.area.toLowerCase().includes(txt) ||
+    comp.nivel?.toLowerCase().includes(txt) ||
+    comp.contacto_tutor?.toLowerCase().includes(txt) ||
+    comp.nombre_tutor?.toLowerCase().includes(txt) ||
+    comp.departamentoNombre?.toLowerCase().includes(txt) ||
+    comp.grado?.toLowerCase().includes(txt)
   );
+});
 
   const totalPaginas = Math.ceil(competidoresFiltrados.length / COMPETIDORES_POR_PAGINA);
   const indiceInicio = (paginaActual - 1) * COMPETIDORES_POR_PAGINA;

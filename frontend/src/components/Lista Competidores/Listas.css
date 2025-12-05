@@ -173,14 +173,6 @@
   vertical-align: middle;
 }
 
-
-.empty-message {
-  text-align: center;
-  color: #6b7280;
-  font-style: italic;
-  padding: 40px 16px !important;
-}
-
 /* ========== COMPETIDORES ========== */
 .competidores-cell {
   display: flex;

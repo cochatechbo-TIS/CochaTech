@@ -1,7 +1,7 @@
 // src/components/ReportesFinales/Reportes.tsx
 
 import { useState } from "react";
-import "./ReportesFinales.css";
+import "./Reportes.css";
 import { TabNavigation } from "../tabNavegacion/TabNavigation";
 
 import Certificados from "./Certificados";

@@ -1,9 +1,9 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import "./Certificados.css";
 import api from "../../services/api";
 import { useFiltrosAreaNivel } from "../../hooks/useFiltrosAreaNivel";
 import FiltrosAreaNivel from "../../components/filtrosAreaNivel/FiltrosAreaNivel";
-import { ChevronDown } from "lucide-react";
+import { Download, ChevronDown } from "lucide-react";
 
 interface Participante {
   id: number;
@@ -24,6 +24,8 @@ const Certificados = () => {
   const [participantes, setParticipantes] = useState<Participante[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [showMenu, setShowMenu] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
 
   // Usuario
   const storedUser = localStorage.getItem("user");
@@ -160,6 +162,20 @@ const expandirFilas = (lista: any[]) => {
 
   return filas;
 };
+
+  useEffect(() => {
+  const handleClickOutside = (e: MouseEvent) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      setShowMenu(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
+
 
   // ===================================================
   // EXPORTAR CSV
@@ -334,14 +350,15 @@ const expandirFilas = (lista: any[]) => {
     <div className="tab-content">
       {/* TÍTULO Y BOTONES */}
       <div className="content-header">
-        <h3 className="content-title">Lista Certificados</h3>
-        <div className="export-dropdown">
+        <h3 className="content-title">Lista de Certificados</h3>
+        <div className="export-dropdown" ref={dropdownRef}>
   <button
     className="export-main-button"
     onClick={() => setShowMenu(!showMenu)}
   >
+    <Download size={18} className="export-main-icon" />
     <span>Exportar</span>
-    <ChevronDown size={16} />
+    <ChevronDown size={18} className="export-main-chevron"/>
   </button>
 
   {showMenu && (

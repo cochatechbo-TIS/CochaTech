@@ -6,7 +6,6 @@ import type {
   InfoEvaluador, 
   Participante,
   EvaluacionPayload,
-  EvaluadorInicioData
 } from "../interfaces/Evaluacion";
 import EvaluacionTable from "../components/evaluadores/EvaluacionTable";
 import {

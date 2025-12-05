@@ -597,7 +597,7 @@ function ReporteLogs() {
           <tbody>
             {logsFiltrados.length === 0 ? (
               <tr>
-                <td colSpan={10} className="empty-message-logs">
+                <td colSpan={10} className="empty-message">
                   No se encontraron registros con los filtros aplicados
                 </td>
               </tr>

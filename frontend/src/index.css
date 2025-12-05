@@ -353,13 +353,16 @@ font-size: 1rem; /* Reducir el tamaño del logo */
   margin-bottom: 4px;
   align-items: center; /* Centra verticalmente ambos elementos */
   flex-wrap: nowrap;
-  justify-content: space-between;
+  justify-content: flex-start;
+}
+
+.search-container {
+  flex: 1; /* ← AGREGADO: permite que el contenedor se expanda */
+  max-width: 500px; /* ← AGREGADO: limita el ancho máximo */
 }
 
 .search-input-wrapper {
   position: relative;
-  max-width: none; /* Opcional: limita el ancho máximo del buscador */
-  max-width: 500px;
   width: 100%;
 }
 
@@ -1067,4 +1070,10 @@ td.medallero {
     color: #dc2626;
     font-size: 12px;
     margin-top: 4px;
+}
+.empty-message {
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+  padding: 40px 16px !important;
 }

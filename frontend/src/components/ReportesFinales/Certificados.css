@@ -136,14 +136,15 @@
 .export-main-button {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 16px;
+  height: 42px;
   background: white;
   border: 1px solid #d1d5db;
-  padding: 8px 16px;
+  padding-left: 15px;
+  padding-right: 8px;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
   transition: all 0.2s;
 }
 
@@ -151,6 +152,13 @@
   background: #f3f4f6;
 }
 
+.export-main-icon {
+  color: #2563eb;
+} 
+.export-main-chevron {
+  color: #6b7280;
+  margin-left: 4px;
+}
 .export-menu {
   position: absolute;
   top: 44px;
@@ -158,9 +166,9 @@
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  width: 180px;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.1);
-  z-index: 99;
+  width: 150px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+  z-index: 200;
   padding: 6px 0;
 }
 
@@ -169,12 +177,11 @@
   background: none;
   border: none;
   padding: 10px 16px;
-  text-align: left;
   font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   transition: background 0.2s;
 }
 
@@ -182,6 +189,11 @@
   background: #f3f4f6;
 }
 
+.export-menu button svg {
+  width: 18px;
+  height: 18px;
+  color: #2563eb;
+}
 .icon-file {
   color: #374151;
 }
