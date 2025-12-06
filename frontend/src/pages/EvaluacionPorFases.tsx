@@ -217,7 +217,7 @@ const EvaluacionPorFases: React.FC = () => {
     try {
       setLoadingParticipantes(true);
 
-      const res = await guardarYClasificar(faseSeleccionada.id_nivel_fase, payload);
+      await guardarYClasificar(faseSeleccionada.id_nivel_fase, payload);
       showNotification("Lista guardada y enviada para aprobación.", "success");
       
       await cargarParticipantes(faseSeleccionada.id_nivel_fase);

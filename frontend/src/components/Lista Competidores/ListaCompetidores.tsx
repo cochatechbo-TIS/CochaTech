@@ -7,8 +7,6 @@ import axios from 'axios';
 import type { Nivel } from './tipo.ts';
 import api from '../../services/api'; // <-- IMPORTAMOS LA INSTANCIA DE AXIOS
 
-// ========== CONSTANTES ==========
-
 // ========== COMPONENTE PRINCIPAL ==========
 function Listas() {
   const navigate = useNavigate();
@@ -323,8 +321,8 @@ console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
       </div>
 
       {/* Tabla */}
-      <div className="table-container">
-        <h2 className="validacion-subtitle">Área: {isAdmin ? selectedArea || '...' : areaResponsable || '...'}</h2>
+      <h2 className="validacion-subtitle">Área: {isAdmin ? selectedArea || '...' : areaResponsable || '...'}</h2>
+      <div className="tabla-container">
         <table className="niveles-table">
           <thead>
             <tr>

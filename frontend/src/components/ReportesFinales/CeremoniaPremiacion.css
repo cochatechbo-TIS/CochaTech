@@ -177,10 +177,10 @@
 
 /* ========== TABLA ========== */
 .ceremonia-table-container {
-  border: 1px solid #e5e7eb;
   border-radius: 8px;
-  overflow: hidden;
   background-color: white;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
 }
 
 .ceremonia-table {
