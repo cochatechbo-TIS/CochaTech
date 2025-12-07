@@ -12,7 +12,9 @@ class Tipo_Premio extends Model
 
     protected $fillable = [
         'nombre',
-        'orden'
+        'orden',
+        'nota_minima',
+        'nota_maxima'
     ];
 
     public function configuraciones()
