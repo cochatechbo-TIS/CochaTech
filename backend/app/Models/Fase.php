@@ -10,17 +10,37 @@ use Illuminate\Database\Eloquent\Relations\HasMany; // <-- AÑADIDO
 class Fase extends Model
 {
     use HasFactory;
+
     protected $table = 'fase';
     protected $primaryKey = 'id_fase';
     public $timestamps = false;
 
-    /**
-     * Define la relación: Una Fase tiene muchos registros Nivel_Fase.
-     * (ESTA ES LA FUNCIÓN QUE FALTABA)
-     */
-    public function nivel_fases(): HasMany
+    protected $fillable = [
+        'nombre_fase',
+        'fecha_inicio',
+        'fecha_fin',
+    ];
+
+    protected $casts = [
+        'fecha_inicio' => 'datetime',
+        'fecha_fin' => 'datetime',
+    ];
+
+    public function estaActiva(): bool
     {
-        // Esto enlaza 'fase.id_fase' (local) con 'nivel_fase.id_fase' (foránea)
-        return $this->hasMany(Nivel_Fase::class, 'id_fase', 'id_fase');
+        $now = now();
+        return $this->fecha_inicio <= $now && $now <= $this->fecha_fin;
     }
+
+    public function estaExpirada(): bool
+    {
+        //return now()->greaterThan($this->fecha_fin);
+        return now('America/La_Paz')->greaterThan($this->fecha_fin->setTimezone('America/La_Paz'));
+    }
+
+    protected function serializeDate($date)
+    {
+        return $date->setTimezone('America/La_Paz')->format('Y-m-d H:i:s');
+    }
+
 }
