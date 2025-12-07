@@ -342,6 +342,7 @@ const expandirFilas = (lista: any[]) => {
       case "oro": return "posicion-oro";
       case "plata": return "posicion-plata";
       case "bronce": return "posicion-bronce";
+      case "mención": return "posicion-mencion";
       default: return "sin-medalla";
     }
   };
@@ -387,7 +388,7 @@ const expandirFilas = (lista: any[]) => {
         showBusqueda={true}
         busqueda={busqueda}
         onBusquedaChange={setBusqueda}
-        placeholderBusqueda="Buscar por nombre, CI o institución"
+        placeholderBusqueda="Buscar por nombre, CI o unidad educativa..."
         isAdmin={isAdmin}
       />
 
@@ -396,7 +397,7 @@ const expandirFilas = (lista: any[]) => {
         <table className="ceremonia-table">
           <thead>
             <tr>
-              <th>NOMBRE</th>
+              <th>NOMBRE COMPLETO</th>
               {!hayGrupal && <th>CI</th>}
               <th>UNIDAD EDUCATIVA</th>
               <th>DEPARTAMENTO</th>

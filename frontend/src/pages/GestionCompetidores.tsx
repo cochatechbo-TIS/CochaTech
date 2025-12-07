@@ -369,6 +369,7 @@ const GestionCompetidores: React.FC = () => {
         <CargarCSV 
           onVerLista={handleVerLista}
           onGenerarListas={handleGenerarListas}
+          onUploadSuccess={fetchCompetidores}
         />
       </div>
       

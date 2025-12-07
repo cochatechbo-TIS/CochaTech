@@ -10,9 +10,10 @@ import { NotificationModal } from '../common/NotificationModal'; // Importamos e
 type NotificationType = 'success' | 'error' | 'info' | 'confirm';
 
 interface CargarCSVProps {
+  onUploadSuccess?: () => void;
 }
 
-function CargarCSV({}: CargarCSVProps) {
+function CargarCSV({ onUploadSuccess }: CargarCSVProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -77,6 +78,10 @@ function CargarCSV({}: CargarCSVProps) {
 
         showNotification(successMessage, notificationType, notificationTitle);
         console.log('Datos de inserción:', data);
+
+        if (onUploadSuccess) {
+          onUploadSuccess();
+        }
       } else {
         // Usamos el modal de error
         showNotification(data.message || 'Ocurrió un error desconocido durante la carga.', 'error', 'Error en la Carga');
@@ -121,7 +126,7 @@ function CargarCSV({}: CargarCSVProps) {
   const handleVerLista = () => {
   navigate("/administrador/listas");
 };
- 
+
 
   return (
     <div className="management-container">
