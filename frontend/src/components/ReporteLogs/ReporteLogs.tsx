@@ -551,7 +551,7 @@ function ReporteLogs() {
           </svg>
           <input
             type="text"
-            placeholder="Buscar por estudiante, evaluador o motivo..."
+            placeholder="Buscar por estudiante, evaluador o motivo de cambio"
             value={busqueda}
             onChange={handleBusquedaChange}
             className="filtro-input-logs"

@@ -4,6 +4,8 @@ import api from "../../services/api";
 import { useFiltrosAreaNivel } from "../../hooks/useFiltrosAreaNivel";
 import FiltrosAreaNivel from "../../components/filtrosAreaNivel/FiltrosAreaNivel";
 import { Download, ChevronDown } from "lucide-react";
+// ✅ CORRECTO - Desde ReportesFinales hacia certificados
+import {generarCertificadoIndividual,generarCertificadosMasivosUnido} from "../certificados/GeneradorCertificados";
 
 interface Participante {
   id: number;
@@ -23,10 +25,17 @@ interface Participante {
 const Certificados = () => {
   const [participantes, setParticipantes] = useState<Participante[]>([]);
   const [busqueda, setBusqueda] = useState("");
+
   const [showMenu, setShowMenu] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
 
+//-------------
+const [generandoMasivo, setGenerandoMasivo] = useState(false);
+const [progreso, setProgreso] = useState({ actual: 0, total: 0 });
+const [showConfirmMasivo, setShowConfirmMasivo] = useState(false);
+const [certSeleccionado, setCertSeleccionado] = useState<Participante | null>(null);
+const [showConfirmIndividual, setShowConfirmIndividual] = useState(false);
   // Usuario
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser) : null;
@@ -118,6 +127,53 @@ const Certificados = () => {
 
   // Detectar si existe algún ganador grupal
   const hayGrupal = participantesFiltrados.some((p) => p.esGrupal);
+// ===================================================
+  // GENERAR CERTIFICADO INDIVIDUAL
+  // ===================================================
+  const handleGenerarCertificado = useCallback(async (participante: Participante) => {
+  const resultado = await generarCertificadoIndividual(participante);
+
+  if (resultado) {
+    alert(`Certificado generado exitosamente para ${participante.nombre}`);
+  } else {
+    alert('Error al generar el certificado. Por favor, intenta nuevamente.');
+  }
+}, []);
+
+const confirmarGenerarIndividual = useCallback(async () => {
+  if (!certSeleccionado) return;
+
+  setShowConfirmIndividual(false);
+
+  await handleGenerarCertificado(certSeleccionado);
+}, [certSeleccionado, handleGenerarCertificado]);
+
+   // ===================================================
+  // GENERAR CERTIFICADOS MASIVOS
+  // ===================================================
+  //Solo abre el modal
+const handleGenerarTodosCertificados = useCallback(() => {
+  if (participantesFiltrados.length === 0) return;
+  setShowConfirmMasivo(true);
+}, [participantesFiltrados]);
+
+//Se ejecuta al hacer clic en "Aceptar" en el modal
+const confirmarGenerarTodos = useCallback(async () => {
+  setShowConfirmMasivo(false);
+  setGenerandoMasivo(true);
+  setProgreso({ actual: 0, total: participantesFiltrados.length });
+
+  const resultado = await generarCertificadosMasivosUnido(
+    participantesFiltrados,
+    (actual: number, total: number) => {
+      setProgreso({ actual, total });
+    }
+  );
+
+  setGenerandoMasivo(false);
+  alert(resultado.mensaje);
+}, [participantesFiltrados]);
+
 
   // Expande los grupales: una fila por integrante
 const expandirFilas = (lista: any[]) => {
@@ -351,31 +407,44 @@ const expandirFilas = (lista: any[]) => {
       {/* TÍTULO Y BOTONES */}
       <div className="content-header">
         <h3 className="content-title">Lista de Certificados</h3>
-        <div className="export-dropdown" ref={dropdownRef}>
-  <button
-    className="export-main-button"
-    onClick={() => setShowMenu(!showMenu)}
-  >
-    <Download size={18} className="export-main-icon" />
-    <span>Exportar</span>
-    <ChevronDown size={18} className="export-main-chevron"/>
-  </button>
+        <div className="content-header-right">
+    <button 
+      className="btn-export btn-certificado" 
+      onClick={handleGenerarTodosCertificados}
+      disabled={generandoMasivo || participantesFiltrados.length === 0}
+    >
+      {generandoMasivo 
+        ? `GENERANDO... (${progreso.actual}/${progreso.total})`
+        : '📜 GENERAR CERTIFICADOS'
+      }
+    </button>
 
-  {showMenu && (
-    <div className="export-menu">
-      <button onClick={handleExportarCSV}>
-        <i className="icon-file"></i> Exportar CSV
+    <div className="export-dropdown" ref={dropdownRef}>
+      <button
+        className="export-main-button"
+        onClick={() => setShowMenu(!showMenu)}
+      >
+        <Download size={18} className="export-main-icon" />
+        <span>Exportar</span>
+        <ChevronDown size={18} className="export-main-chevron"/>
       </button>
-      <button onClick={handleExportarExcel}>
-        <i className="icon-excel"></i> Exportar Excel
-      </button>
-      <button onClick={handleExportarPDF}>
-        <i className="icon-pdf"></i> Exportar PDF
-      </button>
+
+      {showMenu && (
+        <div className="export-menu">
+          <button onClick={handleExportarCSV}>
+            <i className="icon-file"></i> Exportar CSV
+          </button>
+          <button onClick={handleExportarExcel}>
+            <i className="icon-excel"></i> Exportar Excel
+          </button>
+          <button onClick={handleExportarPDF}>
+            <i className="icon-pdf"></i> Exportar PDF
+          </button>
+        </div>
+      )}
     </div>
-  )}
+  </div>
 </div>
-      </div>
       {/* FILTROS */}
       <FiltrosAreaNivel
         areas={areas}
@@ -406,6 +475,7 @@ const expandirFilas = (lista: any[]) => {
               <th>MEDALLA</th>
               <th>TUTOR</th>
               <th>RESPONSABLE DE ÁREA</th>
+              <th>ACCIONES</th>
             </tr>
           </thead>
 
@@ -433,11 +503,79 @@ const expandirFilas = (lista: any[]) => {
                   </td>
                   <td>{p.profesor}</td>
                   <td>{p.responsableArea}</td>
+                  {/*certificado*/}
+                  <td>
+                    <button 
+                    className="btn-generar-certificado"
+                      onClick={() => {
+                        setCertSeleccionado(p);
+                        setShowConfirmIndividual(true);
+                      }}
+                      disabled={generandoMasivo}
+                    >
+                      📜
+                    </button>
+                  </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
+        {showConfirmMasivo && (
+          <div className="modal-backdrop">
+            <div className="modal">
+              <h3>Generar certificados</h3>
+              <p>
+                ¿Deseas generar <strong>UN PDF</strong> con {participantesFiltrados.length} certificados?
+                <br />
+                Esto puede tomar varios minutos.
+              </p>
+              <div className="modal-actions">
+              <button
+                className="btn-outline"
+                onClick={() => setShowConfirmMasivo(false)}
+                disabled={generandoMasivo}
+              >
+                Cancelar
+              </button>
+              <button
+                className="btn-danger"
+                onClick={confirmarGenerarTodos}
+                disabled={generandoMasivo}
+              >
+                {generandoMasivo ? 'Generando...' : 'Sí, Confirmar'}
+              </button>
+            </div>
+            </div>
+          </div>
+        )}
+        {showConfirmIndividual && certSeleccionado && (
+          <div className="modal-backdrop">
+            <div className="modal">
+              <h3>Generar certificado</h3>
+              <p>
+                ¿Deseas generar el certificado para<br />
+                <strong>{certSeleccionado.nombre}</strong>?
+              </p>
+              <div className="modal-actions">
+                <button
+                  className="btn-outline"
+                  onClick={() => setShowConfirmIndividual(false)}
+                  disabled={generandoMasivo}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="btn-danger"
+                  onClick={confirmarGenerarIndividual}
+                  disabled={generandoMasivo}
+                >
+                  Sí, Confirmar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
