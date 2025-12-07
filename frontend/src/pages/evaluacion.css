@@ -257,3 +257,14 @@
   color: #dc2626;
   font-weight: 600;
 }
+
+.btn-enviado {
+  background: transparent !important;
+  color: #6b7280 !important; /* azul */
+  font-style: italic;
+  border: none;
+  font-weight: 600;
+  cursor: default !important;
+  box-shadow: none !important;
+  padding-left: 0;
+}

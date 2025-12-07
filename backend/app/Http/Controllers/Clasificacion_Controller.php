@@ -122,6 +122,9 @@ class Clasificacion_Controller extends Controller
             }
         }
 
+        $nivelFase->id_estado_fase = 4; // En Revisión AÑADIDO
+        $nivelFase->save(); // Guardar el cambio de estado AÑADIDO
+
         DB::commit();
 
         return response()->json([

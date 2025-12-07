@@ -289,7 +289,7 @@ font-size: 1rem; /* Reducir el tamaño del logo */
 
 /* Estilos generales de la página gestionCompetidores */
 .gestion-competidores-page {
-  padding: 20px 0; 
+  padding: 8px 0; 
   max-width: none; 
   margin: 0; 
   width: 100%; /* Usar porcentaje del viewport */
@@ -1042,7 +1042,7 @@ font-size: 1rem; /* Reducir el tamaño del logo */
 .sin-medalla {
   color: #9ca3af; /* Gris */
   font-style: italic;
-  padding: 8px 20px;
+  padding: 8px 16px;
 }
 
 /* Estilo adicional para la columna de medallero */

@@ -217,10 +217,20 @@ const EvaluacionPorFases: React.FC = () => {
     try {
       setLoadingParticipantes(true);
 
-      const res = await guardarYClasificar(faseSeleccionada.id_nivel_fase, payload);
+      await guardarYClasificar(faseSeleccionada.id_nivel_fase, payload);
       showNotification("Lista guardada y enviada para aprobación.", "success");
       
       await cargarParticipantes(faseSeleccionada.id_nivel_fase);
+
+      // Volver a cargar fases actualizadas desde el backend
+      const data = await getDatosInicialesEvaluador(idNivelSeleccionado!);
+
+      // Volver a setear fases y fase seleccionada
+      setFases(data.fases);
+      const nuevaFase = data.fases.find(f => f.id_nivel_fase === faseSeleccionada.id_nivel_fase);
+      if (nuevaFase) {
+        setFaseSeleccionada(nuevaFase);
+      }
 
     } catch (err: any) {
       showNotification(err.response?.data?.error || "Error al guardar y clasificar.", "error");
@@ -295,13 +305,18 @@ const EvaluacionPorFases: React.FC = () => {
               <span>{participantes.length} participantes en esta fase</span>
             </div>
 
-            <button
-              onClick={confirmarGuardarYClasificar}
-              className="btn btn-green"
-              disabled={!isEditable || loadingParticipantes}
-            >
-              Guardar y Clasificar
-            </button>
+            {faseSeleccionada?.estado === "En Revisión" ? (
+              <span className="btn-enviado">Lista enviada. En revisión</span>
+            ) : (
+              <button
+                onClick={confirmarGuardarYClasificar}
+                className="btn btn-green"
+                disabled={!isEditable || loadingParticipantes}
+              >
+                Guardar y Clasificar
+              </button>
+            )}
+
           </div>
 
           {comentarioRechazo && (

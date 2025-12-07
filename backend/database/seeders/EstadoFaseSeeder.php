@@ -14,6 +14,7 @@ class EstadoFaseSeeder extends Seeder
             ['id_estado_fase' => 1, 'nombre_estado' => 'En Proceso'],
             ['id_estado_fase' => 2, 'nombre_estado' => 'Aprobada'],
             ['id_estado_fase' => 3, 'nombre_estado' => 'Rechazada'],
+            ['id_estado_fase' => 4, 'nombre_estado' => 'En Revisión'],
         ];
 
         foreach ($estados as $estado) {

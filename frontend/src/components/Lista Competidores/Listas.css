@@ -27,7 +27,7 @@
   text-align: left;
   color: #2563eb;
   font-weight: 500;
-  margin: 0;
+  margin: 0 0 8px 0;
 }
 
 /* ========== BUSCADOR ========== */
@@ -123,12 +123,13 @@
 }
 
 /* ========== TABLA ========== */
-.table-container {
+.tabla-container {
+  border-radius: 8px;
   background-color: white;
   text-align: center;
-  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(243, 126, 126, 0.1);
+  width: 100%;
 }
 
 .niveles-table {
@@ -142,20 +143,19 @@
 }
 
 .niveles-table th {
-  padding: 16px;
+  padding: 12px 16px;
   text-align: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: white;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  
-}
+ }
 
 .niveles-table tbody tr {
   border-bottom: 1px solid #e5e7eb;
   transition: background-color 0.2s;
-  
+  background-color: white;
 }
 
 .niveles-table tbody tr:hover {
@@ -167,7 +167,7 @@
 }
 
 .niveles-table td {
-  padding: 20px 16px;
+  padding: 14px 16px;
   font-size: 14px;
   color: #374151;
   vertical-align: middle;
@@ -177,6 +177,7 @@
 .competidores-cell {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
@@ -189,6 +190,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  align-items: center;
 }
 
 .progress-bar {
@@ -432,8 +434,9 @@
     font-size: 18px;
   }
 
-  .table-container {
+  .tabla-container {
     overflow-x: auto;
+    overflow-y: hidden;
   }
 
   .niveles-table {
