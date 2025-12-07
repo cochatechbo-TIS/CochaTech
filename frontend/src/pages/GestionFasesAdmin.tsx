@@ -347,7 +347,6 @@ const GestionFasesAdmin: React.FC = () => {
   const handleAprobar = async () => {
     if (!faseSeleccionada || !nivelId || !infoNivel) return;
 
-    try {
       const esUltimaFaseActual = infoNivel.es_Fase_final;
 
       // Mensaje de confirmación dinámico
@@ -355,8 +354,13 @@ const GestionFasesAdmin: React.FC = () => {
         ? "¿Está seguro de aprobar esta fase final? Esta acción marcará la fase como completada."
         : "¿Está seguro de aprobar esta fase? Esta acción generará la siguiente fase con los participantes clasificados.";
 
-      if (!window.confirm(confirmMessage)) return;
-
+      showNotification(
+        confirmMessage,
+        "confirm",
+        async () => {
+          closeNotification();
+      
+      try {
       if (esUltimaFaseActual) {
         // Lógica para la última fase: solo aprobar
         await api.post(`/nivel-fase/aprobar/${faseSeleccionada.id_nivel_fase}`);
@@ -376,8 +380,10 @@ const GestionFasesAdmin: React.FC = () => {
       }
       showNotification(errorMsg, 'error');
     }
-  };
-  
+  },
+    "Confirmar Aprobación"
+      );
+    };
   // Lógica de rechazo extraída para ser llamada por el modal
   const executeRechazar = async (comentario: string) => {
     if (!faseSeleccionada) return;
