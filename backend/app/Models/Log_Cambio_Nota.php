@@ -26,5 +26,5 @@ class Log_Cambio_Nota extends Model
         'nota_anterior',
         'nota_nueva',
         'motivo'
-    ];
+    ];  
 }
