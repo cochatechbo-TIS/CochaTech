@@ -1,3 +1,4 @@
+/* CeremoniaPremiacion.css */
 /* ========== CONTENEDOR CEREMONIA ========== */
 .ceremonia-container {
   width: 100%;
@@ -220,13 +221,6 @@
   font-size: 14px;
   color: #374151;
   vertical-align: middle;
-}
-
-.empty-message {
-  text-align: center;
-  color: #6b7280;
-  font-style: italic;
-  padding: 40px 16px !important;
 }
 
 /* ========== BADGES DE POSICIÓN ========== */

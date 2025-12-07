@@ -21,8 +21,6 @@ export const getDatosInicialesEvaluador = async (idNivel?: number): Promise<Eval
   return response.data as EvaluadorInicioData;
 };
 
-
-
 /**
  * 2. OBTENER PARTICIPANTES (Cargar la tabla)
  * Llama al nuevo controlador de tu compañero.
@@ -50,20 +48,8 @@ export async function guardarYClasificar(
   return response.data;
 }
 
-/**
- * 4. ENVIAR LISTA (Crear Siguiente Fase)
- * Llama al nuevo controlador 'Fase_Dinamico'.
- */
-export async function enviarListaYCrearSiguienteFase(
-  idNivel: number 
-): Promise<{ message: string }> {
-  const response = await api.post(`/fase-nivel/siguiente/${idNivel}`);
-  return response.data;
-}
-
 // Servicio para obtener los niveles del evaluador actual
 // src/services/evaluadorService.ts
-
 
 export const getNivelesEvaluador = async () => {
   const res = await api.get("/evaluador/niveles"); // GET

@@ -55,7 +55,17 @@ export function CompetitorTable({ competitors, onEdit, onDelete }: CompetitorTab
             </tr>
           </thead>
           <tbody className="competitor-table-body">
-            {competitors.map((competitor) => (
+            {competitors.length === 0 ? (
+              <tr>
+                <td 
+                  colSpan={11}
+                  className="empty-message"
+                >
+                  No se encontraron competidores que coincidan con la búsqueda.
+              </td>
+            </tr>
+          ) : (
+            competitors.map((competitor) => (
               <tr key={competitor.ci} className="competitor-table-row">
                 <td className="competitor-table-td competitor-table-td-name">{competitor.nombre}</td>
                 <td className="competitor-table-td">{competitor.apellidos}</td> 
@@ -86,7 +96,8 @@ export function CompetitorTable({ competitors, onEdit, onDelete }: CompetitorTab
                   </div>
                 </td>
               </tr>
-            ))}
+            ))
+          )}
           </tbody>
         </table>
       </div>

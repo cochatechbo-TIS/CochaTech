@@ -6,7 +6,6 @@ import type {
   InfoEvaluador, 
   Participante,
   EvaluacionPayload,
-  EvaluadorInicioData
 } from "../interfaces/Evaluacion";
 import EvaluacionTable from "../components/evaluadores/EvaluacionTable";
 import {
@@ -18,6 +17,9 @@ import {
 } from "../services/evaluacionService";
 import { User, CalendarDays, Users } from 'lucide-react';
 import "./evaluacion.css";
+import { NotificationModal } from "../components/common/NotificationModal";
+
+type NotificationType = 'success' | 'error' | 'info' | 'confirm';
 
 const EvaluacionPorFases: React.FC = () => {
 
@@ -35,18 +37,40 @@ const EvaluacionPorFases: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [loadingParticipantes, setLoadingParticipantes] = useState(false);
 
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-
   const [comentarioRechazo, setComentarioRechazo] = useState<string | null>(null);
   const [esFaseFinal, setEsFaseFinal] = useState(false);
   const [faseCreada, setFaseCreada] = useState(false);
+
+  // 🆕 ESTADOS DEL MODAL
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalType, setModalType] = useState<NotificationType>('info');
+  const [modalTitle, setModalTitle] = useState<string | undefined>(undefined);
+  const [modalOnConfirm, setModalOnConfirm] = useState<((value?: string) => void) | undefined>(undefined);
 
   const fechaActual = new Date().toLocaleString("es-ES", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
+
+  const showNotification = (
+    message: string, 
+    type: NotificationType = 'info', 
+    title?: string,
+    onConfirm?: (value?: string) => void
+  ) => {
+    setModalMessage(message);
+    setModalType(type);
+    setModalTitle(title);
+    setModalOnConfirm(() => onConfirm); // Usar un callback para funciones asíncronas
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setModalOnConfirm(undefined);
+  };
 
   // Cargar los niveles del evaluador
   useEffect(() => {
@@ -55,7 +79,7 @@ const EvaluacionPorFases: React.FC = () => {
         const data = await getNivelesEvaluador();
         setNivelesEvaluador(data.niveles || []);
       } catch {
-        setError("No se pudieron cargar los niveles del evaluador.");
+        showNotification("No se pudieron cargar los niveles del evaluador.", "error");
       }
     };
     cargarNiveles();
@@ -74,18 +98,12 @@ const EvaluacionPorFases: React.FC = () => {
     }
   }, [faseSeleccionada]);
 
-  const clearMessages = () => {
-    setError(null);
-    setSuccess(null);
-  };
-
   // CORRECCIÓN: Ahora siempre se actualiza correctamente idNivelSeleccionado
   const cargarDatosIniciales = async (idNivel?: number) => {
     try {
       setLoading(true);
-      clearMessages();
       
-          // Esperar a que los niveles estén cargados
+    // Esperar a que los niveles estén cargados
     if (nivelesEvaluador.length === 0) {
       console.log("Niveles aún no listos, esperando...");
       return;
@@ -100,25 +118,26 @@ const EvaluacionPorFases: React.FC = () => {
         throw new Error("No se pudo determinar el nivel del evaluador.");
       }
       console.log("Cargando datos para nivel:", nivelUsar);
-    // 1️⃣ Obtener datos iniciales normales
+    // Obtener datos iniciales normales
     let data = await getDatosInicialesEvaluador(nivelUsar);
 
-    // 2️⃣ SI NO EXISTEN FASES → CREAR AUTOMÁTICAMENTE
+    // SI NO EXISTEN FASES → CREAR AUTOMÁTICAMENTE
     if (!data.fases || data.fases.length === 0) {
-      console.warn("➡ No hay fases. Generando PRIMERA FASE automáticamente...");
+      console.warn("No hay fases. Generando PRIMERA FASE automáticamente...");
 
        // evitar doble creación
   if (faseCreada) {
     console.log("Fase ya creada previamente, evitando doble ejecución");
   } else {
-    console.warn("➡ No hay fases. Generando PRIMERA FASE automáticamente...");
+    console.warn("No hay fases. Generando PRIMERA FASE automáticamente...");
     await generarPrimeraFase(nivelUsar);
     setFaseCreada(true);
+    showNotification("Primera fase generada automáticamente.", "info");
   }
 
   // recargar datos
   data = await getDatosInicialesEvaluador(nivelUsar);
-}
+  }
     
      if (!data.infoEvaluador) {
       throw new Error("No se recibió información del evaluador.");
@@ -136,7 +155,7 @@ const EvaluacionPorFases: React.FC = () => {
       
     } catch (err: any) {
       console.error("Error al cargar datos iniciales:", err);
-      setError(err.response?.data?.message || err.message);
+      showNotification(err.response?.data?.message || err.message, "error");
     } finally {
       setLoading(false);
     }
@@ -147,7 +166,6 @@ const EvaluacionPorFases: React.FC = () => {
   const cargarParticipantes = async (idNivelFase: number) => {
     try {
       setLoadingParticipantes(true);
-      clearMessages();
 
       const data = await getParticipantesPorFase(idNivelFase);
       setParticipantes(data.resultados || data.equipos || []);
@@ -159,7 +177,7 @@ const EvaluacionPorFases: React.FC = () => {
       }
 
     } catch (err: any) {
-      setError(err.response?.data?.message || "No se pudieron cargar los participantes.");
+      showNotification(err.response?.data?.message || "No se pudieron cargar los participantes.", "error");
     } finally {
       setLoadingParticipantes(false);
     }
@@ -172,8 +190,22 @@ const EvaluacionPorFases: React.FC = () => {
     cargarDatosIniciales(nuevoId);
   };
 
-  const handleGuardarYClasificar = async () => {
+  const confirmarGuardarYClasificar = () => {
     if (!faseSeleccionada) return;
+
+    // Reemplazamos window.confirm por el modal de confirmación
+    showNotification(
+      "Se guardarán las notas y la lista será enviada al responsable de área para aprobación.\n¿Confirmar el envío?",
+      'confirm',
+      'Confirmar Envio y Clasificación',
+      ejecutarGuardarYClasificar // Pasamos la función a ejecutar si confirman
+    );
+  }
+
+  const ejecutarGuardarYClasificar = async () => {
+    if (!faseSeleccionada) return;
+
+    handleCloseModal();
 
     const payload: EvaluacionPayload[] = participantes.map(p => ({
       id_evaluacion: p.id_evaluacion,
@@ -182,19 +214,16 @@ const EvaluacionPorFases: React.FC = () => {
       falta_etica: p.falta_etica ?? false,
     }));
 
-    if (!window.confirm("¿Estás seguro de guardar y clasificar?")) return;
-
     try {
       setLoadingParticipantes(true);
-      clearMessages();
 
       const res = await guardarYClasificar(faseSeleccionada.id_nivel_fase, payload);
-      setSuccess(res.message);
-
+      showNotification("Lista guardada y enviada para aprobación.", "success");
+      
       await cargarParticipantes(faseSeleccionada.id_nivel_fase);
 
     } catch (err: any) {
-      setError(err.response?.data?.error || "Error al guardar y clasificar.");
+      showNotification(err.response?.data?.error || "Error al guardar y clasificar.", "error");
     } finally {
       setLoadingParticipantes(false);
     }
@@ -243,9 +272,6 @@ const EvaluacionPorFases: React.FC = () => {
         </div>
       )}
 
-      {error && <div className="alerta alerta-error">{error}</div>}
-      {success && <div className="alerta alerta-exito">{success}</div>}
-
       <div className="fases-tabs">
         {fases.map(f => (
           <button
@@ -270,7 +296,7 @@ const EvaluacionPorFases: React.FC = () => {
             </div>
 
             <button
-              onClick={handleGuardarYClasificar}
+              onClick={confirmarGuardarYClasificar}
               className="btn btn-green"
               disabled={!isEditable || loadingParticipantes}
             >
@@ -293,6 +319,16 @@ const EvaluacionPorFases: React.FC = () => {
           />
         </>
       )}
+      {/* 🆕 RENDERIZADO DEL MODAL */}
+      <NotificationModal
+        isVisible={modalVisible}
+        message={modalMessage}
+        type={modalType}
+        title={modalTitle}
+        onClose={handleCloseModal}
+        onConfirm={modalOnConfirm}
+        // Aquí podrías añadir isConfirmDisabled si fuera necesario, por ejemplo, para el tipo 'input'
+      />
     </div>
   );
 };
