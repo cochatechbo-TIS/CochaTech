@@ -494,7 +494,7 @@ const GestionFasesAdmin: React.FC = () => {
         </div>
         
         {/* Botones de acción movidos aquí */}
-        {faseSeleccionada && faseSeleccionada.estado !== 'Aprobada' && (
+        {faseSeleccionada?.estado === 'En Revisión' && (
           <div className="botones-evaluacion">
             <button
               onClick={handleAprobar}
