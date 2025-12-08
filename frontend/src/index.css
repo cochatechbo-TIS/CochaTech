@@ -1077,3 +1077,8 @@ td.medallero {
   font-style: italic;
   padding: 40px 16px !important;
 }
+
+.btn-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
