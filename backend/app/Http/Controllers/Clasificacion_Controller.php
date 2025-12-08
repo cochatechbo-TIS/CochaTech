@@ -35,22 +35,8 @@ class Clasificacion_Controller extends Controller
         $fase  = $nivelFase->fase;
         $nivel = $nivelFase->nivel;
         
-        //  validacion de tiempo de fase
-        if ($fase->estaExpirada()) {
-            return response()->json([
-                'error' => 'La fase ya está cerrada. No puedes registrar evaluaciones.'
-            ], 403);
-        }
 
-        //  bloquear antes de fechainicio:
-        
-        if (now()->lessThan($fase->fecha_inicio)) {
-            return response()->json([
-                'error' => 'La fase aún no está habilitada para evaluaciones.'
-            ], 403);
-        }
-
-        //  NOTA MiNIMA — CORREGIDO
+        // nota minima
 
         $notaMinima = isset($fase->nota_minima)
             ? (float) $fase->nota_minima
