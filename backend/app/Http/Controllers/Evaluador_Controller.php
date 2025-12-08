@@ -251,11 +251,27 @@ class Evaluador_Controller extends Controller
             }
         } 
         else {
-            // Si NO llega idNivel → obtener el primer nivel asignado a algún evaluador
-            $nivel = Nivel::with('area')->whereNotNull('id_evaluador')->first();
+            // OBTENER ID DEL EVALUADOR LOGUEADO
+            $usuario = auth()->user();
+
+            if (!$usuario) {
+                return response()->json(['message' => 'No hay usuario autenticado.'], 401);
+            }
+
+            // Buscar el evaluador correspondiente a ese usuario
+            $evaluadorLogueado = Evaluador::where('id_usuario', $usuario->id_usuario)->first();
+
+            if (!$evaluadorLogueado) {
+                return response()->json(['message' => 'El usuario logueado no es un evaluador.'], 404);
+            }
+
+            // Buscar el primer nivel asignado a este evaluador
+            $nivel = Nivel::with('area')
+                ->where('id_evaluador', $evaluadorLogueado->id_evaluador)
+                ->first();
 
             if (!$nivel) {
-                return response()->json(['message' => 'No existe un nivel asignado a ningún evaluador.'], 404);
+                return response()->json(['message' => 'No hay niveles asignados al evaluador logueado.'], 404);
             }
         }
 
