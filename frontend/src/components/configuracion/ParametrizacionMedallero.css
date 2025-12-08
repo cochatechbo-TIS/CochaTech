@@ -287,3 +287,11 @@
     flex: 1;
   }
 }
+
+.rango-nota-container {
+  background-color: white; /* fondo blanco */
+  padding: 20px;           /* espacio interno */
+  margin-top: 20px;        /* separacion de la tabla */
+  border-radius: 8px;      /* opcional: bordes redondeados */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* sombra opcional */
+}

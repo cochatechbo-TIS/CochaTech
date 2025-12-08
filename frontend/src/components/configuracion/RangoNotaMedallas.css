@@ -1,0 +1,23 @@
+.rnm-container { padding: 1rem; font-family: sans-serif; }
+.rnm-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem; }
+.rnm-title { font-size: 1.125rem; font-weight: 600; }
+.rnm-subtitle { font-size: 0.875rem; color: #4b5563; }
+.rnm-buttons { display: flex; gap: 0.5rem; }
+.rnm-btn-edit { border: 2px solid #d1d5db; border-radius: 0.5rem; padding: 0.25rem 0.75rem; cursor: pointer; }
+.rnm-btn-cancel { border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.25rem 0.75rem; background: #f9fafb; cursor: pointer; }
+.rnm-btn-save { background: #16a34a; color: white; padding: 0.25rem 0.75rem; border-radius: 0.5rem; cursor: pointer; }
+.rnm-slider { position: relative; height: 1rem; background: #e5e7eb; border-radius: 9999px; margin-bottom: 3rem; }
+.rnm-segment { position: absolute; top: 0; height: 100%; border-radius: inherit; transition: all 0.1s ease; }
+.rnm-handle { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 2rem; height: 2rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; cursor: default; }
+.rnm-handle.editable { cursor: grab; background: #3b82f6; }
+.rnm-handle-dot { width: 0.5rem; height: 0.5rem; background: white; border-radius: 50%; }
+.rnm-handle-label { position: absolute; top: -1.5rem; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: bold; padding: 0.125rem 0.25rem; background: #1f2937; color: white; border-radius: 0.25rem; display: none; }
+.rnm-handle-label.active { display: block; background: #2563eb; }
+.rnm-marker { position: absolute; top: 1.5rem; font-size: 0.75rem; font-weight: 500; color: #9ca3af; }
+.rnm-marker.left { left: 0; transform: translateX(-50%); }
+.rnm-marker.right { right: 0; transform: translateX(50%); }
+.rnm-legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0.5rem; }
+.rnm-card { padding: 0.5rem; border-radius: 0.5rem; text-align: center; }
+.rnm-card-emoji { font-size: 1.5rem; margin-bottom: 0.25rem; }
+.rnm-card-label { font-weight: 600; margin-bottom: 0.25rem; }
+.rnm-card-range { font-family: monospace; font-weight: 500; }

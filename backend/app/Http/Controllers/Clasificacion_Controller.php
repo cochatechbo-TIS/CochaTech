@@ -34,7 +34,14 @@ class Clasificacion_Controller extends Controller
 
         $fase  = $nivelFase->fase;
         $nivel = $nivelFase->nivel;
-        
+
+        //si no se configuro las fechas de la fase
+        if ($fase->faltaConfigurarFechas()) {
+            return response()->json([
+                'error' => 'La fase no tiene fechas configuradas. Por favor configure fecha de inicio y fin.'
+            ], 409); 
+        }
+
         //  validacion de tiempo de fase
         if ($fase->estaExpirada()) {
             return response()->json([
@@ -50,7 +57,7 @@ class Clasificacion_Controller extends Controller
             ], 403);
         }
 
-        //  NOTA MiNIMA — CORREGIDO
+        // nota minima
 
         $notaMinima = isset($fase->nota_minima)
             ? (float) $fase->nota_minima

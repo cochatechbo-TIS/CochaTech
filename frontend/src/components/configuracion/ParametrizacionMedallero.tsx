@@ -3,6 +3,7 @@ import './ParametrizacionMedallero.css';
 import api from '../../services/api';
 import { Pencil, Save } from 'lucide-react';
 import { NotificationModal } from '../../components/common/NotificationModal'; // Ajusta la ruta según tu estructura
+import { RangoNotaMedallas } from './RangoNotaMedallas';
 
 
 interface MedalConfigGet {
@@ -290,6 +291,9 @@ const ParametrizacionMedallero: React.FC = () => {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="rango-nota-container">
+        <RangoNotaMedallas />
       </div>
     </div>
   );

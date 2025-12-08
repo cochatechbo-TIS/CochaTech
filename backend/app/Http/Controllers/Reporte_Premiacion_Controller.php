@@ -31,7 +31,7 @@ class Reporte_Premiacion_Controller extends Controller
                 'olimpista.departamento',
                 'olimpista.area',
                 'olimpista.nivel',
-                'olimpista.tutor',
+                //'olimpista.tutor',
                 'equipo.olimpistas',
                 'equipo',
                 'tipoPremio'
@@ -60,7 +60,7 @@ class Reporte_Premiacion_Controller extends Controller
                     'area'             => $o->area->nombre ?? null,
                     'nivel'            => $o->nivel->nombre ?? null,
                     'tutor'            => $o->tutor['nombre'] ?? null,
-                    'nota'             => null, // ya no calculamos nota
+                    'nota'             => $o->nota_final,
                     'medalla'          => $p->tipoPremio->nombre ?? null,
                     'posicion'         => $p->posicion,
                     'responsable_area' => $responsable->usuario->nombre . ' ' . $responsable->usuario->apellidos,
@@ -79,7 +79,7 @@ class Reporte_Premiacion_Controller extends Controller
                     'area'             => $nivel->area->nombre,
                     'nivel'            => $nivel->nombre,
                     'tutor'            => $tutorEquipo,
-                    'nota'             => null,
+                    'nota'             => $o->nota_final,
                     'medalla'          => $p->tipoPremio->nombre ?? null,
                     'posicion'         => $p->posicion,
                     'responsable_area' => $responsable->usuario->nombre . ' ' . $responsable->usuario->apellidos,
