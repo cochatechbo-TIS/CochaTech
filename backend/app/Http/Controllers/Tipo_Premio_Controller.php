@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Tipo_Premio;
 use Illuminate\Support\Facades\DB;
 
-class TipoPremioController extends Controller
+class Tipo_Premio_Controller extends Controller
 {
     public function index()
     {

@@ -44,9 +44,6 @@ function Listas() {
   setNivelesCompletos
 } = useFiltrosAreaNivel(isAdmin);
 
-console.log('selectedArea:', selectedArea);
-console.log('niveles:', niveles);
-console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
 
   // --- FUNCIÓN PARA LLAMAR AL BACKEND Y TRAER LOS EVALUADORES ---
   const fetchEvaluadoresPorArea = useCallback(async (areaId: number) => {

@@ -27,7 +27,8 @@ use App\Http\Controllers\Reporte_Ceremonia_Controller;
 use App\Http\Controllers\Log_Controller;
 
 use App\Http\Controllers\Evaluador_Nivel_Controller ;
-use App\Http\Controllers\TipoPremioController;
+use App\Http\Controllers\Tipo_Premio_Controller;
+use App\Http\Controllers\Fase_Controller;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -64,6 +65,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/medallero-config', [Medallero_Configuracion_Controller::class, 'store']);
         
         Route::get('/log', [Log_Controller::class, 'obtenerLogs']);
+
+        Route::get('/fases', [Fase_Controller::class, 'index']);
+        Route::put('/fases/fechas/{id_fase}', [Fase_Controller::class, 'actualizarFechas']);
     });
     // Grupo Responsable 
     Route::middleware('role:responsable')->group(function () {
@@ -102,8 +106,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reporte-ceremonia/{id_area}/{id_nivel}', [Reporte_Ceremonia_Controller::class, 'obtenerPremiados']);
 
     //para parametrizar la nota minima y maxima
-    Route::get('/tipo-premio', [TipoPremioController::class, 'index']); 
-    Route::put('/tipo-premio', [TipoPremioController::class, 'actualizarNotasMasivas']); 
+    Route::get('/tipo-premio', [Tipo_Premio_Controller::class, 'index']); 
+    Route::put('/tipo-premio', [Tipo_Premio_Controller::class, 'actualizarNotasMasivas']); 
 
 }); 
 
