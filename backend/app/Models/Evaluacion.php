@@ -20,6 +20,7 @@ class Evaluacion extends Model
         'comentario',
         'falta_etica',
         'id_estado_olimpista',
+        'motivo_solicitado',
     ];
 
     // Relación con Olimpista

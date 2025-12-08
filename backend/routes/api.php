@@ -30,6 +30,8 @@ use App\Http\Controllers\Evaluador_Nivel_Controller ;
 use App\Http\Controllers\Tipo_Premio_Controller;
 use App\Http\Controllers\Fase_Controller;
 
+use App\Http\Controllers\MotivoEvaluacionController;
+
 Route::post('/login', [AuthController::class, 'login']);
 
 
@@ -78,6 +80,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/niveles/asignar-evaluador', [Nivel_Evaluador::class, 'asignarEvaluador']);
 
         Route::get('/premiacion/asignar/{id_nivel}', [Premiacion_Controller::class, 'asignarPremios']);
+
+        Route::put('/evaluacion/motivo/{id_evaluacion}', [MotivoEvaluacionController::class, 'updateMotivo']);
         
     });    
 
@@ -108,7 +112,9 @@ Route::middleware('auth:sanctum')->group(function () {
     //para parametrizar la nota minima y maxima
     Route::get('/tipo-premio', [Tipo_Premio_Controller::class, 'index']); 
     Route::put('/tipo-premio', [Tipo_Premio_Controller::class, 'actualizarNotasMasivas']); 
+    
+    //para devolver los motivos que estan en la tabla evaluacion (deberia devolver tanto a responsable para que vea lo que escribio y para evaluador )
+    Route::get('/evaluaciones/motivos/{id_nivel_fase}', [MotivoEvaluacionController::class, 'getMotivosPorNivelFase']);
 
 }); 
-
 
