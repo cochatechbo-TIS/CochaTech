@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Evaluacion;
 
-class MotivoEvaluacionController extends Controller
+class Motivo_Evaluacion_Controller extends Controller
 {
 
     public function updateMotivo(Request $request, $id_evaluacion)
