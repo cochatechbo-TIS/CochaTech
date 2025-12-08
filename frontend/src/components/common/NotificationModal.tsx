@@ -111,7 +111,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
                 Cancelar
               </button>
               <button 
-                onClick={() => onConfirm?.(inputValue)}
+                onClick={() => {onConfirm?.(inputValue); onClose()}}
                 className={`modal-btn modal-btn-primary ${isConfirmDisabled ? 'modal-btn-disabled' : ''}`}
                 disabled={isConfirmDisabled}
               >

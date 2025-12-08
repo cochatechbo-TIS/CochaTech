@@ -297,3 +297,23 @@
   background-color: #3b82f6; /* azul */
   border-radius: 50%;
 }
+.punto-azul-indicador {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  background-color: #3b82f6; /* azul */
+  border-radius: 50%;
+  cursor: pointer;
+}
+.nota-no-editable {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.nota-editable {
+  border: 2px solid #3b82f6;
+  background-color: #e0f2fe;
+  cursor: pointer;
+}

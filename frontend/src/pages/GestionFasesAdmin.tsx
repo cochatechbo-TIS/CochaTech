@@ -405,14 +405,26 @@ const GestionFasesAdmin: React.FC = () => {
       );
     };
   // Lógica de rechazo extraída para ser llamada por el modal
-  const executeRechazar = async (comentario: string) => {
+  const executeRechazar = async (comentarioGeneral: string) => {
     if (!faseSeleccionada) return;
     closeNotification(); // Cierra el modal de input
 
     try {
       await api.post(`/nivel-fase/rechazar/${faseSeleccionada.id_nivel_fase}`, {
-        comentario
+        comentario: comentarioGeneral
       });
+
+      // 2️⃣ Enviar TODOS los motivos individuales
+    const ids = Object.keys(comentariosIndividuales);
+
+    for (const id of ids) {
+      const texto = comentariosIndividuales[Number(id)];
+
+      await api.put(`/evaluacion/motivo/${id}`, {
+        motivo_solicitado: texto
+      });
+    }
+
       showNotification("Fase rechazada correctamente. Se notificará al evaluador.", 'success');
       cargarFases();
     } catch (error) {
@@ -557,6 +569,7 @@ const GestionFasesAdmin: React.FC = () => {
            // 🆕 NUEVO ↓↓↓
           estadoFase={faseSeleccionada?.estado ?? ""}
           onOpenComentario={abrirModalComentario}
+          comentariosIndividuales={comentariosIndividuales}
         />
       )}
 

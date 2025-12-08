@@ -10,8 +10,9 @@ interface Props {
   isEditable: boolean;
   esGrupal: boolean; // <-- Recibimos si es grupal
   esFaseFinal: boolean;
-  estadoFase: string; // <-- Nuevo prop opcional
+  estadoFase?: string; // <-- Nuevo prop opcional
   onOpenComentario?: (p: Participante) => void; // <-- Nuevo prop opcional
+  comentariosIndividuales?: { [id_evaluacion: number]: string };
 }
 
 const EvaluacionTable: React.FC<Props> = ({ 
@@ -22,6 +23,7 @@ const EvaluacionTable: React.FC<Props> = ({
   esFaseFinal,
   estadoFase,
   onOpenComentario,
+  comentariosIndividuales
 }) => {
   
   // Función para determinar la clase CSS según el tipo de medalla
@@ -124,7 +126,8 @@ const EvaluacionTable: React.FC<Props> = ({
                         handleNotaChange(p.id_evaluacion, numero);
                      }
                   }}
-                 disabled={!isEditable}
+                 disabled={!isEditable || !comentariosIndividuales?.[p.id_evaluacion]} // Deshabilitar si no es editable o no hay comentario
+                 className={comentariosIndividuales?.[p.id_evaluacion] ? "nota-editable" : "nota-no-editable"}
                />
                 ) : (
                   <div className="nota-wrapper">
@@ -137,6 +140,16 @@ const EvaluacionTable: React.FC<Props> = ({
                    >
                    <MessageSquareText size={16}/>
                  </button>
+                )}
+                {/* 🔵 PUNTO AZUL SI HAY COMENTARIO TEMPORAL */}
+                {comentariosIndividuales?.[p.id_evaluacion] && (
+                <span
+                  className="punto-azul-indicador"
+                  onClick={() => onOpenComentario?.(p)}
+                  title="Ver comentario del responsable"
+                >
+                  <MessageSquareText size={16} color="#ef4444" />
+                </span>
                 )}
                 </div>
                 )}

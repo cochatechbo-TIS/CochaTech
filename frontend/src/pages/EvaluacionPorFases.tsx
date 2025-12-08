@@ -40,6 +40,7 @@ const EvaluacionPorFases: React.FC = () => {
   const [comentarioRechazo, setComentarioRechazo] = useState<string | null>(null);
   const [esFaseFinal, setEsFaseFinal] = useState(false);
   const [faseCreada, setFaseCreada] = useState(false);
+  const [comentariosIndividuales, setComentariosIndividuales] = useState<{ [id_evaluacion: number]: string }>({});
 
   // 🆕 ESTADOS DEL MODAL
   const [modalVisible, setModalVisible] = useState(false);
@@ -174,6 +175,16 @@ const EvaluacionPorFases: React.FC = () => {
       if (faseSeleccionada?.estado === "Rechazada") {
         const res = await api.get(`/nivel-fase/${idNivelFase}`);
         if (res.data?.comentario) setComentarioRechazo(res.data.comentario);
+
+        const motivos = await api.get(`/evaluaciones/motivos/${idNivelFase}`);
+        const mapMotivos: { [id: number]: string } = {};
+
+        motivos.data.forEach((m: any) => {
+          mapMotivos[m.id_evaluacion] = m.motivo_solicitado;
+        });
+
+        setComentariosIndividuales(mapMotivos);
+
       }
 
     } catch (err: any) {
@@ -201,6 +212,15 @@ const EvaluacionPorFases: React.FC = () => {
       ejecutarGuardarYClasificar // Pasamos la función a ejecutar si confirman
     );
   }
+  const abrirModalComentario = (p: Participante) => {
+  const texto = comentariosIndividuales[p.id_evaluacion];
+  
+  showNotification(
+    texto || "No hay comentario",
+    "info",
+    `Comentario recibido para ${p.nombre ?? p.nombre_equipo}`
+  );
+};
 
   const ejecutarGuardarYClasificar = async () => {
     if (!faseSeleccionada) return;
@@ -311,7 +331,7 @@ const EvaluacionPorFases: React.FC = () => {
               <button
                 onClick={confirmarGuardarYClasificar}
                 className="btn btn-green"
-                disabled={!isEditable || loadingParticipantes}
+                disabled={loadingParticipantes}
               >
                 Guardar y Clasificar
               </button>
@@ -331,6 +351,8 @@ const EvaluacionPorFases: React.FC = () => {
             isEditable={isEditable}
             esGrupal={esGrupal}
             esFaseFinal={esFaseFinal}
+            comentariosIndividuales={comentariosIndividuales}
+            onOpenComentario={abrirModalComentario}
           />
         </>
       )}
