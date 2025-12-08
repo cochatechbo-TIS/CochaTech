@@ -34,7 +34,28 @@ class Clasificacion_Controller extends Controller
 
         $fase  = $nivelFase->fase;
         $nivel = $nivelFase->nivel;
+
+        //si no se configuro las fechas de la fase
+        if ($fase->faltaConfigurarFechas()) {
+            return response()->json([
+                'error' => 'La fase no tiene fechas configuradas. Por favor configure fecha de inicio y fin.'
+            ], 409); 
+        }
+
+        //  validacion de tiempo de fase
+        if ($fase->estaExpirada()) {
+            return response()->json([
+                'error' => 'La fase ya está cerrada. No puedes registrar evaluaciones.'
+            ], 403);
+        }
+
+        //  bloquear antes de fechainicio:
         
+        if (now()->lessThan($fase->fecha_inicio)) {
+            return response()->json([
+                'error' => 'La fase aún no está habilitada para evaluaciones.'
+            ], 403);
+        }
 
         // nota minima
 

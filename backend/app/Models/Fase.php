@@ -27,19 +27,48 @@ class Fase extends Model
 
     public function estaActiva(): bool
     {
-        $now = now();
-        return $this->fecha_inicio <= $now && $now <= $this->fecha_fin;
+        $now = now('America/La_Paz');
+
+        // Si no tiene fechas, siempre está activa
+        if (!$this->fecha_inicio || !$this->fecha_fin) {
+        return false;
+        }
+
+        // Si solo tiene fecha inicio
+        if ($this->fecha_inicio && !$this->fecha_fin) {
+            return $now->greaterThanOrEqualTo($this->fecha_inicio);
+        }
+
+        // Si solo tiene fecha fin
+        if (!$this->fecha_inicio && $this->fecha_fin) {
+            return $now->lessThanOrEqualTo($this->fecha_fin);
+        }
+
+        // Si tiene ambas fechas
+        return $now->between(
+            $this->fecha_inicio,
+            $this->fecha_fin
+        );
     }
 
     public function estaExpirada(): bool
     {
-        //return now()->greaterThan($this->fecha_fin);
-        return now('America/La_Paz')->greaterThan($this->fecha_fin->setTimezone('America/La_Paz'));
+        // Si no hay fecha fin, nunca expira
+        /*if (!$this->fecha_fin) {
+            return false;
+        }*/
+
+        return now('America/La_Paz')
+            ->greaterThan($this->fecha_fin->copy()->setTimezone('America/La_Paz'));
     }
 
     protected function serializeDate($date)
     {
         return $date->setTimezone('America/La_Paz')->format('Y-m-d H:i:s');
+    }
+    public function faltaConfigurarFechas(): bool
+    {
+        return !$this->fecha_inicio || !$this->fecha_fin;
     }
 
 }
