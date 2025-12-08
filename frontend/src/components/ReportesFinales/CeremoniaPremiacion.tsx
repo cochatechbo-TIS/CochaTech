@@ -271,7 +271,7 @@ const exportarPDF = (participantes: ParticipantePremiacion[], area: string, nive
         showBusqueda={true}
         busqueda={busqueda}
         onBusquedaChange={setBusqueda}
-        placeholderBusqueda="Buscar participante o institución"
+        placeholderBusqueda="Buscar por nombre o unidad educativa..."
         isAdmin={isAdmin}
       />
       {/* Tabla */}
@@ -279,11 +279,11 @@ const exportarPDF = (participantes: ParticipantePremiacion[], area: string, nive
         <table className="ceremonia-table">
           <thead>
             <tr>
-              <th>Nombre</th>
-              <th>Unidad Educativa</th>
-              <th>Área</th>
-              <th>Nivel</th>
-              <th>Posición</th>
+              <th>NOMBRE COMPLETO</th>
+              <th>UNIDAD EDUCATIVA</th>
+              <th>ÁREA</th>
+              <th>NIVEL</th>
+              <th>POSICIÓN</th>
             </tr>
           </thead>
           <tbody>

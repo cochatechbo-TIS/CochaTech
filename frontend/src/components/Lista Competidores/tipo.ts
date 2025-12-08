@@ -4,7 +4,7 @@ export interface Nivel {
   nombre: string;
   competidores: number;
   fasesAprobadas: number;
-  faseTotal: number;
+  faseTotales: number;
   evaluador: string;
   id_evaluador?: number;
   area: string;        // <-- NUEVO: nombre del área

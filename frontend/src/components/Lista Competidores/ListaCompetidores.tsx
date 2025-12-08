@@ -1,30 +1,29 @@
 // src/components/Lista Competidores/ListaCompetidores.tsx
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo} from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Listas.css';
-import axios from 'axios';
 //import type { Nivel, ValidacionListasProps } from './tipo.ts'; // Asumiendo que 'tipo' está en el mismo directorio
 import type { Nivel } from './tipo.ts';
 import api from '../../services/api'; // <-- IMPORTAMOS LA INSTANCIA DE AXIOS
-
-// ========== CONSTANTES ==========
+import { useFiltrosAreaNivel } from '../../hooks/useFiltrosAreaNivel';
+import FiltrosAreaNivel from '../filtrosAreaNivel/FiltrosAreaNivel';
 
 // ========== COMPONENTE PRINCIPAL ==========
 function Listas() {
   const navigate = useNavigate();
 
+  interface Evaluador {
+  id_evaluador: number;
+  nombre: string;
+  apellidos: string;
+  }
+
   // ========== ESTADOS ==========
-  const [niveles, setNiveles] = useState<Nivel[]>([]);
   const [busqueda, setBusqueda] = useState('');
-  const [filtroNivel, setFiltroNivel] = useState('');
-  const [filtroArea] = useState('');
-  const [selectedArea, setSelectedArea] = useState<string>('');
-  const [areaResponsable, setAreaResponsable] = useState<string>(''); // <-- NUEVO ESTADO
-  const [areas, setAreas] = useState<string[]>([]);
   // --- NUEVOS ESTADOS PARA EL MODAL ---
   const [mensajeError, setMensajeError] = useState('');
   const [nivelSeleccionado, setNivelSeleccionado] = useState<Nivel | null>(null);
-  const [evaluadoresDisponibles, setEvaluadoresDisponibles] = useState<any[]>([]);
+  const [evaluadoresDisponibles, setEvaluadoresDisponibles] = useState<Evaluador[]>([]);
   const [evaluadorSeleccionado, setEvaluadorSeleccionado] = useState<string>('');
   //-----------
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,10 +33,17 @@ function Listas() {
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : null;
   const isAdmin = user?.rol?.nombre_rol === 'administrador';
- 
-console.log('selectedArea:', selectedArea);
-console.log('niveles:', niveles);
-console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
+  const {
+  areas,
+  niveles,
+  selectedArea,
+  selectedNivel,
+  handleAreaChange,
+  handleNivelChange,
+  nivelesCompletos,
+  setNivelesCompletos
+} = useFiltrosAreaNivel(isAdmin);
+
 
   // --- FUNCIÓN PARA LLAMAR AL BACKEND Y TRAER LOS EVALUADORES ---
   const fetchEvaluadoresPorArea = useCallback(async (areaId: number) => {
@@ -90,17 +96,22 @@ console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
     };
 
     try {
-  
       await api.post('/niveles/asignar-evaluador', body);
 
       // --- ACTUALIZACIÓN EN TIEMPO REAL ---
-      const evaluadorElegido = evaluadoresDisponibles.find(ev => ev.id_evaluador === parseInt(evaluadorSeleccionado));
+      const evaluadorElegido = evaluadoresDisponibles.find(
+        ev => ev.id_evaluador === parseInt(evaluadorSeleccionado)
+      );
       const nombreCompletoEvaluador = evaluadorElegido ? `${evaluadorElegido.nombre} ${evaluadorElegido.apellidos}` : '';
-      setNiveles(currentNiveles =>
-        currentNiveles.map(nivel =>
+      setNivelesCompletos((prev: Nivel[]) =>
+        prev.map((nivel: Nivel) =>
           nivel.id === nivelSeleccionado.id
-            ? { ...nivel, evaluador: nombreCompletoEvaluador, id_evaluador: parseInt(evaluadorSeleccionado) }
-            : nivel
+            ? { 
+              ...nivel,
+              evaluador: nombreCompletoEvaluador,
+              id_evaluador: parseInt(evaluadorSeleccionado)
+            }
+          : nivel
         )
       );
 
@@ -109,117 +120,23 @@ console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
       console.error("Error al asignar evaluador:", error);
       alert("Ocurrió un error al guardar el evaluador.");
     }
-  }, [nivelSeleccionado, evaluadorSeleccionado, evaluadoresDisponibles, closeModal]);
+  }, [nivelSeleccionado, evaluadorSeleccionado, evaluadoresDisponibles, closeModal, setNivelesCompletos]);
 
-  // ========== CARGAR ÁREAS ==========
-  useEffect(() => {
-    const fetchAreas = async () => {
-      try {
-        const response = await api.get('/areas/nombres');
-        const soloNombres = response.data.map((a: any) => a.nombre);
-        
-        setAreas(soloNombres);
-      } catch (err: unknown) {
-        if (axios.isAxiosError(err)) {
-          console.error('Error al cargar áreas:', err.response?.status, err.response?.data);
-        } else {
-          console.error(err);
-        }
-      }
-    };
-    fetchAreas();
-  }, []);
-
-  // ========== CARGAR NIVELES ==========
-  useEffect(() => {
-    const fetchNiveles = async () => {
-      try {
-        console.log("isAdmin:", isAdmin);
-        console.log("selectedArea:", selectedArea);
-
-        let url = '';
-
-        if (isAdmin) {
-          if (!selectedArea) {
-            console.warn('No se ha seleccionado un área. Se usará el área predeterminada.');
-            return;
-          }
-          url = `/niveles/area/${selectedArea}`;
-        } else {
-          url = '/niveles/auth';
-        }
-
-        const token = localStorage.getItem('authToken');
-        console.log('Token usado:', token);
-
-        if (!token) {
-          console.error('No hay token guardado en localStorage. Debes iniciar sesión.');
-          return;
-        }
-
-        const response = await api.get(url);
-        console.log('Respuesta completa del backend:', response.data);
-
-        const nivelesRaw = Array.isArray(response.data)
-          ? response.data
-          : response.data?.data || [];
-
-        if (!Array.isArray(nivelesRaw)) {
-          console.error('La respuesta no es un array:', nivelesRaw);
-          return;
-        }
-
-        const nivelesAdaptados: Nivel[] = nivelesRaw.map((item: any) => ({
-          id: item.id,
-          nombre: item.nombre,
-          competidores: item.competidores,
-          fasesAprobadas: item.fasesAprobadas,
-          faseTotal: item.faseTotales,
-          evaluador: item.evaluador || '',
-          id_evaluador: item.id_evaluador,
-          area: item.area || '',
-          id_area: item.id_area,
-        }));
-
-        // --- INICIO DE LA MODIFICACIÓN ---
-        // Si no es admin y hay niveles, extraemos el área del primer nivel.
-        if (!isAdmin && nivelesRaw.length > 0 && nivelesRaw[0].area) {
-          setAreaResponsable(nivelesRaw[0].area);
-        }
-        setNiveles(nivelesAdaptados);
-      } catch (err: unknown) {
-        if (axios.isAxiosError(err)) {
-          console.error('Error al cargar niveles:', err.response?.status, err.response?.data);
-          if (err.response?.status === 401) {
-            console.warn('Token inválido o expirado. Debes volver a iniciar sesión.');
-          }
-        } else {
-          console.error(err);
-        }
-      }
-    };
-    fetchNiveles();
-  }, [selectedArea, isAdmin]); // No es necesario añadir areaResponsable a las dependencias
-
-  // ========== UTILIDADES ==========
+   // ========== UTILIDADES ==========
   const calcularProgreso = (aprobadas: number, total: number): number => {
     if (total === 0) return 0;
     return Math.round((aprobadas / total) * 100);
   };
 
-  const filtrarNiveles = (
-    niveles: Nivel[],
-    busqueda: string,
-    filtroNivel: string,
-    filtroArea: string
-  ): Nivel[] => {
-    let resultado = niveles;
+  const filtrarNiveles = useCallback(
+    (
+      niveles: Nivel[],
+      busqueda: string,
+    ): Nivel[] => {
+      let resultado = niveles;
 
-    if (filtroNivel) {
-      resultado = resultado.filter((nivel) => nivel.nombre === filtroNivel);
-    }
-    if (filtroArea) {
-      // Aquí podrías filtrar por área si tu backend lo devuelve en cada nivel
+    if (selectedNivel) {
+      resultado = resultado.filter((nivel) => nivel.nombre === selectedNivel);
     }
     if (busqueda.trim()) {
       const searchLower = busqueda.toLowerCase().trim();
@@ -230,25 +147,14 @@ console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
       );
     }
     return resultado;
-  };
+  },
+    [selectedNivel]
+);
 
   const nivelesFiltrados = useMemo(
-    () => filtrarNiveles(niveles, busqueda, filtroNivel, filtroArea),
-    [niveles, busqueda, filtroNivel, filtroArea]
+    () => filtrarNiveles(nivelesCompletos, busqueda),
+    [nivelesCompletos, busqueda, filtrarNiveles]
   );
-
-  // ========== MANEJADORES ==========
-  const handleBusquedaChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setBusqueda(e.target.value);
-  }, []);
-
-  const handleNivelChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFiltroNivel(e.target.value);
-  }, []);
-
-  const handleAreaChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedArea(e.target.value);
-  }, []);
 
   const handleOpenModalEvaluador = useCallback((nivel: Nivel) => {
     openModal(nivel);
@@ -267,64 +173,30 @@ console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
     <div className="validacion-container">
       <div className="validacion-header">
         <h1 className="validacion-title">Validación de Listas</h1>
-      </div>
-
-      {/* Filtros y buscador */}
-      <div className="search-container">
-        <div style={{ display: "flex", gap: "10px", width: "100%" }}>
-          <div style={{ flex: 1, display: "flex", alignItems: "center", position: "relative" }}>
-            <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Buscar por nivel o evaluador..."
-              value={busqueda}
-              onChange={handleBusquedaChange}
-              className="search-input"
-            />
-          </div>
-          
-          {isAdmin && (
-            <select value={selectedArea} onChange={handleAreaChange} className="filter-select">
-              <option value="">Todas las áreas</option>
-              {areas.map((a) => (
-                <option key={a} value={a}>{a}</option>
-              ))}
-            </select>
-          )}
-          <select value={filtroNivel} onChange={handleNivelChange} className="filter-select">
-            <option value="">Todos los niveles</option>
-            {niveles.map(nivel => (
-              <option key={nivel.id} value={nivel.nombre}>{nivel.nombre}</option>
-            ))}
-          </select>
-          
-        </div>
-      </div>
-
-      {/* Info Box */}
-      <div className="info-box">
-        <svg className="info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-        </svg>
-        <div className="info-content">
-          <h3 className="info-title">Validación de niveles para el área: {isAdmin ? selectedArea || '...' : areaResponsable || '...'}</h3>
-          <p className="info-text">
+        <p className="page-subtitle">
             Como responsable, usted puede gestionar todos los niveles asignados a su área
             y asignar evaluadores. Haga clic en "Gestionar fases" para ver y validar 
             las listas de cada nivel.
           </p>
-        </div>
       </div>
 
+      <FiltrosAreaNivel
+        areas={areas}
+        niveles={niveles}
+        selectedArea={selectedArea}
+        selectedNivel={selectedNivel}
+        onAreaChange={handleAreaChange}
+        onNivelChange={handleNivelChange}
+        showBusqueda={true}
+        busqueda={busqueda}
+        onBusquedaChange={setBusqueda}
+        placeholderBusqueda="Buscar por nivel o evaluador..."
+        isAdmin={isAdmin}
+      />
+
       {/* Tabla */}
-      <div className="table-container">
-        <h2 className="validacion-subtitle">Área: {isAdmin ? selectedArea || '...' : areaResponsable || '...'}</h2>
+      <h2 className="validacion-subtitle">Área: {isAdmin ? selectedArea || '...' : nivelesCompletos[0]?.area || '...'}</h2>
+      <div className="tabla-container">
         <table className="niveles-table">
           <thead>
             <tr>
@@ -343,7 +215,7 @@ console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
                 </td>
               </tr>
             ) : (
-              nivelesFiltrados.map((nivel) => (
+              nivelesFiltrados.map((nivel: Nivel) => (
                 <tr key={nivel.id}>
                   <td className="centrado"><strong>{nivel.nombre}</strong></td>
                   <td className="centrado">
@@ -362,11 +234,11 @@ console.log('evaluadoresDisponibles:', evaluadoresDisponibles);
                       <div className="progress-bar">
                         <div
                           className="progress-fill"
-                          style={{ width: `${calcularProgreso(nivel.fasesAprobadas, nivel.faseTotal)}%` }}
+                          style={{ width: `${calcularProgreso(nivel.fasesAprobadas, nivel.faseTotales)}%` }}
                         />
                       </div>
                       <span className="progreso-text">
-                        {nivel.fasesAprobadas}/{nivel.faseTotal} fases aprobadas
+                        {nivel.fasesAprobadas}/{nivel.faseTotales} fases aprobadas
                       </span>
                     </div>
                   </td>

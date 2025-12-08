@@ -5,17 +5,26 @@ interface Area {
   id_area: number;
   nombre: string;
 }
-
 interface Nivel {
   id: number;
   nombre: string;
+  competidores: number;
+  fasesAprobadas: number;
+  faseTotales: number;
+  evaluador: string;
+  id_evaluador?: number;
+  area: string;        // <-- NUEVO: nombre del área
+  id_area: number;
 }
 
 export const useFiltrosAreaNivel = (isAdmin: boolean) => {
   const [areas, setAreas] = useState<Area[]>([]);
+  const [nivelesCompletos, setNivelesCompletos] = useState<Nivel[]>([]);
+
   const [selectedArea, setSelectedArea] = useState<string>('');
   const [selectedAreaId, setSelectedAreaId] = useState<number | null>(null);
-  const [niveles, setNiveles] = useState<Nivel[]>([]);
+
+  //const [niveles, setNiveles] = useState<Nivel[]>([]);
   const [selectedNivel, setSelectedNivel] = useState<string>('');
   const [selectedNivelId, setSelectedNivelId] = useState<number | null>(null);
   //const [responsibleAreaName, setResponsibleAreaName] = useState<string>('');
@@ -45,9 +54,10 @@ export const useFiltrosAreaNivel = (isAdmin: boolean) => {
       if (isAdmin) {
         // ADMIN: usa el área seleccionada
         if (!selectedArea) {
-            setNiveles([]);
-            setSelectedNivel('');
-            setSelectedNivelId(null);
+            //setNiveles([]);
+            //setSelectedNivel('');
+            //setSelectedNivelId(null);
+            setNivelesCompletos([]);
             return;
         }
         url = `/niveles/area/${selectedArea}`;
@@ -63,12 +73,17 @@ export const useFiltrosAreaNivel = (isAdmin: boolean) => {
         const nivelesData = data.map((nivel: any) => ({
           id: nivel.id,
           nombre: nivel.nombre,
+          competidores: nivel.competidores,
+          fasesAprobadas: nivel.fasesAprobadas,
+          faseTotales: nivel.faseTotales,
+          evaluador: nivel.evaluador || 'Sin asignar',
+          id_evaluador: nivel.id_evaluador,
           // Si el responsable está logueado, los niveles vienen con su área
           area: nivel.area || '', 
           id_area: nivel.id_area || null
         }));
         
-        setNiveles(nivelesData);
+        setNivelesCompletos(nivelesData);
         
         // Si no es admin y hay niveles, extraemos el nombre del área
         if (!isAdmin && nivelesData.length > 0) {
@@ -78,7 +93,7 @@ export const useFiltrosAreaNivel = (isAdmin: boolean) => {
         }
       } catch (error) {
         console.error('Error al cargar niveles:', error);
-        setNiveles([]);
+        setNivelesCompletos([]);
       }
     };
 
@@ -97,18 +112,20 @@ export const useFiltrosAreaNivel = (isAdmin: boolean) => {
 
   const handleNivelChange = useCallback((nivelNombre: string) => {
     setSelectedNivel(nivelNombre);
-    const nivel = niveles.find((n) => n.nombre === nivelNombre);
+    const nivel = nivelesCompletos.find((n) => n.nombre === nivelNombre);
     setSelectedNivelId(nivel?.id ?? null);
-  }, [niveles]);
+  }, [nivelesCompletos]);
 
   return {
     areas: areas.map(a => a.nombre),            // SOLO nombres
-    niveles: niveles.map(n => n.nombre),        // SOLO nombres
+    niveles: nivelesCompletos.map(n => n.nombre),        // SOLO nombres
     selectedArea,
     selectedNivel,
     selectedAreaId,
     selectedNivelId,
     handleAreaChange,
     handleNivelChange,
+    nivelesCompletos,
+    setNivelesCompletos
   };
 };

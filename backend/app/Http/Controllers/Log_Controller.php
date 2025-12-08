@@ -61,4 +61,32 @@ class Log_Controller extends Controller
             'mensaje' => 'Nota actualizada y log registrado correctamente'
         ], 200);
     }
+
+    public function obtenerLogs()
+    {
+        try {
+            $logs = Log_Cambio_Nota::select(
+                    'id_log as numero',
+                    'fecha',
+                    'hora',
+                    'nombre_evaluador as evaluador',
+                    'nombre_area as area',
+                    'nombre_nivel as nivel',
+                    'nombre_estudiante as estudiante',
+                    'nota_anterior',
+                    'nota_nueva',
+                    'motivo'
+                )
+                ->orderBy('id_log', 'asc') 
+                ->get();
+
+            return response()->json($logs, 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error al obtener los registros del log',
+                'detalle' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

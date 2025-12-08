@@ -190,7 +190,7 @@ const exportarPDF = (participantes: ParticipantePublicacion[], area: string, niv
         showBusqueda={true}
         busqueda={busqueda}
         onBusquedaChange={setBusqueda}
-        placeholderBusqueda="Buscar por nombre o institución"
+        placeholderBusqueda="Buscar por nombre..."
         isAdmin={isAdmin}
       />
 
@@ -199,10 +199,10 @@ const exportarPDF = (participantes: ParticipantePublicacion[], area: string, niv
         <table className="publicacion-table">
           <thead>
             <tr>
-              <th>Nombre Completo</th>
-              <th>Área</th>
-              <th>Nivel</th>
-              <th>Lugar Obtenido</th>
+              <th>NOMBRE COMPLETO</th>
+              <th>ÁREA</th>
+              <th>NIVEL</th>
+              <th>LUGAR OBTENIDO</th>
             </tr>
           </thead>
           <tbody>
