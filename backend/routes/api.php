@@ -123,5 +123,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/logistica', [Logistica_Controller::class, 'index']);
 
 }); 
-
-
