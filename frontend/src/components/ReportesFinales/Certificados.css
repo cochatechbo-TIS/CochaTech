@@ -40,7 +40,45 @@
   color: #1a1a1a;
   text-align: center;
 }
+/* ========== BOTÓN GENERAR CERTIFICADOS ========== */
+.btn-certificado {
+  background-color: #7c3aed !important;
+  font-weight: 600 !important;
+  padding: 10px 20px !important;
+  font-size: 14px !important;
+}
 
+.btn-certificado:hover {
+  background-color: #6d28d9 !important;
+}
+
+.btn-certificado:disabled {
+  background-color: #9ca3af !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+}
+
+.btn-generar-certificado {
+  background-color: #7c3aed;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-generar-certificado:hover {
+  background-color: #6d28d9;
+  transform: scale(1.1);
+}
+
+.btn-generar-certificado:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
 /* Badges de posición */
 .badge-posicion {
   display: inline-block;
@@ -65,6 +103,17 @@
 .posicion-bronce {
   background-color: #fed7aa;
   color: #92400e;
+}
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.content-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 /* Info box */
@@ -111,6 +160,76 @@
   transition: all 0.2s;
   color: white;
 }
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal {
+  background: #ffffff;
+  padding: 24px 28px;
+  border-radius: 12px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.3);
+}
+
+.modal h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.modal p {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+/* Botón blanco con borde azul (Cancelar) */
+.btn-outline {
+  background: #ffffff;
+  color: #1d4ed8;
+  border: 1px solid #1d4ed8;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 200;
+  cursor: pointer;
+}
+
+/* Botón rojo sólido (Sí, Confirmar) */
+.btn-danger {
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Estado disabled */
+.btn-outline:disabled,
+.btn-danger:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 
 
 .btn-csv { background-color: #AAA9AD; }
