@@ -31,6 +31,7 @@ use App\Http\Controllers\Tipo_Premio_Controller;
 use App\Http\Controllers\Fase_Controller;
 
 use App\Http\Controllers\Motivo_Evaluacion_Controller;
+use App\Http\Controllers\Logistica_Controller;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -115,6 +116,8 @@ Route::middleware('auth:sanctum')->group(function () {
     
     //para devolver los motivos que estan en la tabla evaluacion (deberia devolver tanto a responsable para que vea lo que escribio y para evaluador )
     Route::get('/evaluaciones/motivos/{id_nivel_fase}', [Motivo_Evaluacion_Controller::class, 'getMotivosPorNivelFase']);
+
+    Route::get('/logistica', [Logistica_Controller::class, 'index']);
 
 }); 
 
