@@ -2,6 +2,7 @@
 import React from "react";
 import type { Participante } from "../../interfaces/Evaluacion";
 import "../../pages/evaluacion.css";
+import { MessageSquareText } from "lucide-react";
 
 interface Props {
   participantes: Participante[];
@@ -9,6 +10,8 @@ interface Props {
   isEditable: boolean;
   esGrupal: boolean; // <-- Recibimos si es grupal
   esFaseFinal: boolean;
+  estadoFase: string; // <-- Nuevo prop opcional
+  onOpenComentario?: (p: Participante) => void; // <-- Nuevo prop opcional
 }
 
 const EvaluacionTable: React.FC<Props> = ({ 
@@ -16,7 +19,9 @@ const EvaluacionTable: React.FC<Props> = ({
   onChange, 
   isEditable, 
   esGrupal, // <-- Usamos la prop
-  esFaseFinal
+  esFaseFinal,
+  estadoFase,
+  onOpenComentario,
 }) => {
   
   // Función para determinar la clase CSS según el tipo de medalla
@@ -89,7 +94,6 @@ const EvaluacionTable: React.FC<Props> = ({
         <tbody>
           {participantes.map(p => (
             <tr key={p.id_evaluacion}>
-              
               <td className="font-bold">
                 {esGrupal ? p.nombre_equipo : `${p.nombre} ${p.apellidos}`}
               </td>
@@ -100,7 +104,8 @@ const EvaluacionTable: React.FC<Props> = ({
 
               <td>{p.institucion}</td>
              
-              <td>
+              <td className="nota-cell">
+                {isEditable ? (
                 <input
                    type="number"
                    min={0}
@@ -110,10 +115,7 @@ const EvaluacionTable: React.FC<Props> = ({
                      const valor = e.target.value;
 
                       // Si borran la nota → dejar vacío
-                     if (valor === "") {
-                       handleNotaChange(p.id_evaluacion, NaN); // NaN = sin nota
-                      return;
-                     }
+                     if (valor === "") return handleNotaChange(p.id_evaluacion, NaN); // NaN = sin nota
 
                      const numero = Number(valor);
 
@@ -124,6 +126,20 @@ const EvaluacionTable: React.FC<Props> = ({
                   }}
                  disabled={!isEditable}
                />
+                ) : (
+                  <div className="nota-wrapper">
+                    {p.nota ?? "-"}
+               {estadoFase === "En Revisión" && onOpenComentario && (
+                 <button
+                   className="btn-comentario-nota"
+                   onClick={() => onOpenComentario(p)}
+                   title="Agregar comentario personalizado"
+                   >
+                   <MessageSquareText size={16}/>
+                 </button>
+                )}
+                </div>
+                )}
               </td>
 
               <td className="text-center">

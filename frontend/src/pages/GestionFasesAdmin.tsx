@@ -29,6 +29,10 @@ const GestionFasesAdmin: React.FC = () => {
   const [comentarioFase, setComentarioFase] = useState<string | null>(null); // <-- 1. NUEVO ESTADO
   const [loadingParticipantes, setLoadingParticipantes] = useState(false);
   const [error, setError] = useState<string | null>(null);  
+  const [comentariosIndividuales, setComentariosIndividuales] = useState<
+  { [id_evaluacion: number]: string }
+>({});
+
 
   // ✅ Estado para el modal de notificación
   const [notification, setNotification] = useState({
@@ -68,6 +72,22 @@ const GestionFasesAdmin: React.FC = () => {
   const closeNotification = () => {
     setNotification(prev => ({ ...prev, isVisible: false }));
   };
+
+  const abrirModalComentario = (p: Participante) => {
+  showNotification(
+    `Comentario para la nota de ${p.nombre ?? p.nombre_equipo}`,
+    "input",
+    (texto) => {
+      if (!texto || !texto.trim()) return;
+      setComentariosIndividuales(prev => ({
+        ...prev,
+        [p.id_evaluacion]: texto.trim()
+      }));
+    },
+    "Comentario de Nota"
+  );
+};
+
   // ✅ FUNCIÓN: Obtener el nombre del evaluador
   const cargarInfoNivel = async () => {
     try {
@@ -78,7 +98,7 @@ const GestionFasesAdmin: React.FC = () => {
       if (isAdmin) {
         // Para admin: obtener todas las áreas y buscar el nivel
         const areasResponse = await api.get('/areas/nombres');
-        const areas: string[] = areasResponse.data.map((a: any) => a.nombre);
+        const areas: string[] = areasResponse.data.map((a: {nombre: string}) => a.nombre);
 
         // Buscar en cada área hasta encontrar el nivel
         for (const area of areas) {
@@ -533,6 +553,10 @@ const GestionFasesAdmin: React.FC = () => {
           isEditable={false}
           esGrupal={infoNivel?.esGrupal || false}
           esFaseFinal={infoNivel?.es_Fase_final || false}
+
+           // 🆕 NUEVO ↓↓↓
+          estadoFase={faseSeleccionada?.estado ?? ""}
+          onOpenComentario={abrirModalComentario}
         />
       )}
 

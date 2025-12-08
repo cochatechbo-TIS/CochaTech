@@ -115,7 +115,11 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
                 className={`modal-btn modal-btn-primary ${isConfirmDisabled ? 'modal-btn-disabled' : ''}`}
                 disabled={isConfirmDisabled}
               >
-                {type === 'confirm' ? 'Sí, Confirmar' : 'Rechazar lista'}
+                {type === 'confirm' 
+                ? 'Sí, Confirmar' 
+                : title?.toLowerCase().includes("comentario")
+                  ? 'Comentar nota'
+                  : 'Rechazar lista'}
               </button>
             </>
           ) : (

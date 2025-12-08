@@ -268,3 +268,32 @@
   box-shadow: none !important;
   padding-left: 0;
 }
+
+
+.btn-comentario-nota {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  margin-left: 5%;
+  color: #6b7280; /* azul */
+  transform: translateY(3px); /* ↓↓↓ BAJA EL ICONO */
+}
+
+.btn-comentario-nota:hover {
+  color: #1d4ed8;
+}
+
+.celda-nota {
+  position: relative;
+}
+
+.celda-nota .comentario-indicador {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  background-color: #3b82f6; /* azul */
+  border-radius: 50%;
+}
