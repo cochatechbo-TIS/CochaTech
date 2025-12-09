@@ -309,7 +309,6 @@
 }
 .nota-no-editable {
   background-color: #f3f4f6;
-  cursor: not-allowed;
 }
 
 .nota-editable {

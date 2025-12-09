@@ -119,7 +119,7 @@ const EvaluacionTable: React.FC<Props> = ({
 
                       // Si borran la nota → dejar vacío
                      if (valor === "") return handleNotaChange(p.id_evaluacion, NaN); // NaN = sin nota
-
+ 
                      const numero = Number(valor);
 
                       // Validar que sea número entre 0 y 100
@@ -127,7 +127,10 @@ const EvaluacionTable: React.FC<Props> = ({
                         handleNotaChange(p.id_evaluacion, numero);
                      }
                   }}
-                 disabled={!comentariosIndividuales?.[p.id_evaluacion]} // Deshabilitar si no es editable o no hay comentario
+                  disabled={
+                    !isEditable ||
+                   (estadoFase === "Rechazada" && !comentariosIndividuales?.[p.id_evaluacion])
+                  }
                  className={
                   comentariosIndividuales?.[p.id_evaluacion]
                     ? "nota-editable"
@@ -161,7 +164,10 @@ const EvaluacionTable: React.FC<Props> = ({
                   type="checkbox"
                   checked={p.falta_etica ?? false}
                   onChange={evt => handleFaltaEticaChange(p.id_evaluacion, evt.target.checked)}
-                  disabled={!isEditable}
+                  disabled={
+                    !isEditable ||
+                    (estadoFase === "Rechazada" && !comentariosIndividuales?.[p.id_evaluacion])
+                  }
                 />
               </td>
               <td>
@@ -170,7 +176,10 @@ const EvaluacionTable: React.FC<Props> = ({
                   value={p.observaciones ?? ""}
                   onChange={evt => handleObsChange(p.id_evaluacion, evt.target.value)}
                   placeholder={isEditable ? "Observaciones..." : "No editable"}
-                  disabled={!isEditable}
+                  disabled={
+                    !isEditable ||
+                    (estadoFase === "Rechazada" && !comentariosIndividuales?.[p.id_evaluacion])
+                  } 
                 />
               </td>
               <td className="estado">

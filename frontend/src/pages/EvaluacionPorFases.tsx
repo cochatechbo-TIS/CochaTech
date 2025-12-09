@@ -254,8 +254,9 @@ const EvaluacionPorFases: React.FC = () => {
 
     try {
       setLoadingParticipantes(true);
-
-      await registrarCambios();
+      if(faseSeleccionada.estado === "Rechazada") {
+        await registrarCambios();
+      }
       await guardarYClasificar(faseSeleccionada.id_nivel_fase, payload);
       showNotification("Lista guardada y enviada para aprobación.", "success");
       
@@ -347,6 +348,8 @@ const EvaluacionPorFases: React.FC = () => {
 
             {faseSeleccionada?.estado === "En Revisión" ? (
               <span className="btn-enviado">Lista enviada. En revisión</span>
+            ) : faseSeleccionada?.estado === "Aprobada"? (
+              <span className="btn-aprobada"></span>
             ) : (
               <button
                 onClick={confirmarGuardarYClasificar}
@@ -371,6 +374,7 @@ const EvaluacionPorFases: React.FC = () => {
             isEditable={isEditable}
             esGrupal={esGrupal}
             esFaseFinal={esFaseFinal}
+            estadoFase={faseSeleccionada?.estado}
             comentariosIndividuales={comentariosIndividuales}
             onOpenComentario={abrirModalComentario}
           />
