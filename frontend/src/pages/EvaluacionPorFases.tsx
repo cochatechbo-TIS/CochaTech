@@ -48,6 +48,7 @@ const EvaluacionPorFases: React.FC = () => {
   const [modalType, setModalType] = useState<NotificationType>('info');
   const [modalTitle, setModalTitle] = useState<string | undefined>(undefined);
   const [modalOnConfirm, setModalOnConfirm] = useState<((value?: string) => void) | undefined>(undefined);
+  const [originalParticipantes, setOriginalParticipantes] = useState<Participante[]>([]);
 
   const fechaActual = new Date().toLocaleString("es-ES", {
     year: "numeric",
@@ -170,6 +171,8 @@ const EvaluacionPorFases: React.FC = () => {
 
       const data = await getParticipantesPorFase(idNivelFase);
       setParticipantes(data.resultados || data.equipos || []);
+      setOriginalParticipantes(data.resultados || data.equipos || []);
+
       setEsFaseFinal(data.es_Fase_final ?? false);
 
       if (faseSeleccionada?.estado === "Rechazada") {
@@ -200,6 +203,21 @@ const EvaluacionPorFases: React.FC = () => {
     setIdNivelSeleccionado(nuevoId);
     cargarDatosIniciales(nuevoId);
   };
+
+  const registrarCambios = async () => {
+    for (const p of participantes) {
+      const original = originalParticipantes.find(o => o.id_evaluacion === p.id_evaluacion);
+
+      if (!original) continue;
+      if (original.nota !== p.nota) {
+
+       await api.put(`/log/${p.id_evaluacion}`, {
+        nota_nueva: p.nota,
+        motivo: "Corrección solicitada por el responsable", // <-- Aquí puedes permitir al evaluador escribir algo
+      });
+    }
+  }
+};
 
   const confirmarGuardarYClasificar = () => {
     if (!faseSeleccionada) return;
@@ -237,6 +255,7 @@ const EvaluacionPorFases: React.FC = () => {
     try {
       setLoadingParticipantes(true);
 
+      await registrarCambios();
       await guardarYClasificar(faseSeleccionada.id_nivel_fase, payload);
       showNotification("Lista guardada y enviada para aprobación.", "success");
       
@@ -259,7 +278,8 @@ const EvaluacionPorFases: React.FC = () => {
     }
   };
 
-  const isEditable = faseSeleccionada?.estado === "En Proceso";
+  const isEditable = faseSeleccionada?.estado === "En Proceso" ||
+  faseSeleccionada?.estado === "Rechazada";
 
   if (loading) return <div className="evaluacion-container"><p>Cargando panel de evaluador...</p></div>;
 

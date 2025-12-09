@@ -108,6 +108,7 @@ const EvaluacionTable: React.FC<Props> = ({
              
               <td className="nota-cell">
                 {isEditable ? (
+                <div className="celda-nota">
                 <input
                    type="number"
                    min={0}
@@ -126,9 +127,20 @@ const EvaluacionTable: React.FC<Props> = ({
                         handleNotaChange(p.id_evaluacion, numero);
                      }
                   }}
-                 disabled={!isEditable || !comentariosIndividuales?.[p.id_evaluacion]} // Deshabilitar si no es editable o no hay comentario
-                 className={comentariosIndividuales?.[p.id_evaluacion] ? "nota-editable" : "nota-no-editable"}
-               />
+                 disabled={!comentariosIndividuales?.[p.id_evaluacion]} // Deshabilitar si no es editable o no hay comentario
+                 className={
+                  comentariosIndividuales?.[p.id_evaluacion]
+                    ? "nota-editable"
+                    : "nota-no-editable"}
+                  />
+                  {/* 🔵 PUNTO AZUL SI HAY COMENTARIO TEMPORAL */}
+                {comentariosIndividuales?.[p.id_evaluacion] && (
+                <span
+                  className="punto-azul-indicador"
+                  onClick={() => onOpenComentario?.(p)}
+                ></span>
+                )}
+                </div>
                 ) : (
                   <div className="nota-wrapper">
                     {p.nota ?? "-"}
@@ -141,20 +153,9 @@ const EvaluacionTable: React.FC<Props> = ({
                    <MessageSquareText size={16}/>
                  </button>
                 )}
-                {/* 🔵 PUNTO AZUL SI HAY COMENTARIO TEMPORAL */}
-                {comentariosIndividuales?.[p.id_evaluacion] && (
-                <span
-                  className="punto-azul-indicador"
-                  onClick={() => onOpenComentario?.(p)}
-                  title="Ver comentario del responsable"
-                >
-                  <MessageSquareText size={16} color="#ef4444" />
-                </span>
-                )}
-                </div>
+              </div>
                 )}
               </td>
-
               <td className="text-center">
                 <input
                   type="checkbox"
