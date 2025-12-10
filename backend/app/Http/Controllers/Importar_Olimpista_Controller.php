@@ -72,8 +72,8 @@ class Importar_Olimpista_Controller extends Controller
                         continue;
                     }
 
-                    // Validar CI
-                    if (!preg_match('/^[1-9][0-9]{7,15}$/', $data['ci'])) {
+                    // Validar CI (números, 7-10 dígitos)
+                    if (!preg_match('/^[1-9][0-9]{6,9}$/', $data['ci'])) {
                         $errores[] = "Línea $linea: el CI '{$data['ci']}' no es válido (solo números, mínimo 8 dígitos)";
                         continue;
                     }
