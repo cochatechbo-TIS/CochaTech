@@ -35,8 +35,7 @@ interface MedalConfigInternal {
   total?: number;
 }
 
-// Definimos el tipo para las claves de los premios para usarlo en handleInputChange
-//type PremioKey = keyof BackendMedalConfig['premios'];
+const MAX_PER_MEDAL = 10; // Definimos la constante para el máximo
 
 const ParametrizacionMedallero: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -114,14 +113,22 @@ const ParametrizacionMedallero: React.FC = () => {
     
     if (value === '') {
       newConfig[index] = { ...newConfig[index], [field]: '' };
-    } else {
+      // quitar error si existe (vacío permitido mientras edita)
+      } else {
       const numValue = parseInt(value, 10);
+
       // Permitimos el valor si es un número válido y no es negativo
       if (!isNaN(numValue) && numValue >= 0) {
-        newConfig[index] = { ...newConfig[index], [field]: numValue };
+
+        // Si supera el máximo, lo forzamos al máximo y registramos error
+        if (numValue > MAX_PER_MEDAL) {
+          newConfig[index] = { ...newConfig[index], [field]: MAX_PER_MEDAL };
+          showNotification(`El valor máximo por tipo de medalla es ${MAX_PER_MEDAL}. Se ha ajustado automáticamente.`, 'info', 'Límite alcanzado');
+        } else {
+          newConfig[index] = { ...newConfig[index], [field]: numValue };
+        }
       }
     }
-
     setMedalConfig(newConfig);
   };
 
@@ -252,6 +259,7 @@ const ParametrizacionMedallero: React.FC = () => {
                     onChange={(e) => handleInputChange(index, 'oro', e.target.value)}
                     disabled={!isEditing || saving}
                     min="0"
+                    max={MAX_PER_MEDAL}
                   />
                 </td>
                 <td className='competitor-table-td'>
@@ -262,8 +270,9 @@ const ParametrizacionMedallero: React.FC = () => {
                     onChange={(e) => handleInputChange(index, 'plata', e.target.value)}
                     disabled={!isEditing || saving}
                     min="0"
+                    max={MAX_PER_MEDAL}
                   />
-                </td>
+                  </td>
                 <td className='competitor-table-td'>
                   <input 
                     type="number" 
@@ -272,6 +281,7 @@ const ParametrizacionMedallero: React.FC = () => {
                     onChange={(e) => handleInputChange(index, 'bronce', e.target.value)}
                     disabled={!isEditing || saving}
                     min="0"
+                    max={MAX_PER_MEDAL}
                   />
                 </td>
                 <td className='competitor-table-td'>
@@ -282,6 +292,7 @@ const ParametrizacionMedallero: React.FC = () => {
                     onChange={(e) => handleInputChange(index, 'mención', e.target.value)}
                     disabled={!isEditing || saving}
                     min="0"
+                    max={MAX_PER_MEDAL}
                   />
                 </td>
                 <td className="competitor-table-td total-value">
