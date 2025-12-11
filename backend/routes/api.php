@@ -73,7 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/fases/fechas/{id_fase}', [Fase_Controller::class, 'actualizarFechas']);
         Route::put('/fases/actualizar-fechas', [Fase_Controller::class, 'actualizarFechasMasivo']);
         
-
+        Route::get('/fases/existen', [Fase_Lista_Controller::class, 'existenFases']);
     });
     // Grupo Responsable 
     Route::middleware('role:responsable')->group(function () {

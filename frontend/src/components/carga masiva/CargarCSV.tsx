@@ -1,5 +1,5 @@
 // src/components/carga-masiva/CargarCSV.tsx
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import api from '../../services/api'; // Importamos la instancia centralizada
 import { useNavigate } from "react-router-dom";
 import './CargarCSV.css';
@@ -16,6 +16,7 @@ interface CargarCSVProps {
 function CargarCSV({ onUploadSuccess }: CargarCSVProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const [bloquearCSV, setBloquearCSV] = useState(false);
 
   // Estado para controlar el modal de notificaciones
   const [notification, setNotification] = useState({
@@ -121,11 +122,38 @@ function CargarCSV({ onUploadSuccess }: CargarCSVProps) {
     }
   };
 
-  const handleSelectCSV = () => inputRef.current?.click();
+  const handleSelectCSV = () => {
+    if (bloquearCSV) {
+      showNotification(
+        "Las olimpiadas ya iniciaron. No se pueden cargar más participantes.",
+        "info",
+        "Carga no permitida"
+      );
+      return;
+    }
+  inputRef.current?.click();
+};
 
   const handleVerLista = () => {
-  navigate("/administrador/listas");
-};
+    navigate("/administrador/listas");
+  };
+
+  useEffect(() => {
+  const verificarFases = async () => {
+    try {
+      const res = await api.get('/fases/existen'); 
+
+      if (res.data?.existen === true) {
+        setBloquearCSV(true);
+      }
+      
+    } catch (err) {
+      console.error("Error verificando fases:", err);
+    }
+  };
+
+  verificarFases();
+}, []);
 
 
   return (
@@ -133,13 +161,14 @@ function CargarCSV({ onUploadSuccess }: CargarCSVProps) {
       <div className="csv-header">
         <h1 className="csv-title">Carga de Olimpistas</h1>
         <p className="csv-description">
-          Sube un archivo CSV con los datos de los olimpistas. El archivo debe contener las siguientes columnas:
-          Nombre, Apellidos, Documento, Institucion,  Área, Nivel, Grado, Nombre Tutor, Contacto Tutor, Departamento.
+          Sube un archivo CSV con los datos de los olimpistas. El archivo debe contener las siguientes columnas: ci, nombre, apellidos, institucion, area, nivel, grado, contacto_tutor, nombre_tutor, id_departamento, nombre_equipo
         </p>
       </div>
 
       <div className="carga-action-buttons">
-        <button className="btn-primary" onClick={handleSelectCSV}>
+        <button className={`btn-primary ${bloquearCSV ? 'btn-disabled' : 'btn-primary-enabled'}`}
+        onClick={handleSelectCSV}
+        >
           SELECCIONAR CSV
         </button>
         <button className="btn-secondary" onClick={handleVerLista}>
