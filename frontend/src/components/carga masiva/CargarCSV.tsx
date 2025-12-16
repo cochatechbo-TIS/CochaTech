@@ -5,15 +5,28 @@ import { useNavigate } from "react-router-dom";
 import './CargarCSV.css';
 import axios from 'axios';
 import { NotificationModal } from '../common/NotificationModal'; // Importamos el modal
+import { CsvErrorModal } from './CsvErrorModal';
 
 // Tipos para el modal de notificación
 type NotificationType = 'success' | 'error' | 'info' | 'confirm';
 
 interface CargarCSVProps {
-  onUploadSuccess?: () => void;
+  onVerLista: () => void;
+  onGenerarListas: () => void;
+  onUploadSuccess: () => Promise<void>;
 }
 
+
 function CargarCSV({ onUploadSuccess }: CargarCSVProps) {
+
+  const [csvError, setCsvError] = useState<{
+    message: string;
+    faltan?: string[];
+    sobran?: string[];
+  } | null>(null);
+  
+  const [showCsvError, setShowCsvError] = useState(false);
+  
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -26,10 +39,10 @@ function CargarCSV({ onUploadSuccess }: CargarCSVProps) {
     onConfirm: undefined as (() => void) | undefined,
   });
 
-  const [confirmDialog, setConfirmDialog] = useState<{
-  isVisible: boolean;
-  file?: File;
-}>({ isVisible: false });
+    const [confirmDialog, setConfirmDialog] = useState<{
+    isVisible: boolean;
+    file?: File;
+  }>({ isVisible: false });
 
   const [isUploading, setIsUploading] = useState(false);
 
@@ -89,24 +102,49 @@ function CargarCSV({ onUploadSuccess }: CargarCSVProps) {
       }
 
       return true;
-    } catch (error: unknown) {
-      console.error('Error al cargar CSV:', error);
-
-      let errorMessage = 'Error de conexión o autenticación.';
-
-      if (axios.isAxiosError(error)) {
-        errorMessage = error.response?.data?.message || error.message || errorMessage;
-
-        if (error.response?.status === 401) {
-          errorMessage = 'No autorizado. Tu sesión puede haber expirado.';
+      } catch (error: unknown) {
+        console.error('Error al cargar CSV:', error);
+      
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+          const data = error.response?.data;
+      
+          // 🟥 CUALQUIER ERROR 422 → MODAL CSV
+          if (status === 422 && data?.message) {
+            setCsvError(data);
+            setShowCsvError(true);
+            return false; // ⛔ NO mostrar toast
+          }
+      
+          // 🔐 NO AUTORIZADO
+          if (status === 401) {
+            showNotification(
+              'Tu sesión ha expirado. Vuelve a iniciar sesión.',
+              'error',
+              'No autorizado'
+            );
+            return false;
+          }
+      
+          // ❌ OTROS ERRORES
+          showNotification(
+            data?.message || error.message,
+            'error',
+            'Error en la Carga'
+          );
+          return false;
         }
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
+      
+        // ❌ ERROR DESCONOCIDO
+        showNotification(
+          'Error inesperado al procesar el archivo.',
+          'error',
+          'Error'
+        );
+        return false;
       }
-
-      showNotification(errorMessage, 'error', 'Error de Conexión');
-      return false;
-    }
+    
+    
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,9 +170,30 @@ function CargarCSV({ onUploadSuccess }: CargarCSVProps) {
     <div className="management-container">
       <div className="csv-header">
         <h1 className="csv-title">Carga de Olimpistas</h1>
+
         <p className="csv-description">
           Sube un archivo CSV con los datos de los olimpistas. El archivo debe contener las siguientes columnas:
-          Nombre, Apellidos, Documento, Institucion,  Área, Nivel, Grado, Nombre Tutor, Contacto Tutor, Departamento.
+        </p>
+
+        <div className="csv-columns">
+          <span>ci</span>
+          <span>nombre</span>
+          <span>apellidos</span>
+          <span>institucion</span>
+          <span>area</span>
+          <span>nivel</span>
+          <span>grado</span>
+          <span>contacto_tutor</span>
+          <span>nombre_tutor</span>
+          <span>departamento</span>
+          <span>nombre_equipo</span>
+        </div>
+
+        <p className="csv-note">
+          Nota: También debe respetar los tildes de las áreas, de lo contrario dará error.
+        </p>
+        <p className="csv-note">
+          Nota 2: La columna de nombre_equipo puede dejarla vacia si es que el olimpista no pertenece a ningun equipo.
         </p>
       </div>
 
@@ -164,6 +223,14 @@ function CargarCSV({ onUploadSuccess }: CargarCSVProps) {
           title={notification.title}
           onClose={closeNotification}
         />
+        <CsvErrorModal
+          isOpen={showCsvError}
+          data={csvError}
+          onClose={() => {
+            setShowCsvError(false);
+            setCsvError(null);
+          }}
+        />
         <NotificationModal
           isVisible={confirmDialog.isVisible}
           type="confirm"
@@ -186,3 +253,4 @@ function CargarCSV({ onUploadSuccess }: CargarCSVProps) {
 }
 
 export default CargarCSV;
+

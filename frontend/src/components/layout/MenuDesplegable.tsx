@@ -7,7 +7,7 @@ interface MenuDesplegableProps {
   onProfile: () => void;
 }
 
-const MenuDesplegable: React.FC<MenuDesplegableProps> = ({ onLogout, onProfile }) => {
+const MenuDesplegable: React.FC<MenuDesplegableProps> = ({ onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
