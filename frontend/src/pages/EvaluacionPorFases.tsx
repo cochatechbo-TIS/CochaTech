@@ -169,6 +169,10 @@ const EvaluacionPorFases: React.FC = () => {
     try {
       setLoadingParticipantes(true);
 
+      if (faseSeleccionada?.estado !== "Rechazada") {
+      setComentarioRechazo(null);
+      setComentariosIndividuales({});
+    }
       const data = await getParticipantesPorFase(idNivelFase);
       setParticipantes(data.resultados || data.equipos || []);
       setOriginalParticipantes(data.resultados || data.equipos || []);

@@ -557,7 +557,7 @@ const GestionFasesAdmin: React.FC = () => {
         )}
       {/* Tabla de participantes */}
       {loadingParticipantes ? (
-        <p>⏳ Cargando participantes...</p>
+        <p>Cargando participantes...</p>
       ) : (
         <EvaluacionTable 
           participantes={participantes}

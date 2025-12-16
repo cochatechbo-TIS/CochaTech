@@ -174,9 +174,14 @@ function Listas() {
       <div className="validacion-header">
         <h1 className="validacion-title">Validación de Listas</h1>
         <p className="page-subtitle">
-            Como responsable, usted puede gestionar todos los niveles asignados a su área
+          {isAdmin? (
+            <>Como administrador, usted puede visualizar todas las listas y niveles de todas las áreas. 
+              No tiene permisos para aprobar, rechazar o asignar evaluadores.</>
+          ) : (
+            <>Como responsable, usted puede gestionar los niveles asignados a su área
             y asignar evaluadores. Haga clic en "Gestionar fases" para ver y validar 
-            las listas de cada nivel.
+            las listas de cada nivel.</>
+          )}
           </p>
       </div>
 

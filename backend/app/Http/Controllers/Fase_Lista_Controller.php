@@ -33,4 +33,13 @@ class Fase_Lista_Controller extends Controller
             'fases'        => $fases
         ]);
     }
+    
+    public function existenFases()
+    {
+        $hayFases = \App\Models\Nivel_Fase::exists();
+
+        return response()->json([
+            'existen' => $hayFases
+        ]);
+    }
 }
