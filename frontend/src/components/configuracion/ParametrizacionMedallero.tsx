@@ -42,6 +42,7 @@ const ParametrizacionMedallero: React.FC = () => {
   const [medalConfig, setMedalConfig] = useState<MedalConfigInternal[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [bloqueado, setBloqueado] = useState(false);
   const [originalMedalConfig, setOriginalMedalConfig] = useState<MedalConfigInternal[] | null>(null);
   const [notificationModal, setNotificationModal] = useState({
     isVisible: false,
@@ -49,6 +50,22 @@ const ParametrizacionMedallero: React.FC = () => {
     type: 'success' as 'success' | 'error' | 'info' | 'confirm' | 'input',
     title: ''
   });
+
+  useEffect(() => {
+  const verificarFases = async () => {
+    try {
+      const res = await api.get('/fases/existen');
+
+      if (res.data?.existen === true) {
+        setBloqueado(true);
+      }
+    } catch (error) {
+      console.error('Error verificando fases:', error);
+    }
+  };
+
+  verificarFases();
+}, []);
 
   useEffect(() => {
     fetchParametrizacion();
@@ -205,6 +222,7 @@ const ParametrizacionMedallero: React.FC = () => {
   }
 
   return (
+    <div className="medallero-config-container">
     <div className="management-container">
       <NotificationModal
         isVisible={notificationModal.isVisible}
@@ -215,18 +233,30 @@ const ParametrizacionMedallero: React.FC = () => {
       />
       <div className="edit-button-container">
         {!isEditing ? (
-          <button className="btn-primary" onClick={handleEdit}>
+          <button className={`btn-primary ${bloqueado ? 'btn-disabled' : 'btn-primary-enabled'}`}
+          onClick={() => {
+           if (bloqueado) {
+      showNotification(
+        'Las olimpiadas ya iniciaron. No se puede modificar las medallas.',
+        'info',
+        'Edición no permitida'
+      );
+      return;
+    }
+    handleEdit();
+  }}
+>
             <Pencil size={16}/> EDITAR CONFIGURACIÓN
           </button>
         ) : (
           <div className="edit-actions">
             <button className="btn-primary"
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || bloqueado}
               >
               <Save size={16} /> GUARDAR CAMBIOS
             </button>
-            <button className="btn-secondary" onClick={handleCancel} disabled={saving}>
+            <button className="btn-secondary" onClick={handleCancel} disabled={saving || bloqueado}>
               CANCELAR
             </button>
           </div>
@@ -303,7 +333,8 @@ const ParametrizacionMedallero: React.FC = () => {
           </tbody>
         </table>
       </div>
-      <div className="rango-nota-container">
+    </div>
+    <div className="rango-nota-container">
         <RangoNotaMedallas />
       </div>
     </div>

@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { PencilIcon, SaveIcon, XIcon } from 'lucide-react';
+import { PencilIcon, Save } from 'lucide-react';
+import './RangoNotaMedallas.css';
 import './RangoNotaMedallas.css';
 import api from '../../services/api';
+import { NotificationModal } from '../common/NotificationModal';
 
 export type GradeRange = {
   id_tipo_premio?: number;
@@ -18,9 +20,51 @@ export function RangoNotaMedallas() {
   const [activeHandle, setActiveHandle] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const sliderRef = useRef<HTMLDivElement>(null);
+  const [bloqueado, setBloqueado] = useState(true); // empieza bloqueado
+  const [verificando, setVerificando] = useState(true);
+
 
   const segmentColors = ['#60A5FA', '#F97316', '#9CA3AF', '#FACC15'];
   const segmentLightColors = ['#DBEAFE', '#FFEDD5', '#F3F4F6', '#FEF9C3'];
+
+  const [notification, setNotification] = useState({
+  isVisible: false,
+  message: '',
+  type: 'info' as 'success' | 'error' | 'info',
+  title: '',
+});
+  
+  const showNotification = (
+  message: string,
+  type: 'success' | 'error' | 'info',
+  title?: string
+) => {
+  setNotification({
+    isVisible: true,
+    message,
+    type,
+    title: title || '',
+  });
+};
+
+const closeNotification = () => {
+  setNotification(prev => ({ ...prev, isVisible: false }));
+};
+  useEffect(() => {
+  const verificarFases = async () => {
+    try {
+      const res = await api.get('/fases/existen');
+      setBloqueado(res.data?.existen === true);
+    } catch (e) {
+      console.error('Error verificando fases', e);
+      setBloqueado(true); // por seguridad
+    } finally {
+      setVerificando(false);
+    }
+  };
+
+  verificarFases();
+}, []);
 
   // ----------------------------
   // 1. CARGAR + ORDENAR RANGOS
@@ -85,6 +129,19 @@ export function RangoNotaMedallas() {
     setActiveHandle(index);
   };
 
+  const handleEdit = () => {
+  if (bloqueado) {
+    showNotification(
+      'Las fases ya han iniciado. No es posible modificar los rangos de notas.',
+      'info',
+      'Edición no permitida'
+    );
+    return;
+  }
+
+  setIsEditing(true);
+};
+
   // ----------------------------
   // 3. MOVIMIENTO EXACTO DE HANDLES
   // ----------------------------
@@ -97,7 +154,7 @@ export function RangoNotaMedallas() {
       const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       const rect = sliderRef.current.getBoundingClientRect();
 
-      let value = Math.round(
+      const value = Math.round(
         Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1) * 100
       );
 
@@ -156,9 +213,17 @@ export function RangoNotaMedallas() {
       });
 
       setIsEditing(false);
-      alert('Rangos guardados correctamente');
+      showNotification(
+      'Los rangos de notas se guardaron correctamente.',
+      'success',
+      'Guardado exitoso'
+    );
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al guardar rangos');
+      showNotification(
+      error.response?.data?.message || 'Error al guardar los rangos.',
+      'error',
+      'Error'
+    );
     }
   };
 
@@ -173,25 +238,26 @@ export function RangoNotaMedallas() {
   return (
     <div className="rnm-container">
       <div className="rnm-header">
-        <h3>Rangos de Notas por Medalla</h3>
+        <h3 className='rnm-title'>Rangos de Notas por Medalla</h3>
 
-        <div className="rnm-buttons">
+        <div className="edit-button-container">
           {!isEditing ? (
-            <button className="rnm-btn-edit" onClick={() => setIsEditing(true)}>
+            <button className={`btn-primary ${bloqueado ? 'btn-disabled' : 'btn-primary-enabled'}`}
+            onClick={handleEdit}>
               <PencilIcon size={16} /> Editar
             </button>
           ) : (
-            <>
-              <button className="rnm-btn-save" onClick={handleSave}>
-                <SaveIcon size={16} /> Guardar
+            <div className='edit-actions'>
+              <button className="btn-primary" onClick={handleSave}>
+                <Save size={16} /> Guardar
               </button>
               <button
-                className="rnm-btn-cancel"
+                className="btn-secondary"
                 onClick={() => setIsEditing(false)}
               >
-                <XIcon size={16} /> Cancelar
+                Cancelar
               </button>
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -242,6 +308,14 @@ export function RangoNotaMedallas() {
           </div>
         ))}
       </div>
+      <NotificationModal
+        isVisible={notification.isVisible}
+        message={notification.message}
+        type={notification.type}
+        title={notification.title}
+        onClose={closeNotification}
+/>
+
     </div>
   );
 }
