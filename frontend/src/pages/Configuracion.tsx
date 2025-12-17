@@ -4,6 +4,7 @@ import ParametrizacionMedallero from "../components/configuracion/Parametrizacio
 import { CronogramaFases } from "../components/cronograma/CronogramaFases";
 import type { Phase } from "../components/cronograma/types";
 import api from "../services/api";
+import { NotificationModal } from "../components/common/NotificationModal";
 
 type HistorialTab = "parametrizacion" | "cronograma";
 
@@ -26,6 +27,31 @@ const getNowLocal = () => {
 };
 
 const Configuracion: React.FC = () => {
+  const [bloquearCronograma, setBloquearCronograma] = useState(false);
+  const [notification, setNotification] = useState({
+  isVisible: false,
+  message: "",
+  type: "info" as "success" | "error" | "info",
+  title: "",
+});
+
+const showNotification = (
+  message: string,
+  type: "success" | "error" | "info",
+  title?: string
+) => {
+  setNotification({
+    isVisible: true,
+    message,
+    type,
+    title: title || "",
+  });
+};
+
+const closeNotification = () => {
+  setNotification((prev) => ({ ...prev, isVisible: false }));
+};
+
   const [activeTab, setActiveTab] = useState<HistorialTab>("parametrizacion");
   const [phases, setPhases] = useState<Phase[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -71,7 +97,19 @@ const Configuracion: React.FC = () => {
 
   useEffect(() => {
     fetchFases();
-  }, []);
+    const verificarBloqueoCronograma = async () => {
+    try {
+      const res = await api.get('/fases/existen');
+      if (res.data?.existen === true) {
+        setBloquearCronograma(true);
+      }
+    } catch (err) {
+      console.error('Error verificando fases:', err);
+    }
+  };
+
+  verificarBloqueoCronograma();
+}, []);
 
   // Actualizar campo editable
   const onFieldChange = (
@@ -86,6 +124,15 @@ const Configuracion: React.FC = () => {
 
   // Guardar fases (SIN new Date)
  const onSave = async () => {
+  if (bloquearCronograma) {
+    showNotification(
+  "Las olimpiadas ya iniciaron. No se puede modificar el cronograma.",
+  "info",
+  "Edición no permitida"
+);
+    return;
+  }
+
   const compare = (a: string, b: string) => a.localeCompare(b);
 
   // Validaciones locales
@@ -93,21 +140,34 @@ const Configuracion: React.FC = () => {
     const curr = phases[i];
 
     if (!curr.startDate || !curr.endDate) {
-      alert(`La fase "${curr.name}" debe tener fecha inicio y fin.`);
-      return;
+      showNotification(
+  `La fase "${curr.name}" debe tener fecha de inicio y fin.`,
+  "info",
+  "Datos incompletos"
+);
+return;
+
     }
 
     if (compare(curr.endDate, curr.startDate) <= 0) {
-      alert(`La fase "${curr.name}" tiene una duración inválida.`);
-      return;
+      showNotification(
+  `La fase "${curr.name}" tiene una duración inválida. La fecha de fin debe ser posterior a la de inicio.`,
+  "info",
+  "Duración inválida"
+);
+return;
+
     }
 
     if (i > 0) {
       if (compare(curr.startDate, phases[i - 1].endDate) < 0) {
-        alert(
-          `La fase "${curr.name}" inicia antes de finalizar la fase anterior.`
-        );
-        return;
+        showNotification(
+  `La fase "${curr.name}" inicia antes de que finalice la fase anterior.`,
+  "info",
+  "Orden de fases inválido"
+);
+return;
+
       }
     }
   }
@@ -126,13 +186,20 @@ const Configuracion: React.FC = () => {
   // Enviar UNA sola petición
   try {
     await api.put("/fases/actualizar-fechas", payload);
-    alert("✔ Cronograma guardado correctamente");
+    showNotification(
+  "El cronograma fue guardado correctamente.",
+  "success",
+  "Guardado exitoso"
+);
+
     fetchFases();
   } catch (error: any) {
-    alert(
-      error.response?.data?.error ||
-        JSON.stringify(error.response?.data)
-    );
+    showNotification(
+  error.response?.data?.error || "Error al guardar el cronograma.",
+  "error",
+  "Error"
+);
+
     fetchFases();
   }
 };
@@ -145,12 +212,15 @@ const Configuracion: React.FC = () => {
 
       case "cronograma":
         return loading ? (
-          <p>Cargando fases...</p>
-        ) : (
+      <div className="management-container">
+        <p>Cargando cronograma...</p>
+      </div>
+      ) : (
           <CronogramaFases
             phases={phases}
             onFieldChange={onFieldChange}
             onSave={onSave}
+            bloqueado={bloquearCronograma}
           />
         );
 
@@ -177,6 +247,14 @@ const Configuracion: React.FC = () => {
 
         <div className="historial-content">{renderActiveTab()}</div>
       </div>
+      <NotificationModal
+  isVisible={notification.isVisible}
+  message={notification.message}
+  type={notification.type}
+  title={notification.title}
+  onClose={closeNotification}
+/>
+
     </div>
   );
 };

@@ -31,7 +31,7 @@
 }
 
 .cronograma-table tr:hover {
-  background: #eef4ff;
+  background: #f9fafb;
 }
 
 /* Inputs */
@@ -51,7 +51,7 @@
 .cronograma-table input:focus {
   border-color: #1d4ed8;
   outline: none;
-  box-shadow: 0 0 6px rgba(29, 78, 216, 0.3);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
 /* Badge duración */
@@ -104,4 +104,10 @@
 
 .save-button:hover {
   background-color: #11508f;
+}
+
+.edit-button-container {
+  display: flex;
+  justify-content: flex-end;  /* 👈 Alinea todo a la derecha */
+  margin-bottom: 16px;
 }

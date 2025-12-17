@@ -34,7 +34,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
   onConfirm,
   isConfirmDisabled = false, // Valor por defecto
 }) => {
-  const DURATION = 5000; // 5 segundos para Toast
+  const DURATION = 8000; // 5 segundos para Toast
   const [inputValue, setInputValue] = React.useState('');
 
   const { Icon, title: defaultTitle, className, isToast } = typeMap[type];

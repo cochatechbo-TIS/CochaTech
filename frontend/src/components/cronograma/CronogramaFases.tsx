@@ -23,12 +23,14 @@ interface CronogramaFasesProps {
     value: string
   ) => void;
   onSave: () => void;
+  bloqueado: boolean;
 }
 
 export const CronogramaFases: React.FC<CronogramaFasesProps> = ({
   phases,
   onFieldChange,
   onSave,
+  bloqueado,
 }) => {
   const calculateDuration = (start: string, end: string) => {
     if (!start || !end) return "0h 0m";
@@ -46,9 +48,15 @@ export const CronogramaFases: React.FC<CronogramaFasesProps> = ({
   };
 
   return (
-    <div className="cronograma-container">
+    <div className="management-container">
+      <div className="edit-button-container">
+        <button className={`btn-primary ${bloqueado ? 'btn-disabled' : 'btn-primary-enabled'}`} onClick={onSave}>
+          GUARDAR CRONOGRAMA
+        </button>
+      </div>
+      <div className="competitor-table-container">
       <table className="cronograma-table">
-        <thead>
+        <thead className="competitor-table-header">
           <tr>
             <th>Fase</th>
             <th>Fecha Inicio</th>
@@ -82,6 +90,7 @@ export const CronogramaFases: React.FC<CronogramaFasesProps> = ({
                     type="datetime-local"
                     value={phase.startDate || todayLocal}
                     min={minStartDate}
+                    disabled={bloqueado}
                     onChange={(e) => {
                       const value = e.target.value;
                       if (value < minStartDate) return; // bloquea valores menores
@@ -96,6 +105,7 @@ export const CronogramaFases: React.FC<CronogramaFasesProps> = ({
                     type="datetime-local"
                     value={phase.endDate}
                     min={phase.startDate || minStartDate} // nunca menor que startDate
+                    disabled={bloqueado}
                     onChange={(e) => {
                       const value = e.target.value;
                       if (phase.startDate && value < phase.startDate) return;
@@ -114,12 +124,7 @@ export const CronogramaFases: React.FC<CronogramaFasesProps> = ({
           })}
         </tbody>
       </table>
-
-      <div style={{ textAlign: "right", marginTop: "20px" }}>
-        <button className="save-button" onClick={onSave}>
-          Guardar Cronograma
-        </button>
-      </div>
+    </div>
     </div>
   );
 };
