@@ -1,5 +1,5 @@
 // src/components/evaluaddres/EditEvaluadorModal.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
 import { XIcon } from 'lucide-react';
 import type { Usuario } from '../../interfaces/Usuario';
 
@@ -8,6 +8,9 @@ interface EditEvaluadorModalProps {
     onSave: (responsable: Usuario) => void;
     onCancel: () => void;
     isOpen: boolean;
+    backendError?: Record<string, string[]>;
+    isSaving?: boolean;
+
 }
 
 const areas = [
@@ -24,7 +27,9 @@ export function EditEvaluadorModal({
     usuario, 
     onSave, 
     onCancel, 
-    isOpen
+    isOpen,
+    backendError,
+    isSaving = false
 }: EditEvaluadorModalProps) {
 
     const emptyForm: Usuario = {
@@ -40,17 +45,42 @@ export function EditEvaluadorModal({
     };
     
     // Inicialización del estado
-    const [editedUsuario, setEditedUsuario] = useState<Usuario>(usuario || emptyForm);
+    const [editedUsuario, setEditedUsuario] = useState<Usuario>(emptyForm);
     const [errors, setErrors] = useState<Record<string, string>>({});
+    // Ref para saber si el formulario ya se inicializó
+    ;
 
-    // Sincronizar estado cuando se abre el modal o cambia el responsable
-    React.useEffect(() => {
-        if (usuario) {
-            setEditedUsuario(usuario);
-        } else {
-            setEditedUsuario(emptyForm);
-        }
-    }, [usuario]);
+        //  Inicialización del formulario al abrir modal
+       // Cuando cambia el usuario (EDIT)
+
+       React.useEffect(() => {
+        if (!isOpen) return;
+    
+        setEditedUsuario(usuario ? { ...usuario } : { ...emptyForm });
+        setErrors({});
+    }, [usuario, isOpen]);
+    
+
+        // Resetea cuando cambia el modal
+        useEffect(() => {
+            if (!isOpen) return;
+            setEditedUsuario(usuario ? { ...usuario } : { ...emptyForm });
+            setErrors({});
+          }, [isOpen, usuario]);
+    
+
+        //  Actualización de errores del backend
+        React.useEffect(() => {
+            if (!backendError || Object.keys(backendError).length === 0) return;
+          
+            const mappedErrors: Record<string, string> = {};
+            Object.keys(backendError).forEach((field) => {
+              mappedErrors[field] = backendError[field][0];
+            });
+          
+            setErrors(mappedErrors);
+          }, [backendError]);
+          
 
     const resetForm = () => {
         setEditedUsuario(emptyForm);
@@ -75,7 +105,7 @@ export function EditEvaluadorModal({
             editedUsuario.ci.length < 7 ||
             editedUsuario.ci.length > 8
         ) {
-            newErrors.ci = "El CI debe tener entre 7 y 8 dígitos.";
+            newErrors.ci = "El CI debe tener entre 6 y 8 dígitos.";
         }
 
         if (!editedUsuario.email.trim()) {
@@ -195,13 +225,29 @@ export function EditEvaluadorModal({
         validateField(name, sanitized);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!validate()) {
-            return; // No enviar al backend
-            }
-        onSave(editedUsuario);
-    };
+    const handleSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+
+    const usuarioAEnviar = { ...editedUsuario };
+
+    // Si editedUsuario está vacío y hay usuario (caso del primer render)
+    if (usuario && !editedUsuario.id_usuario) {
+        Object.assign(usuarioAEnviar, usuario);
+    }
+
+    console.log("SUBMIT");
+    console.log("usuarioAEnviar EN MODAL:", usuarioAEnviar);
+
+    if (!validate()) {
+        console.log("NO PASÓ VALIDACIÓN");
+        return;
+    }
+
+    onSave(usuarioAEnviar);
+};
+
+      
+      
 
     if (!isOpen) return null;
 
@@ -354,11 +400,13 @@ export function EditEvaluadorModal({
                             Cancelar
                         </button>
                         <button
-                            type="submit"
+                            type="submit" // Cambiado a submit
                             className="modal-btn modal-btn-primary"
+                            disabled={isSaving}
                         >
-                            {usuario ? 'Actualizar' : 'Crear'}
+                            {isSaving ? "Guardando..." : usuario ? "Actualizar" : "Crear"}
                         </button>
+
                     </div>
                 </form>
             </div>

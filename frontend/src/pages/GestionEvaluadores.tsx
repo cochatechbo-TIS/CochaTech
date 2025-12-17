@@ -19,6 +19,30 @@ const GestionEvaluadores: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [paginaActual, setPaginaActual] = useState(1); // Página inicial: 1
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedEvaluador, setSelectedEvaluador] = useState<Usuario | null>(null);
+
+  
+  const [backendError, setBackendError] = useState<Record<string, string[]> | undefined>(undefined);
+  const [saving, setSaving] = useState(false);
+
+  const handleCancelCreateModal = () => {
+    setBackendError(undefined);
+    setSaving(false);          
+    setIsCreateModalOpen(false);
+  };
+  
+  const openEditModal = (evaluador: Usuario) => {
+    setBackendError(undefined);
+    setSaving(false);
+
+    // Inicializamos el estado aquí antes de abrir modal
+    setSelectedEvaluador({ ...evaluador });
+    setIsEditModalOpen(true);
+};
+
+  
+  
    // ESTADO DE NOTIFICACIONES
   const [notification, setNotification] = useState({
     isVisible: false,
@@ -114,49 +138,38 @@ const GestionEvaluadores: React.FC = () => {
 
   // Función de edición (usando optimistic updates)
   const handleEditEvaluador = async (editedEvaluador: Usuario) => {
-    console.log("Guardando edición de evaluador:", editedEvaluador);
-
-    const evaluadoresAnteriores = [...evaluadores];
-
     try {
-      // Optimistic update
-      setEvaluadores(prev =>
-        prev.map(r =>
-          r.id_usuario === editedEvaluador.id_usuario ? editedEvaluador : r
-        )
-      );
-
-      // SOLO enviar los campos que el backend espera
-    const datosParaEnviar = {
-      nombre: editedEvaluador.nombre,
-      apellidos: editedEvaluador.apellidos,
-      ci: editedEvaluador.ci,
-      email: editedEvaluador.email,
-      telefono: editedEvaluador.telefono,
-      area: editedEvaluador.area,
-    };
-
-      // RUTA DE EDICIÓN PARA EVALUADOR
-      await api.put(`/evaluador/${editedEvaluador.id_usuario}`, datosParaEnviar);
-
-      showNotification('Evaluador actualizado exitosamente', 'success');
+      setSaving(true);          // 🔥 PRIMERO
+      setBackendError(undefined);
+  
+      await api.put(`/evaluador/${editedEvaluador.id_usuario}`, {
+        nombre: editedEvaluador.nombre,
+        apellidos: editedEvaluador.apellidos,
+        ci: editedEvaluador.ci,
+        email: editedEvaluador.email,
+        telefono: editedEvaluador.telefono,
+        area: editedEvaluador.area,
+      });
+  
+      showNotification("Evaluador actualizado exitosamente", "success");
+      setIsEditModalOpen(false);
+      setSelectedEvaluador(null);
+  
+      await fetchEvaluadores();
     } catch (err: unknown) {
-      console.error("Error al actualizar evaluador:", err);
-
-      setEvaluadores(evaluadoresAnteriores); // Revertir
-
-      let errorMessage = 'Error al actualizar evaluador. El cambio fue revertido.';
-
-      if (axios.isAxiosError(err)) {
-        errorMessage = err.response?.data?.message || errorMessage;
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
+      if (axios.isAxiosError(err) && err.response?.status === 422) {
+        setBackendError(err.response.data.errors);
+        return;
       }
-
-      showNotification(errorMessage, 'error');
-      throw err;
+      showNotification("Error al actualizar evaluador", "error");
+    } finally {
+      setSaving(false);
     }
   };
+  
+  
+  
+  
 
   // Función de eliminación (usando optimistic updates)
   const executeDeleteEvaluador = useCallback(async (id: number) => {
@@ -211,59 +224,48 @@ const GestionEvaluadores: React.FC = () => {
   // Función de creación
   const handleCreateEvaluador = async (newEvaluador: Usuario) => {
     try {
-      setLoading(true);
-      setError("");
-
-      // RUTA DE CREACIÓN PARA EVALUADOR - ENVIANDO DATOS ESPECÍFICOS
-      const response = await api.post("/evaluador", {
+      setSaving(true);
+      setBackendError(undefined);
+  
+      await api.post("/evaluador", {
         nombre: newEvaluador.nombre,
         apellidos: newEvaluador.apellidos,
         ci: newEvaluador.ci,
         email: newEvaluador.email,
         telefono: newEvaluador.telefono,
-        area: newEvaluador.area, 
-        //id_nivel: newEvaluador.id_nivel, // Campo de Evaluador
-        //disponible: newEvaluador.disponible ?? true, // Campo de Evaluador
-        //id_rol: 3, // Asumiendo que 3 es el ID de rol para Evaluador
+        area: newEvaluador.area,
       });
-
-            if (response.data && response.data.usuario) {
-        const evaluadorCreado: Usuario = {
-          id_usuario: response.data.usuario.id_usuario, // ✅ ID real del backend
-          nombre: response.data.usuario.nombre,
-          apellidos: response.data.usuario.apellidos,
-          ci: response.data.usuario.ci,
-          email: response.data.usuario.email,
-          telefono: response.data.usuario.telefono,
-          area: newEvaluador.area,
-          id_rol: response.data.usuario.id_rol || 3,
-        };
-
-        setEvaluadores((prev) => [...prev, evaluadorCreado]);
-        showNotification("Evaluador creado exitosamente", 'success');
-        setIsCreateModalOpen(false);
-      } else {
-        showNotification("No se recibió confirmación del servidor.", 'error');
+  
+      // ✅ ÉXITO
+      showNotification("Evaluador creado exitosamente", "success");
+  
+      // ✅ Cerrar modal y limpiar estado
+      setIsCreateModalOpen(false);
+      setSaving(false);
+  
+      // ✅ RECARGAR TABLA DESPUÉS DE CREAR
+      await fetchEvaluadores();
+  
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 422) {
+          setBackendError(err.response.data.errors);
+          setSaving(false); // 🔥 IMPORTANTE
+          return;
+        }
+  
+        showNotification(
+          err.response?.data?.message || "Error del servidor",
+          "error"
+        );
+      } else if (err instanceof Error) {
+        showNotification(err.message, "error");
       }
-
-    } catch (error: unknown) {
-      console.error("Error al crear evaluador:", error);
-
-      let errorMessage = "Error al registrar el evaluador.";
-
-      if (axios.isAxiosError(error)) {
-        errorMessage =
-          error.response?.data?.message || error.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-
-      showNotification(errorMessage, 'error');
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+  
+      setSaving(false); // 🔥 SIEMPRE
     }
   };
+  
 
   // 6. FILTRO DE BÚSQUEDA
   const evaluadoresFiltrados = evaluadores.filter(
@@ -385,7 +387,7 @@ const GestionEvaluadores: React.FC = () => {
         {/* TABLA */}
         <EvaluadorTable
           usuario={evaluadoresPaginados}
-          onEdit={handleEditEvaluador}
+          onEdit={openEditModal} 
           onDelete={handleDeleteEvaluador}
         />
       </div>
@@ -425,13 +427,31 @@ const GestionEvaluadores: React.FC = () => {
         </div>
       )}
 
+
       {/* ➕ MODAL CREAR */}
+        <EditEvaluadorModal
+          usuario={null}
+          onSave={handleCreateEvaluador}
+          onCancel={handleCancelCreateModal}
+          isOpen={isCreateModalOpen}
+          backendError={backendError}
+          isSaving={saving}
+        />
+
       <EditEvaluadorModal
-        usuario={null}
-        onSave={handleCreateEvaluador}
-        onCancel={() => setIsCreateModalOpen(false)}
-        isOpen={isCreateModalOpen}
+        usuario={selectedEvaluador}
+        onSave={handleEditEvaluador}
+        onCancel={() => {
+          setIsEditModalOpen(false);
+          setSelectedEvaluador(null);
+          setBackendError(undefined);
+        }}
+        isOpen={isEditModalOpen}
+        backendError={backendError}
+        isSaving={saving}
       />
+
+
       <NotificationModal
         isVisible={notification.isVisible}
         message={notification.message}

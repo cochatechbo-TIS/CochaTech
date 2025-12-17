@@ -48,14 +48,22 @@ export function EditResponsableModal({
 
     // Sincronizar estado cuando se abre el modal o cambia el responsable
     React.useEffect(() => {
-        setEditedResponsable(usuario || emptyForm);
-        }, [usuario]);
-
-    const resetForm = () => {
+        if (!isOpen) return;
+      
+        if (usuario) {
+          setEditedResponsable(usuario);
+        } else {
+          setEditedResponsable(emptyForm);
+        }
+      
+        setErrors({});
+      }, [isOpen, usuario]);
+    
+      const resetForm = () => {
         setEditedResponsable(emptyForm);
         setErrors({});
-    };
-
+      };
+      
 // ========================= VALIDACIÓN GENERAL =========================
     const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -71,7 +79,7 @@ export function EditResponsableModal({
     if (!editedResponsable.ci.trim()) {
         newErrors.ci = "El CI es obligatorio.";
     } else if (editedResponsable.ci.length < 7 || editedResponsable.ci.length > 8) {
-        newErrors.ci = "El CI debe tener entre 7 y 8 dígitos.";
+        newErrors.ci = "El CI debe tener entre 6 y 8 dígitos.";
     }
 
     if (!editedResponsable.email.trim()) {
@@ -113,7 +121,7 @@ const validateField = (name: string, value: string) => {
         case "ci":
             if (!value.trim()) newErrors.ci = "El CI es obligatorio.";
             else if (value.length < 7 || value.length > 8)
-                newErrors.ci = "El CI debe tener entre 7 y 8 dígitos.";
+                newErrors.ci = "El CI debe tener entre 6 y 8 dígitos.";
             else delete newErrors.ci;
             break;
 
@@ -196,23 +204,26 @@ const limits: Record<string, number> = {
     onSave(editedResponsable);
     };
 
-    if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay">
-            <div className="modal-container">
-                <div className="modal-header">
-                    <h3 className="modal-title">
-                        {usuario ? 'Editar Responsable' : 'Nuevo Responsable'}
-                    </h3>
-                    <button
-                        onClick={() => { resetForm(); onCancel(); }}
-                        className="modal-close-btn"
-                        type="button"
-                    >
-                        <XIcon size={20} />
-                    </button>
-                </div>
+        
+        <div
+        className="modal-overlay"
+        style={{ display: isOpen ? 'flex' : 'none' }}
+      >
+        <div className="modal-container">
+          <div className="modal-header">
+            <h3 className="modal-title">
+              {usuario ? 'Editar Responsable' : 'Nuevo Responsable'}
+            </h3>
+            <button
+              onClick={() => { resetForm(); onCancel(); }}
+              className="modal-close-btn"
+              type="button"
+            >
+              <XIcon size={20} />
+            </button>
+          </div>
                 
                 <form onSubmit={handleSubmit} noValidate>
                     <div className="modal-form-grid">
