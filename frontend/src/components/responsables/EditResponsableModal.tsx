@@ -1,7 +1,8 @@
 // src/components/responsables/EditResponsableModal.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { XIcon } from 'lucide-react';
 import type { Usuario } from '../../interfaces/Usuario';
+import api from '../../services/api';
 
 interface EditResponsableModalProps {
     usuario: Usuario | null;
@@ -9,16 +10,6 @@ interface EditResponsableModalProps {
     onCancel: () => void;
     isOpen: boolean;
 }
-
-const areas = [
-    'Matemáticas',
-    'Física', 
-    'Química',
-    'Biología',
-    'Astronomía',
-    'Geografía',
-    'Informática'
-];
 
 // Form vacío estándar
 const emptyForm: Usuario = {
@@ -39,7 +30,8 @@ export function EditResponsableModal({
     onCancel, 
     isOpen
 }: EditResponsableModalProps) {
-    
+    const [areas, setAreas] = useState<{ id_area: number; nombre: string }[]>([]);
+
     // Inicialización del estado
     const [editedResponsable, setEditedResponsable] = useState<Usuario>(
         usuario || emptyForm
@@ -59,6 +51,21 @@ export function EditResponsableModal({
         setErrors({});
       }, [isOpen, usuario]);
     
+      useEffect(() => {
+  if (!isOpen) return;
+
+  const fetchAreas = async () => {
+    try {
+      const response = await api.get('/areas/nombres');
+      setAreas(response.data);
+    } catch (error) {
+      console.error('Error al cargar áreas:', error);
+    }
+  };
+
+  fetchAreas();
+}, [isOpen]);
+
       const resetForm = () => {
         setEditedResponsable(emptyForm);
         setErrors({});
@@ -88,8 +95,12 @@ export function EditResponsableModal({
         newErrors.email = "Formato de correo inválido. Ej: usuario@dominio.com";
     }
 
-    if (editedResponsable.telefono && editedResponsable.telefono.length !== 8) {
-        newErrors.telefono = "El teléfono debe tener exactamente 8 dígitos.";
+    if (editedResponsable.telefono) {
+        if (editedResponsable.telefono.length !== 8) {
+            newErrors.telefono = "El teléfono debe tener exactamente 8 dígitos.";
+        } else if (!editedResponsable.telefono.startsWith('6') && !editedResponsable.telefono.startsWith('7')) {
+            newErrors.telefono = "El teléfono debe iniciar con 6 o 7.";
+        }
     }
 
     if (!editedResponsable.area.trim()) {
@@ -133,9 +144,17 @@ const validateField = (name: string, value: string) => {
             break;
 
         case "telefono":
-            if (value && value.length !== 8)
-                newErrors.telefono = "El teléfono debe tener exactamente 8 dígitos.";
-            else delete newErrors.telefono;
+            if (value) {
+                if (value.length !== 8) {
+                    newErrors.telefono = "El teléfono debe tener exactamente 8 dígitos.";
+                } else if (!value.startsWith('6') && !value.startsWith('7')) {
+                    newErrors.telefono = "El teléfono debe iniciar con 6 o 7.";
+                } else {
+                    delete newErrors.telefono;
+                }
+            } else {
+                delete newErrors.telefono;
+            }
             break;
 
         case "area":
@@ -206,7 +225,6 @@ const limits: Record<string, number> = {
 
 
     return (
-        
         <div
         className="modal-overlay"
         style={{ display: isOpen ? 'flex' : 'none' }}
@@ -321,7 +339,7 @@ const limits: Record<string, number> = {
                             >
                                 <option value="">Seleccione un área</option>
                                 {areas.map(area => (
-                                    <option key={area} value={area}>{area}</option>
+                                    <option key={area.id_area} value={area.nombre}>{area.nombre}</option>
                                 ))}
                             </select>
                             {errors.area && <p className="input-error-message">{errors.area}</p>}

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { XIcon } from 'lucide-react';
 import type { Usuario } from '../../interfaces/Usuario';
-
+import api from '../../services/api';
 interface EditEvaluadorModalProps {
     usuario: Usuario | null;
     onSave: (responsable: Usuario) => void;
@@ -12,16 +12,6 @@ interface EditEvaluadorModalProps {
     isSaving?: boolean;
 
 }
-
-const areas = [
-    'Matemáticas',
-    'Física', 
-    'Química',
-    'Biología',
-    'Astronomía',
-    'Geografía',
-    'Informática'
-];
 
 export function EditEvaluadorModal({ 
     usuario, 
@@ -47,6 +37,8 @@ export function EditEvaluadorModal({
     // Inicialización del estado
     const [editedUsuario, setEditedUsuario] = useState<Usuario>(emptyForm);
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [areas, setAreas] = useState<{ id_area: number; nombre: string }[]>([]);
+
     // Ref para saber si el formulario ya se inicializó
     ;
 
@@ -68,6 +60,21 @@ export function EditEvaluadorModal({
             setErrors({});
           }, [isOpen, usuario]);
     
+
+          useEffect(() => {
+  if (!isOpen) return;
+
+  const fetchAreas = async () => {
+    try {
+      const response = await api.get('/areas/nombres');
+      setAreas(response.data);
+    } catch (error) {
+      console.error('Error al cargar áreas:', error);
+    }
+  };
+
+  fetchAreas();
+}, [isOpen]);
 
         //  Actualización de errores del backend
         React.useEffect(() => {
@@ -119,9 +126,13 @@ export function EditEvaluadorModal({
                 "Formato de correo inválido. Ej: usuario@dominio.com";
         }
 
-        if (editedUsuario.telefono && editedUsuario.telefono.length !== 8) {
+        if (editedUsuario.telefono) {
+        if (editedUsuario.telefono.length !== 8) {
             newErrors.telefono = "El teléfono debe tener exactamente 8 dígitos.";
+        } else if (!editedUsuario.telefono.startsWith('6') && !editedUsuario.telefono.startsWith('7')) {
+            newErrors.telefono = "El teléfono debe iniciar con 6 o 7.";
         }
+    }
 
         if (!editedUsuario.area.trim()) {
             newErrors.area = "Debe seleccionar un área.";
@@ -167,11 +178,18 @@ export function EditEvaluadorModal({
             break;
 
         case "telefono":
-            if (value && value.length !== 8)
-                newErrors.telefono = "El teléfono debe tener exactamente 8 dígitos.";
-            else delete newErrors.telefono;
+            if (value) {
+                if (value.length !== 8) {
+                    newErrors.telefono = "El teléfono debe tener exactamente 8 dígitos.";
+                } else if (!value.startsWith('6') && !value.startsWith('7')) {
+                    newErrors.telefono = "El teléfono debe iniciar con 6 o 7.";
+                } else {
+                    delete newErrors.telefono;
+                }
+            } else {
+                delete newErrors.telefono;
+            }
             break;
-
         case "area":
             if (!value.trim()) newErrors.area = "Debe seleccionar un área.";
             else delete newErrors.area;
@@ -245,9 +263,6 @@ export function EditEvaluadorModal({
 
     onSave(usuarioAEnviar);
 };
-
-      
-      
 
     if (!isOpen) return null;
 
@@ -377,7 +392,7 @@ export function EditEvaluadorModal({
                             >
                                 <option value="">Seleccione un área</option>
                                 {areas.map(area => (
-                                    <option key={area} value={area}>{area}</option>
+                                    <option key={area.id_area} value={area.nombre}>{area.nombre}</option>
                                 ))}
                             </select>
                             {errors.area && (
