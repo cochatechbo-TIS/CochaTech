@@ -255,9 +255,10 @@ function Listas() {
                           <span className="evaluador-nombre">{nivel.evaluador}</span>
                           <a 
                             href="#" 
-                            className="btn-cambiar-texto" 
+                            className={`btn-cambiar-texto ${isAdmin ? 'btn-disabled-text' : ''}`}
                             onClick={(e) => { 
                               e.preventDefault(); 
+                              if(isAdmin) return;
                               handleOpenModalEvaluador(nivel); 
                             }}
                           >
@@ -267,8 +268,11 @@ function Listas() {
                       ):(
                         // ✅ NO hay evaluador → Mostrar botón de asignar
                         <button
-                          className="btn-asignar-cambiar"
-                          onClick={() => handleOpenModalEvaluador(nivel)}
+                          className={`btn-asignar-cambiar ${isAdmin ? 'btn-disabled' : ''}`}
+                          disabled={isAdmin}
+                          onClick={() => {
+                            if(isAdmin) return;
+                            handleOpenModalEvaluador(nivel)}}
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />

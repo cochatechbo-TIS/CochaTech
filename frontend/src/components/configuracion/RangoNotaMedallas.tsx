@@ -243,6 +243,7 @@ const closeNotification = () => {
         <div className="edit-button-container">
           {!isEditing ? (
             <button className={`btn-primary ${bloqueado ? 'btn-disabled' : 'btn-primary-enabled'}`}
+            disabled={verificando}
             onClick={handleEdit}>
               <PencilIcon size={16} /> Editar
             </button>
